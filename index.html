@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OQTA AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="stage">
+    <div class="canvas">
+      <div class="lines" aria-hidden="true"></div>
+      <img src="assets/image6.png" class="city">
+
+      <header>
+        <div class="logo">
+          <img src="assets/logo.png">
+        </div>
+        <button class="session" type="button">
+          <span>Continue Your Session</span>
+        </button>
+      </header>
+
+      <div class="welcome">
+        <div class="welcome-inner">
+          <img src="assets/image1.png">
+          <span>WELCOME TO <strong>OQTA </strong>AI</span>
+        </div>
+      </div>
+
+      <section class="title">
+        <div class="title-row mobile--visible">
+          <h1>Register</h1>
+        </div>
+        <div class="title-row">
+          <h1 class="mobile--visible">your</h1>
+          <h1 class="mobile--hidden">Register your</h1>
+          <div class="uae-flag" aria-hidden="true">
+            <div class="uae-card"></div>
+            <div class="uae-inner-icon"></div>
+          </div>
+          <h1>UAE company</h1>
+        </div>
+        <div class="title-row">
+          <h1>in minutes</h1>
+          <div class="ai-icon" aria-hidden="true">
+            <div class="ai-card"></div>
+            <div class="ai-inner-icon"></div>            
+          </div>
+          <h1 class="with-ai">with AI</h1>
+        </div>
+      </section>
+
+      <p class="subtitle">
+        Describe your needs &mdash; your data is securely protected
+      </p>
+
+      <div class="prompt">
+        <div class="prompt-card">
+          <div class="prompt-input-wrapper">
+            <textarea class="prompt-textarea" placeholder="I want to register a UAE company" rows="1"></textarea>
+          </div>
+          <div class="prompt-actions">
+            <div class="prompt-actions-left">
+              <button class="action-btn add" type="button" aria-label="Add"></button>
+            </div>
+            <div class="prompt-actions-right">
+              <button class="action-btn voice" type="button" aria-label="Voice"></button>
+              <button class="action-btn dark send" type="button" aria-label="Send"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const textarea = document.querySelector('.prompt-textarea');
+    if (textarea) {
+      textarea.addEventListener('input', () => {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+      });
+    }
+  </script>
+</body>
+</html>
