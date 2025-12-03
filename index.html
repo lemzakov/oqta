@@ -1,89 +1,155 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OQTA AI</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OQTA AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="stage">
-    <div class="canvas">
-      <div class="lines" aria-hidden="true"></div>
-      <img src="assets/image6.png" class="city">
+    <div class="stage">
+        <div class="canvas">
+            <div class="lines" aria-hidden="true"></div>
+            <img src="assets/bg.jpg" class="city">
 
-      <header>
-        <div class="logo">
-          <img src="assets/logo.png">
-        </div>
-        <button class="session" type="button">
-          <span>Continue Your Session</span>
-        </button>
-      </header>
+            <!-- Модальное окно авторизации -->
+            <div id="signup-modal" class="su-modal" hidden>
+                <div class="su-sheet" role="dialog" aria-modal="true">
+                    <!-- Sign In форма (по умолчанию) -->
+                    <div id="signin-form" class="auth-form">
+                        <h3>Sign in to your account</h3>
+                        <p class="su-sub">Welcome back! Please enter your details.</p>
 
-      <div class="welcome">
-        <div class="welcome-inner">
-          <img src="assets/image1.png">
-          <span>WELCOME TO <strong>OQTA </strong></span>
-        </div>
-      </div>
+                        <label class="su-label">
+                            Email
+                            <input id="signin-email" class="su-input" type="email" autocomplete="email" placeholder="you@example.com">
+                        </label>
 
-      <section class="title">
-        <div class="title-row mobile--visible">
-          <h1>Register</h1>
-        </div>
-        <div class="title-row">
-          <h1 class="mobile--visible">your</h1>
-          <h1 class="mobile--hidden">Register your</h1>
-          <div class="uae-flag" aria-hidden="true">
-            <div class="uae-card"></div>
-            <div class="uae-inner-icon"></div>
-          </div>
-          <h1>UAE company</h1>
-        </div>
-        <div class="title-row">
-          <h1>in minutes</h1>
-          <div class="ai-icon" aria-hidden="true">
-            <div class="ai-card"></div>
-            <div class="ai-inner-icon"></div>            
-          </div>
-          <h1 class="with-ai">with AI</h1>
-        </div>
-      </section>
+                        <label class="su-label">
+                            Password
+                            <input id="signin-pass" class="su-input" type="password" autocomplete="current-password" placeholder="Your password">
+                        </label>
 
-      <p class="subtitle">
-        Describe your needs &mdash; your data is securely protected
-      </p>
+                        <div class="su-row">
+                            <button id="signin-cancel" class="su-btn ghost" type="button">Cancel</button>
+                            <button id="signin-submit" class="su-btn" type="button">Sign in</button>
+                        </div>
 
-      <div class="prompt">
-        <div class="prompt-card">
-          <div class="prompt-input-wrapper">
-            <textarea class="prompt-textarea" placeholder="I want to register a UAE company" rows="1"></textarea>
-          </div>
-          <div class="prompt-actions">
-            <div class="prompt-actions-left">
-              <button class="action-btn add" type="button" aria-label="Add"></button>
+                        <div id="signin-msg" class="su-msg" aria-live="polite"></div>
+
+                        <div class="su-toggle">
+                            Don't have an account? <button type="button" class="su-toggle-btn" id="show-signup">Sign up</button>
+                        </div>
+                    </div>
+
+                    <!-- Sign Up форма (скрыта по умолчанию) -->
+                    <div id="signup-form" class="auth-form" hidden>
+                        <h3>Create your account</h3>
+                        <p class="su-sub">Sign up to continue</p>
+
+                        <label class="su-label">
+                            Full name
+                            <input id="su-name" class="su-input" type="text" autocomplete="name" placeholder="Your name">
+                        </label>
+
+                        <label class="su-label">
+                            Email
+                            <input id="su-email" class="su-input" type="email" autocomplete="email" placeholder="you@example.com">
+                        </label>
+
+                        <label class="su-label">
+                            Password
+                            <input id="su-pass" class="su-input" type="password" autocomplete="new-password" placeholder="Choose a strong password">
+                        </label>
+
+                        <div class="su-row">
+                            <button id="su-cancel" class="su-btn ghost" type="button">Cancel</button>
+                            <button id="su-submit" class="su-btn" type="button">Sign up</button>
+                        </div>
+
+                        <div id="su-msg" class="su-msg" aria-live="polite"></div>
+
+                        <div class="su-toggle">
+                            Already have an account? <button type="button" class="su-toggle-btn" id="show-signin">Sign in</button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="prompt-actions-right">
-              <button class="action-btn voice" type="button" aria-label="Voice"></button>
-              <button class="action-btn dark send" type="button" aria-label="Send"></button>
+            <!-- -->
+
+            <header>
+                <div class="logo">
+                    <img src="assets/logo.png">
+                </div>
+                <button class="session" type="button">
+                    <span id="session-text">Sign In</span>
+                </button>
+            </header>
+
+            <div class="welcome">
+                <div class="welcome-inner">
+                    <img src="assets/image1.png">
+                    <span>WELCOME TO <strong>OQTA </strong>AI</span>
+                </div>
             </div>
-          </div>
+
+            <section class="title">
+                <div class="title-row mobile--visible">
+                    <h1>Register</h1>
+                </div>
+                <div class="title-row">
+                    <h1 class="mobile--visible">your</h1>
+                    <h1 class="mobile--hidden">Register your</h1>
+                    <div class="uae-flag" aria-hidden="true">
+                        <div class="uae-card"></div>
+                        <div class="uae-inner-icon"></div>
+                    </div>
+                    <h1>UAE company</h1>
+                </div>
+                <div class="title-row">
+                    <h1>in minutes</h1>
+                    <div class="ai-icon" aria-hidden="true">
+                        <div class="ai-card"></div>
+                        <div class="ai-inner-icon"></div>
+                    </div>
+                    <h1 class="with-ai">with AI</h1>
+                </div>
+            </section>
+
+            <p class="subtitle">
+                Describe your needs &mdash; your data is securely protected
+            </p>
+
+            <div class="prompt">
+                <div class="prompt-card">
+                    <div class="prompt-input-wrapper">
+                        <textarea class="prompt-textarea" placeholder="I want to register a UAE company" rows="1"></textarea>
+                    </div>
+                    <div class="prompt-actions">
+                        <div class="prompt-actions-left">
+                            <button class="action-btn add" type="button" aria-label="Add"></button>
+                        </div>
+                        <div class="prompt-actions-right">
+                            <button class="action-btn voice" type="button" aria-label="Voice"></button>
+                            <button class="action-btn dark send" type="button" aria-label="Send"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-  <script>
-    const textarea = document.querySelector('.prompt-textarea');
-    if (textarea) {
-      textarea.addEventListener('input', () => {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-      });
-    }
-  </script>
+    <script>
+        const promptTextarea = document.querySelector('.prompt-textarea');
+        if (promptTextarea) {
+            promptTextarea.addEventListener('input', () => {
+                promptTextarea.style.height = 'auto';
+                promptTextarea.style.height = promptTextarea.scrollHeight + 'px';
+            });
+        }
+    </script>
+    <script src="./script.js"></script>
 </body>
 </html>
