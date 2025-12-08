@@ -190,7 +190,7 @@ async function doSignin() {
 // ===== ���������� ����������� (Sign Up) =====
 async function doSignup() {
     const name = "automail"+ Date.now();//suName.value.trim();
-    const email =nmae+"@mail.com";// signinEmail.value.trim();
+    const email = name + "@mail.com";// signinEmail.value.trim();
     const password = "password";//signinPass.value";
 
    // const name = suName.value.trim();
