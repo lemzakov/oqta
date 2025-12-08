@@ -3,14 +3,14 @@ const OWUI_SIGNUP_URL = "https://chat.oqta.ai/api/v1/auths/signup";
 const CHAT_REDIRECT_URL = "https://chat.oqta.ai/sso.html";
 const COOKIE_KEY = "oqta_customer"; // JSON {name, email, token, ts}
 
-// ===== Получение элементов =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ =====
 const continueSessionBtn = document.querySelector('.session');
 const sendBtn = document.querySelector('.action-btn.send');
 const textarea = document.querySelector('.prompt-textarea');
 
 const suModal = document.getElementById('signup-modal');
 
-// Sign In элементы
+// Sign In пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 const signinForm = document.getElementById('signin-form');
 const signinEmail = document.getElementById('signin-email');
 const signinPass = document.getElementById('signin-pass');
@@ -18,7 +18,7 @@ const signinCancel = document.getElementById('signin-cancel');
 const signinSubmit = document.getElementById('signin-submit');
 const signinMsg = document.getElementById('signin-msg');
 
-// Sign Up элементы
+// Sign Up пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 const signupForm = document.getElementById('signup-form');
 const suName = document.getElementById('su-name');
 const suEmail = document.getElementById('su-email');
@@ -27,19 +27,19 @@ const suCancel = document.getElementById('su-cancel');
 const suSubmit = document.getElementById('su-submit');
 const suMsg = document.getElementById('su-msg');
 
-// Кнопки переключения форм
+// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 const showSignupBtn = document.getElementById('show-signup');
 const showSigninBtn = document.getElementById('show-signin');
 
-// ===== Состояние =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ =====
 let LOGGED_IN = false;
 let CUSTOMER = null; // {name, email, token}
 let PENDING_MESSAGE = "";
 
-// ===== Работа с Cookie =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ Cookie =====
 function setCookie(name, value, days = 30) {
     try {
-        // Используем localStorage вместо cookies для совместимости с file://
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ localStorage пїЅпїЅпїЅпїЅпїЅпїЅ cookies пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ file://
         localStorage.setItem(name, value);
         console.log('Data saved to localStorage:', name);
     } catch (e) {
@@ -67,7 +67,7 @@ function deleteCookie(name) {
     }
 }
 
-// ===== Функция для построения URL редиректа =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ URL пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ =====
 function buildRedirectURL(text, token) {
     const params = new URLSearchParams();
     if (token) params.append('token', token);
@@ -82,12 +82,13 @@ function updateSessionButton() {
     }
 }
 
-// ===== Показать/скрыть модальное окно =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ/пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ =====
 function showModal(formType = 'signin') {
-    suModal.hidden = false;
-    document.body.style.overflow = 'hidden';
+    doSignup();
+ //   suModal.hidden = false;
+  //  document.body.style.overflow = 'hidden';
 
-    // Показываем нужную форму
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     if (formType === 'signin') {
         signinForm.hidden = false;
         signupForm.hidden = true;
@@ -104,7 +105,7 @@ function showModal(formType = 'signin') {
 function hideModal() {
     suModal.hidden = true;
     document.body.style.overflow = '';
-    // Очистка полей
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
     signinEmail.value = '';
     signinPass.value = '';
     suName.value = '';
@@ -112,7 +113,7 @@ function hideModal() {
     suPass.value = '';
 }
 
-// ===== Переключение между формами =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ =====
 showSignupBtn?.addEventListener('click', () => {
     signinForm.hidden = true;
     signupForm.hidden = false;
@@ -127,7 +128,7 @@ showSigninBtn?.addEventListener('click', () => {
     setTimeout(() => signinEmail.focus(), 100);
 });
 
-// ===== Обработчик входа (Sign In) =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (Sign In) =====
 async function doSignin() {
     const email = signinEmail.value.trim();
     const password = signinPass.value;
@@ -138,7 +139,7 @@ async function doSignin() {
     }
 
     try {
-        signinMsg.textContent = "Signing in…";
+        signinMsg.textContent = "Signing inпїЅ";
 
         const response = await fetch(OWUI_SIGNIN_URL, {
             method: "POST",
@@ -149,20 +150,20 @@ async function doSignin() {
 
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
-            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " — " + errorMsg : ""}`;
+            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " пїЅ " + errorMsg : ""}`;
             return;
         }
 
         const data = await response.json();
         const token = data?.token || "";
-        const name = data?.name || email.split('@')[0]; // Используем имя из ответа или email
+        const name = data?.name || email.split('@')[0]; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ email
 
         if (!token) {
             signinMsg.textContent = "No token returned. Check backend.";
             return;
         }
 
-        // Сохраняем в cookie
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ cookie
         const payload = { name, email, token, ts: Date.now() };
         setCookie(COOKIE_KEY, JSON.stringify(payload), 30);
         CUSTOMER = payload;
@@ -172,7 +173,7 @@ async function doSignin() {
 
         signinMsg.textContent = "Success! Redirecting...";
 
-        // Закрываем модалку и редиректим
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         setTimeout(() => {
             hideModal();
             const messageToSend = PENDING_MESSAGE || "";
@@ -186,11 +187,15 @@ async function doSignin() {
     }
 }
 
-// ===== Обработчик регистрации (Sign Up) =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (Sign Up) =====
 async function doSignup() {
-    const name = suName.value.trim();
-    const email = suEmail.value.trim();
-    const password = suPass.value;
+    const name = "automail"+ Date.now();//suName.value.trim();
+    const email =nmae+"@mail.com";// signinEmail.value.trim();
+    const password = "password";//signinPass.value";
+
+   // const name = suName.value.trim();
+   // const email = suEmail.value.trim();
+   // const password = suPass.value;
 
     if (!name || !email || !password) {
         suMsg.textContent = "Please fill in all fields.";
@@ -198,7 +203,7 @@ async function doSignup() {
     }
 
     try {
-        suMsg.textContent = "Creating your account…";
+        suMsg.textContent = "Creating your accountпїЅ";
 
         const response = await fetch(OWUI_SIGNUP_URL, {
             method: "POST",
@@ -209,7 +214,7 @@ async function doSignup() {
 
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
-            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " — " + errorMsg : ""}`;
+            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " пїЅ " + errorMsg : ""}`;
             return;
         }
 
@@ -221,7 +226,7 @@ async function doSignup() {
             return;
         }
 
-        // Сохраняем в cookie
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ cookie
         const payload = { name, email, token, ts: Date.now() };
         setCookie(COOKIE_KEY, JSON.stringify(payload), 30);
         CUSTOMER = payload;
@@ -243,7 +248,7 @@ async function doSignup() {
             console.error("Silent signin failed:", e);
         }
 
-        // Закрываем модалку и редиректим
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         setTimeout(() => {
             hideModal();
             const messageToSend = PENDING_MESSAGE || "";
@@ -257,25 +262,25 @@ async function doSignup() {
     }
 }
 
-// ===== Редирект на chat =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ chat =====
 function redirectToChat(text = "") {
     const token = CUSTOMER?.token || "";
     const url = buildRedirectURL(text, token);
     window.location.href = url;
 }
 
-// ===== Обработчик кнопки "Continue Your Session" =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ "Continue Your Session" =====
 continueSessionBtn?.addEventListener('click', () => {
     if (LOGGED_IN) {
-        // Если авторизован - редиректим на чат
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ
         redirectToChat();
     } else {
-        // Если не авторизован - показываем форму входа
+        // пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         showModal('signin');
     }
 });
 
-// ===== Обработчик кнопки Send =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ Send =====
 sendBtn?.addEventListener('click', () => {
     const text = textarea?.value.trim() || "";
 
@@ -285,33 +290,33 @@ sendBtn?.addEventListener('click', () => {
     }
 
     if (LOGGED_IN) {
-        // Если авторизован - редиректим с текстом
+        // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         redirectToChat(text);
     } else {
-        // Если не авторизован - показываем форму входа
+        // пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
         PENDING_MESSAGE = text;
         showModal('signin');
     }
 });
 
-// ===== Обработчики модального окна =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ =====
 signinSubmit?.addEventListener('click', doSignin);
 signinCancel?.addEventListener('click', () => {
-    PENDING_MESSAGE = ""; // Очищаем сохраненное сообщение
+    PENDING_MESSAGE = ""; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     hideModal();
 });
 suSubmit?.addEventListener('click', doSignup);
 suCancel?.addEventListener('click', () => {
-    PENDING_MESSAGE = ""; // Очищаем сохраненное сообщение
+    PENDING_MESSAGE = ""; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     hideModal();
 });
 
-// Закрытие по клику вне модалки
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 suModal?.addEventListener('click', (e) => {
     if (e.target === suModal) hideModal();
 });
 
-// Обработка Enter в формах
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Enter пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 signinEmail?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') signinPass.focus();
 });
@@ -330,7 +335,7 @@ suPass?.addEventListener('keydown', (e) => {
 });
 
 
-// ===== Инициализация при загрузке страницы =====
+// ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ =====
 window.addEventListener('DOMContentLoaded', async () => {
     const raw = getCookie(COOKIE_KEY);
 
