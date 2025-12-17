@@ -12,6 +12,7 @@
     --hero-height: 59.375rem;
     --font-body: "GoogleSansRegular", "Inter", system-ui, -apple-system, sans-serif;
     --font-brand: "KamerikBold", "Google Sans", "Inter", sans-serif;
+    --font-arabic: "Noto Sans Arabic", sans-serif;
 }
 
 html {
@@ -44,6 +45,11 @@ body {
     background: linear-gradient(180deg, rgba(228, 216, 240, 0.3) 4.4632%, rgba(249, 249, 249, 0) 100%), linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 100%);
     min-height: 100vh;
     overflow: hidden;
+}
+
+/* RTL support for Arabic */
+[dir="rtl"] body {
+    font-family: var(--font-arabic), var(--font-body);
 }
 
 .stage {
@@ -96,6 +102,34 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    background: #ffffff;
+    color: var(--color-dark);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lang-switcher:hover {
+    background: var(--color-dark);
+    color: #ffffff;
+    border-color: var(--color-dark);
 }
 
 .logo {
@@ -271,6 +305,77 @@ header {
     text-align: center;
 }
 
+/* Info Section Styles */
+.info-section {
+    position: absolute;
+    top: 47rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 53.75rem;
+    z-index: 10;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid var(--color-border);
+    border-radius: 1.5rem;
+    padding: 1.75rem 2rem;
+    box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.06);
+}
+
+.info-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #10b981;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 6.25rem;
+    margin-bottom: 1rem;
+}
+
+.info-card h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.5rem;
+    line-height: 1.875rem;
+    font-weight: 600;
+    color: var(--color-dark);
+}
+
+.info-card p {
+    margin: 0 0 1.25rem 0;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: var(--color-muted);
+}
+
+.info-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.25rem;
+}
+
+.info-item strong {
+    color: var(--color-dark);
+    font-weight: 600;
+    min-width: 5rem;
+}
+
+.info-item span {
+    color: var(--color-text);
+}
+
 .prompt {
     position: absolute;
     top: 34.375rem;
@@ -402,7 +507,7 @@ header {
     display: none;
 }
 
-/* ===== Модальное окно регистрации ===== */
+/* ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ===== */
 .su-modal {
     display: none;
     position: fixed;
@@ -533,7 +638,7 @@ header {
         background: #fee2e2;
     }
 
-/* Стили для переключения между формами */
+/* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 .auth-form[hidden] {
     display: none !important;
 }
@@ -586,12 +691,43 @@ header {
 
     .subtitle {
         top: 33.5rem;
+        width: calc(100% - 4.5rem);
+        padding: 0 2.25rem;
+    }
+
+    .info-section {
+        width: calc(100% - 4.5rem);
+        padding: 0 2.25rem;
+        top: 40rem;
+    }
+
+    .info-card {
+        padding: 1.5rem 1.5rem;
+    }
+
+    .info-card h3 {
+        font-size: 1.25rem;
+        line-height: 1.625rem;
+    }
+
+    .info-card p {
+        font-size: 0.9375rem;
+    }
+
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .info-item strong {
+        min-width: auto;
     }
 
     .prompt {
         width: 100%;
         padding: 0 2.25rem;
-        top: 39rem;
+        top: 54rem;
     }
 }
 
@@ -610,6 +746,12 @@ header {
 
     header {
         padding: 0 1rem;
+    }
+
+    .lang-switcher {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.75rem;
     }
 
     button.session span {
@@ -633,12 +775,43 @@ header {
     .subtitle {
         top: 35.5rem;
         font-size: 1.125rem;
+        width: calc(100% - 2rem);
+        padding: 0 1rem;
+    }
+
+    .info-section {
+        width: calc(100% - 2rem);
+        padding: 0 1rem;
+        top: 40rem;
+    }
+
+    .info-card {
+        padding: 1.25rem 1.25rem;
+    }
+
+    .info-card h3 {
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+    }
+
+    .info-card p {
+        font-size: 0.875rem;
+        line-height: 1.375rem;
+    }
+
+    .info-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.875rem;
+    }
+
+    .info-item {
+        font-size: 0.875rem;
     }
 
     .prompt {
         width: 100%;
         padding: 0 1rem;
-        top: 40.5rem;
+        top: 54rem;
     }
 }
 

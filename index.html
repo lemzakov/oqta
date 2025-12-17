@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -20,60 +21,60 @@
                 <div class="su-sheet" role="dialog" aria-modal="true">
                     <!-- Sign In форма (по умолчанию) -->
                     <div id="signin-form" class="auth-form">
-                        <h3>Sign in to your account</h3>
-                        <p class="su-sub">Welcome back! Please enter your details.</p>
+                        <h3 data-i18n="signin-title">Sign in to your account</h3>
+                        <p class="su-sub" data-i18n="signin-subtitle">Welcome back! Please enter your details.</p>
 
                         <label class="su-label">
-                            Email
-                            <input id="signin-email" class="su-input" type="email" autocomplete="email" placeholder="you@example.com">
+                            <span data-i18n="email-label">Email</span>
+                            <input id="signin-email" class="su-input" type="email" autocomplete="email" data-i18n-placeholder="email-placeholder" placeholder="you@example.com">
                         </label>
 
                         <label class="su-label">
-                            Password
-                            <input id="signin-pass" class="su-input" type="password" autocomplete="current-password" placeholder="Your password">
+                            <span data-i18n="password-label">Password</span>
+                            <input id="signin-pass" class="su-input" type="password" autocomplete="current-password" data-i18n-placeholder="password-placeholder" placeholder="Your password">
                         </label>
 
                         <div class="su-row">
-                            <button id="signin-cancel" class="su-btn ghost" type="button">Cancel</button>
-                            <button id="signin-submit" class="su-btn" type="button">Sign in</button>
+                            <button id="signin-cancel" class="su-btn ghost" type="button" data-i18n="cancel">Cancel</button>
+                            <button id="signin-submit" class="su-btn" type="button" data-i18n="signin">Sign in</button>
                         </div>
 
                         <div id="signin-msg" class="su-msg" aria-live="polite"></div>
 
                         <div class="su-toggle">
-                            Don't have an account? <button type="button" class="su-toggle-btn" id="show-signup">Sign up</button>
+                            <span data-i18n="no-account">Don't have an account?</span> <button type="button" class="su-toggle-btn" id="show-signup" data-i18n="signup">Sign up</button>
                         </div>
                     </div>
 
                     <!-- Sign Up форма (скрыта по умолчанию) -->
                     <div id="signup-form" class="auth-form" hidden>
-                        <h3>Create your account</h3>
-                        <p class="su-sub">Sign up to continue</p>
+                        <h3 data-i18n="signup-title">Create your account</h3>
+                        <p class="su-sub" data-i18n="signup-subtitle">Sign up to continue</p>
 
                         <label class="su-label">
-                            Full name
-                            <input id="su-name" class="su-input" type="text" autocomplete="name" placeholder="Your name">
+                            <span data-i18n="fullname-label">Full name</span>
+                            <input id="su-name" class="su-input" type="text" autocomplete="name" data-i18n-placeholder="fullname-placeholder" placeholder="Your name">
                         </label>
 
                         <label class="su-label">
-                            Email
-                            <input id="su-email" class="su-input" type="email" autocomplete="email" placeholder="you@example.com">
+                            <span data-i18n="email-label">Email</span>
+                            <input id="su-email" class="su-input" type="email" autocomplete="email" data-i18n-placeholder="email-placeholder" placeholder="you@example.com">
                         </label>
 
                         <label class="su-label">
-                            Password
-                            <input id="su-pass" class="su-input" type="password" autocomplete="new-password" placeholder="Choose a strong password">
+                            <span data-i18n="password-label">Password</span>
+                            <input id="su-pass" class="su-input" type="password" autocomplete="new-password" data-i18n-placeholder="new-password-placeholder" placeholder="Choose a strong password">
                         </label>
 
                         <div class="su-row">
-                            <button id="su-cancel" class="su-btn ghost" type="button">Cancel</button>
-                            <button id="su-submit" class="su-btn" type="button">Sign up</button>
+                            <button id="su-cancel" class="su-btn ghost" type="button" data-i18n="cancel">Cancel</button>
+                            <button id="su-submit" class="su-btn" type="button" data-i18n="signup">Sign up</button>
                         </div>
 
                         <div id="su-msg" class="su-msg" aria-live="polite"></div>
 
                         <div class="su-toggle">
-                            Already have an account? <button type="button" class="su-toggle-btn" id="show-signin">Sign in</button>
+                            <span data-i18n="have-account">Already have an account?</span> <button type="button" class="su-toggle-btn" id="show-signin" data-i18n="signin">Sign in</button>
                         </div>
                     </div>
                 </div>
@@ -84,57 +85,83 @@
                 <div class="logo">
                     <img src="assets/logo.png">
                 </div>
-                <button class="session" type="button">
-                    <span id="session-text">Sign In</span>
-                </button>
+                <div class="header-right">
+                    <button class="lang-switcher" type="button" aria-label="Switch Language">
+                        <span id="current-lang">EN</span>
+                    </button>
+                    <button class="session" type="button">
+                        <span id="session-text" data-i18n="signin">Sign In</span>
+                    </button>
+                </div>
             </header>
 
             <div class="welcome">
                 <div class="welcome-inner">
                     <img src="assets/image1.png">
-                    <span>WELCOME TO <strong>OQTA </strong>AI</span>
+                    <span><span data-i18n="welcome">WELCOME TO</span> <strong>OQTA </strong>AI</span>
                 </div>
             </div>
 
             <section class="title">
                 <div class="title-row mobile--visible">
-                    <h1>Register</h1>
+                    <h1 data-i18n="register">Register</h1>
                 </div>
                 <div class="title-row">
-                    <h1 class="mobile--visible">your</h1>
-                    <h1 class="mobile--hidden">Register your</h1>
+                    <h1 class="mobile--visible" data-i18n="your">your</h1>
+                    <h1 class="mobile--hidden" data-i18n="register-your">Register your</h1>
                     <div class="uae-flag" aria-hidden="true">
                         <div class="uae-card"></div>
                         <div class="uae-inner-icon"></div>
                     </div>
-                    <h1>UAE company</h1>
+                    <h1 data-i18n="uae-company">UAE company</h1>
                 </div>
                 <div class="title-row">
-                    <h1>in minutes</h1>
+                    <h1 data-i18n="in-minutes">in minutes</h1>
                     <div class="ai-icon" aria-hidden="true">
                         <div class="ai-card"></div>
                         <div class="ai-inner-icon"></div>
                     </div>
-                    <h1 class="with-ai">with AI</h1>
+                    <h1 class="with-ai" data-i18n="with-ai">with AI</h1>
                 </div>
             </section>
 
-            <p class="subtitle">
+            <p class="subtitle" data-i18n="subtitle">
                 Describe your needs &mdash; your data is securely protected
             </p>
+
+            <!-- Info Section -->
+            <div class="info-section">
+                <div class="info-card">
+                    <div class="info-badge">
+                        <span data-i18n="info-badge">✓ 100% Safe & Secure</span>
+                    </div>
+                    <h3 data-i18n="info-title">Fast & Fully Online UAE Company Registration</h3>
+                    <p data-i18n="info-description">Register your business in the UAE quickly and securely through our fully online process. We operate under the GTA Consulting license for your peace of mind.</p>
+                    <div class="info-details">
+                        <div class="info-item">
+                            <strong data-i18n="info-license">License:</strong>
+                            <span>GTA Consulting - #1234567</span>
+                        </div>
+                        <div class="info-item">
+                            <strong data-i18n="info-contact">Contact:</strong>
+                            <span>info@gtaconsulting.ae | +971 4 123 4567</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="prompt">
                 <div class="prompt-card">
                     <div class="prompt-input-wrapper">
-                        <textarea class="prompt-textarea" placeholder="I want to register a UAE company" rows="1"></textarea>
+                        <textarea class="prompt-textarea" data-i18n-placeholder="prompt-placeholder" placeholder="I want to register a UAE company" rows="1"></textarea>
                     </div>
                     <div class="prompt-actions">
                         <div class="prompt-actions-left">
-                            <button class="action-btn add" type="button" aria-label="Add"></button>
+                            <button class="action-btn add" type="button" data-i18n-aria="add-aria" aria-label="Add"></button>
                         </div>
                         <div class="prompt-actions-right">
-                            <button class="action-btn voice" type="button" aria-label="Voice"></button>
-                            <button class="action-btn dark send" type="button" aria-label="Send"></button>
+                            <button class="action-btn voice" type="button" data-i18n-aria="voice-aria" aria-label="Voice"></button>
+                            <button class="action-btn dark send" type="button" data-i18n-aria="send-aria" aria-label="Send"></button>
                         </div>
                     </div>
                 </div>
@@ -149,6 +176,166 @@
                 promptTextarea.style.height = promptTextarea.scrollHeight + 'px';
             });
         }
+    </script>
+    <script>
+        // Translation system
+        const translations = {
+            en: {
+                'welcome': 'WELCOME TO',
+                'register': 'Register',
+                'your': 'your',
+                'register-your': 'Register your',
+                'uae-company': 'UAE company',
+                'in-minutes': 'in minutes',
+                'with-ai': 'with AI',
+                'subtitle': 'Describe your needs — your data is securely protected',
+                'info-badge': '✓ 100% Safe & Secure',
+                'info-title': 'Fast & Fully Online UAE Company Registration',
+                'info-description': 'Register your business in the UAE quickly and securely through our fully online process. We operate under the GTA Consulting license for your peace of mind.',
+                'info-license': 'License:',
+                'info-contact': 'Contact:',
+                'prompt-placeholder': 'I want to register a UAE company',
+                'signin': 'Sign in',
+                'signup': 'Sign up',
+                'continue-session': 'Continue Your Session',
+                'signin-title': 'Sign in to your account',
+                'signin-subtitle': 'Welcome back! Please enter your details.',
+                'signup-title': 'Create your account',
+                'signup-subtitle': 'Sign up to continue',
+                'email-label': 'Email',
+                'password-label': 'Password',
+                'fullname-label': 'Full name',
+                'email-placeholder': 'you@example.com',
+                'password-placeholder': 'Your password',
+                'new-password-placeholder': 'Choose a strong password',
+                'fullname-placeholder': 'Your name',
+                'cancel': 'Cancel',
+                'no-account': "Don't have an account?",
+                'have-account': 'Already have an account?',
+                'add-aria': 'Add',
+                'voice-aria': 'Voice',
+                'send-aria': 'Send'
+            },
+            ar: {
+                'welcome': 'مرحباً بك في',
+                'register': 'سجل',
+                'your': 'شركتك',
+                'register-your': 'سجل شركتك',
+                'uae-company': 'في الإمارات',
+                'in-minutes': 'في دقائق',
+                'with-ai': 'بالذكاء الاصطناعي',
+                'subtitle': 'صف احتياجاتك - بياناتك محمية بشكل آمن',
+                'info-badge': '✓ آمن 100% ومضمون',
+                'info-title': 'تسجيل شركة في الإمارات بسرعة وبالكامل عبر الإنترنت',
+                'info-description': 'سجل عملك في الإمارات بسرعة وأمان من خلال عمليتنا الكاملة عبر الإنترنت. نحن نعمل بموجب ترخيص GTA Consulting لراحة بالك.',
+                'info-license': 'الترخيص:',
+                'info-contact': 'للتواصل:',
+                'prompt-placeholder': 'أريد تسجيل شركة في الإمارات',
+                'signin': 'تسجيل الدخول',
+                'signup': 'إنشاء حساب',
+                'continue-session': 'متابعة الجلسة',
+                'signin-title': 'تسجيل الدخول إلى حسابك',
+                'signin-subtitle': 'مرحباً بعودتك! الرجاء إدخال بياناتك.',
+                'signup-title': 'إنشاء حسابك',
+                'signup-subtitle': 'سجل للمتابعة',
+                'email-label': 'البريد الإلكتروني',
+                'password-label': 'كلمة المرور',
+                'fullname-label': 'الاسم الكامل',
+                'email-placeholder': 'you@example.com',
+                'password-placeholder': 'كلمة المرور الخاصة بك',
+                'new-password-placeholder': 'اختر كلمة مرور قوية',
+                'fullname-placeholder': 'اسمك',
+                'cancel': 'إلغاء',
+                'no-account': 'ليس لديك حساب؟',
+                'have-account': 'هل لديك حساب بالفعل؟',
+                'add-aria': 'إضافة',
+                'voice-aria': 'صوت',
+                'send-aria': 'إرسال'
+            }
+        };
+
+        // Make translations globally accessible
+        window.translations = translations;
+        let currentLang = 'en';
+
+        // Detect user's preferred language
+        function detectLanguage() {
+            const userLang = navigator.language || navigator.userLanguage;
+            if (userLang.startsWith('ar')) {
+                return 'ar';
+            }
+            return 'en';
+        }
+
+        // Apply translations
+        function applyTranslations(lang) {
+            currentLang = lang;
+            window.currentLang = lang;
+            const langData = translations[lang];
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+            
+            // Update direction for RTL languages
+            if (lang === 'ar') {
+                document.documentElement.dir = 'rtl';
+            } else {
+                document.documentElement.dir = 'ltr';
+            }
+            
+            // Update text content
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (langData[key]) {
+                    el.textContent = langData[key];
+                }
+            });
+            
+            // Update placeholders
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (langData[key]) {
+                    el.placeholder = langData[key];
+                }
+            });
+            
+            // Update aria-labels
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+                const key = el.getAttribute('data-i18n-aria');
+                if (langData[key]) {
+                    el.setAttribute('aria-label', langData[key]);
+                }
+            });
+            
+            // Update language switcher
+            const langSwitcher = document.getElementById('current-lang');
+            if (langSwitcher) {
+                langSwitcher.textContent = lang.toUpperCase();
+            }
+            
+            // Save preference
+            localStorage.setItem('preferred-lang', lang);
+            
+            // Trigger update session button if function exists
+            if (typeof window.updateSessionButton === 'function') {
+                window.updateSessionButton();
+            }
+        }
+
+        // Initialize language on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('preferred-lang') || detectLanguage();
+            applyTranslations(savedLang);
+            
+            // Add language switcher event
+            const langSwitcher = document.querySelector('.lang-switcher');
+            if (langSwitcher) {
+                langSwitcher.addEventListener('click', () => {
+                    const newLang = currentLang === 'en' ? 'ar' : 'en';
+                    applyTranslations(newLang);
+                });
+            }
+        });
     </script>
     <script src="./script.js"></script>
 </body>

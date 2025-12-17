@@ -78,9 +78,21 @@ function buildRedirectURL(text, token) {
 function updateSessionButton() {
     const sessionText = document.getElementById('session-text');
     if (sessionText) {
-        sessionText.textContent = LOGGED_IN ? 'Continue Your Session' : 'Sign In';
+        const key = LOGGED_IN ? 'continue-session' : 'signin';
+        const translations = window.translations || {};
+        const currentLang = window.currentLang || 'en';
+        
+        if (translations[currentLang] && translations[currentLang][key]) {
+            sessionText.textContent = translations[currentLang][key];
+        } else {
+            sessionText.textContent = LOGGED_IN ? 'Continue Your Session' : 'Sign In';
+        }
+        sessionText.setAttribute('data-i18n', key);
     }
 }
+
+// Make updateSessionButton globally accessible
+window.updateSessionButton = updateSessionButton;
 
 // ===== ��������/������ ��������� ���� =====
 function showModal(formType = 'signin') {
