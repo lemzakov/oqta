@@ -84,9 +84,8 @@ function updateSessionButton() {
 
 // ===== ��������/������ ��������� ���� =====
 function showModal(formType = 'signin') {
-    doSignup();
- //   suModal.hidden = false;
-  //  document.body.style.overflow = 'hidden';
+    suModal.hidden = false;
+    document.body.style.overflow = 'hidden';
 
     // ���������� ������ �����
     if (formType === 'signin') {
@@ -189,13 +188,9 @@ async function doSignin() {
 
 // ===== ���������� ����������� (Sign Up) =====
 async function doSignup() {
-    const name = "automail"+ Date.now();//suName.value.trim();
-    const email = name + "@mail.com";// signinEmail.value.trim();
-    const password = "password";//signinPass.value";
-
-   // const name = suName.value.trim();
-   // const email = suEmail.value.trim();
-   // const password = suPass.value;
+    const name = suName.value.trim();
+    const email = suEmail.value.trim();
+    const password = suPass.value;
 
     if (!name || !email || !password) {
         suMsg.textContent = "Please fill in all fields.";
