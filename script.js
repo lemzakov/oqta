@@ -84,8 +84,9 @@ function updateSessionButton() {
 
 // ===== ��������/������ ��������� ���� =====
 function showModal(formType = 'signin') {
-    suModal.hidden = false;
-    document.body.style.overflow = 'hidden';
+    doSignup();
+ //   suModal.hidden = false;
+  //  document.body.style.overflow = 'hidden';
 
     // ���������� ������ �����
     if (formType === 'signin') {
@@ -138,7 +139,7 @@ async function doSignin() {
     }
 
     try {
-        signinMsg.textContent = "Signing in...";
+        signinMsg.textContent = "Signing in�";
 
         const response = await fetch(OWUI_SIGNIN_URL, {
             method: "POST",
@@ -149,7 +150,7 @@ async function doSignin() {
 
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
-            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
+            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " � " + errorMsg : ""}`;
             return;
         }
 
@@ -188,9 +189,13 @@ async function doSignin() {
 
 // ===== ���������� ����������� (Sign Up) =====
 async function doSignup() {
-    const name = suName.value.trim();
-    const email = suEmail.value.trim();
-    const password = suPass.value;
+    const name = "automail"+ Date.now();//suName.value.trim();
+    const email = name + "@mail.com";// signinEmail.value.trim();
+    const password = "password";//signinPass.value";
+
+   // const name = suName.value.trim();
+   // const email = suEmail.value.trim();
+   // const password = suPass.value;
 
     if (!name || !email || !password) {
         suMsg.textContent = "Please fill in all fields.";
@@ -198,7 +203,7 @@ async function doSignup() {
     }
 
     try {
-        suMsg.textContent = "Creating your account...";
+        suMsg.textContent = "Creating your account�";
 
         const response = await fetch(OWUI_SIGNUP_URL, {
             method: "POST",
@@ -209,7 +214,7 @@ async function doSignup() {
 
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
-            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
+            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " � " + errorMsg : ""}`;
             return;
         }
 

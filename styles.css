@@ -98,6 +98,33 @@ header {
     justify-content: space-between;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.language-selector {
+    position: relative;
+}
+
+.lang-select {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6.25rem;
+    background: #ffffff;
+    color: var(--color-text);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--font-body);
+    outline: none;
+}
+
+    .lang-select:hover {
+        border-color: var(--color-dark);
+    }
+
 .logo {
     display: inline-flex;
 }
@@ -261,14 +288,22 @@ header {
     position: absolute;
     top: 29.415625rem;
     left: 50%;
-    width: 37.25rem;
+    width: 42rem;
     transform: translateX(-50%);
     margin: 0;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     line-height: 1.75rem;
-    font-weight: 400;
-    color: rgba(0, 0, 0, 0.5);
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.7);
     text-align: center;
+}
+
+.subtitle-small {
+    display: block;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.6);
 }
 
 .prompt {
@@ -398,11 +433,69 @@ header {
         background-image: url('./assets/send.svg');
     }
 
+.contact-info {
+    position: absolute;
+    top: 46rem;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.contact-text {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+}
+
+.contact-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6.25rem;
+    background: #ffffff;
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .contact-link:hover {
+        border-color: var(--color-dark);
+        background: var(--color-dark);
+        color: #ffffff;
+    }
+
+    .contact-link svg {
+        flex-shrink: 0;
+    }
+
+    .contact-link.whatsapp {
+        background: #25D366;
+        border-color: #25D366;
+        color: #ffffff;
+    }
+
+    .contact-link.whatsapp:hover {
+        background: #1EBE57;
+        border-color: #1EBE57;
+    }
+
 .mobile--visible {
     display: none;
 }
 
-/* ===== Модальное окно регистрации ===== */
+/* ===== пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ===== */
 .su-modal {
     display: none;
     position: fixed;
@@ -533,7 +626,7 @@ header {
         background: #fee2e2;
     }
 
-/* Стили для переключения между формами */
+/* пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
 .auth-form[hidden] {
     display: none !important;
 }
