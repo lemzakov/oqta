@@ -140,11 +140,11 @@
                     <div class="info-details">
                         <div class="info-item">
                             <strong data-i18n="info-license">License:</strong>
-                            <span>GTA Consulting - #1234567</span>
+                            <span>GTA Consulting - License No. TBD</span>
                         </div>
                         <div class="info-item">
                             <strong data-i18n="info-contact">Contact:</strong>
-                            <span>info@gtaconsulting.ae | +971 4 123 4567</span>
+                            <span>contact@gtaconsulting.ae | +971 50 XXX XXXX</span>
                         </div>
                     </div>
                 </div>
@@ -261,9 +261,11 @@
         // Detect user's preferred language
         function detectLanguage() {
             const userLang = navigator.language || navigator.userLanguage;
-            if (userLang.startsWith('ar')) {
+            // Handle Arabic variants (ar, ar-AE, ar-SA, etc.)
+            if (userLang.toLowerCase().startsWith('ar')) {
                 return 'ar';
             }
+            // Default to English for all other languages
             return 'en';
         }
 
