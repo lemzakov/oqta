@@ -328,12 +328,18 @@ header {
     border-radius: 1.25rem;
     box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease;
+    cursor: pointer;
 }
 
     .service-item:hover {
         transform: translateY(-2px);
         box-shadow: 0 0.5rem 1.25rem rgba(0, 0, 0, 0.08);
         border-color: var(--color-dark);
+    }
+
+    .service-item:focus {
+        outline: 2px solid var(--color-dark);
+        outline-offset: 2px;
     }
 
 .service-icon {
@@ -739,12 +745,32 @@ header {
 
     .subtitle {
         top: 33.5rem;
+        width: 100%;
+        padding: 0 2.25rem;
+    }
+
+    .services-grid {
+        top: 38rem;
+        width: 100%;
+        padding: 0 2.25rem;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .cta-text {
+        top: 47rem;
+        width: 100%;
+        padding: 0 2.25rem;
     }
 
     .prompt {
         width: 100%;
         padding: 0 2.25rem;
-        top: 39rem;
+        top: 50rem;
+    }
+
+    .contact-info {
+        top: 61rem;
     }
 }
 
@@ -786,12 +812,50 @@ header {
     .subtitle {
         top: 35.5rem;
         font-size: 1.125rem;
+        width: 100%;
+        padding: 0 1rem;
+    }
+
+    .services-grid {
+        top: 40rem;
+        width: 100%;
+        padding: 0 1rem;
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+
+    .service-item {
+        padding: 0.75rem 1rem;
+    }
+
+    .service-icon {
+        font-size: 1.25rem;
+    }
+
+    .service-text {
+        font-size: 0.875rem;
+    }
+
+    .cta-text {
+        top: 50.5rem;
+        width: 100%;
+        padding: 0 1rem;
+        font-size: 1rem;
     }
 
     .prompt {
         width: 100%;
         padding: 0 1rem;
-        top: 40.5rem;
+        top: 53.5rem;
+    }
+
+    .contact-info {
+        top: 64.5rem;
+    }
+
+    .contact-links {
+        flex-direction: column;
+        gap: 0.75rem;
     }
 }
 
