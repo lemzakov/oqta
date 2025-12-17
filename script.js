@@ -138,7 +138,7 @@ async function doSignin() {
     }
 
     try {
-        signinMsg.textContent = "Signing in�";
+        signinMsg.textContent = "Signing in...";
 
         const response = await fetch(OWUI_SIGNIN_URL, {
             method: "POST",
@@ -149,7 +149,7 @@ async function doSignin() {
 
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
-            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " � " + errorMsg : ""}`;
+            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
             return;
         }
 
@@ -198,7 +198,7 @@ async function doSignup() {
     }
 
     try {
-        suMsg.textContent = "Creating your account�";
+        suMsg.textContent = "Creating your account...";
 
         const response = await fetch(OWUI_SIGNUP_URL, {
             method: "POST",
@@ -209,7 +209,7 @@ async function doSignup() {
 
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
-            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " � " + errorMsg : ""}`;
+            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
             return;
         }
 
