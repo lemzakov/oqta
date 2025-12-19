@@ -978,7 +978,7 @@ header {
 }
 
 @media (max-width: 768px) {
-    /* Prevent horizontal scrolling on mobile */
+    /* Hide large background image to prevent horizontal scrolling on mobile */
     .city {
         display: none;
     }
@@ -1042,7 +1042,7 @@ header {
 
     .chat-input-container {
         padding: 0.75rem 1rem;
-        /* Prevent Safari toolbar from hiding input */
+        /* Account for iOS bottom safe area (home indicator) */
         padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
     }
 
