@@ -3,6 +3,7 @@ const OWUI_SIGNUP_URL = "https://chat.oqta.ai/api/v1/auths/signup";
 const COOKIE_KEY = "oqta_customer"; // JSON {name, email, token, ts}
 const SESSION_KEY = "oqta_session"; // JSON {chat_id, user_id, messages, ts}
 const N8N_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
+const DEFAULT_SYSTEM_PROMPT = "I want to register company"; // Can be customized based on user context
 
 // ===== DOM Elements =====
 const continueSessionBtn = document.querySelector('.session');
@@ -48,6 +49,12 @@ let IS_SENDING = false;
 
 // ===== UUID Generation =====
 function generateUUID() {
+    // Use crypto.randomUUID() if available (modern browsers)
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    
+    // Fallback for older browsers
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         const r = Math.random() * 16 | 0;
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -213,8 +220,8 @@ async function sendToN8N(message) {
     
     const messageId = generateUUID();
     
-    // System prompt can be customized based on the context
-    const systemPrompt = "I want to register company";
+    // Use the default system prompt (can be customized based on context)
+    const systemPrompt = DEFAULT_SYSTEM_PROMPT;
     
     // Prepare the request body in the format expected by n8n
     const requestBody = {
@@ -260,8 +267,8 @@ async function sendToN8N(message) {
             aiResponse = data.message;
             console.log('Using response.message field');
         } else {
-            console.warn('Unknown response format, using JSON stringify');
-            aiResponse = JSON.stringify(data);
+            console.warn('Unknown response format:', data);
+            aiResponse = "I received your message, but I'm having trouble formatting my response. Please try again or contact support.";
         }
         
         return aiResponse;
