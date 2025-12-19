@@ -213,28 +213,22 @@ async function sendToN8N(message) {
     
     const messageId = generateUUID();
     
-    // Prepare the exact format required by n8n
-    const payload = [{
-        headers: {
-            "content-type": "application/json"
-        },
-        params: {},
-        query: {},
-        body: {
-            systemPrompt: "I want to register company",
-            user_id: SESSION.user_id,
-            user_email: CUSTOMER?.email || "guest@oqta.ai",
-            user_name: CUSTOMER?.name || "Guest User",
-            user_role: CUSTOMER ? "user" : "guest",
-            chat_id: SESSION.chat_id,
-            message_id: messageId,
-            chatInput: message
-        },
-        webhookUrl: N8N_WEBHOOK_URL,
-        executionMode: "production"
-    }];
+    // System prompt can be customized based on the context
+    const systemPrompt = "I want to register company";
     
-    console.log('Sending to n8n:', payload);
+    // Prepare the request body in the format expected by n8n
+    const requestBody = {
+        systemPrompt: systemPrompt,
+        user_id: SESSION.user_id,
+        user_email: CUSTOMER?.email || "guest@oqta.ai",
+        user_name: CUSTOMER?.name || "Guest User",
+        user_role: CUSTOMER ? "user" : "guest",
+        chat_id: SESSION.chat_id,
+        message_id: messageId,
+        chatInput: message
+    };
+    
+    console.log('Sending to n8n:', requestBody);
     
     try {
         const response = await fetch(N8N_WEBHOOK_URL, {
@@ -242,7 +236,7 @@ async function sendToN8N(message) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload[0].body)
+            body: JSON.stringify(requestBody)
         });
         
         if (!response.ok) {
@@ -252,17 +246,21 @@ async function sendToN8N(message) {
         const data = await response.json();
         console.log('n8n response:', data);
         
-        // Extract the AI response from the n8n webhook response
+        // Parse the AI response - try common response formats
         let aiResponse = '';
         if (typeof data === 'string') {
             aiResponse = data;
         } else if (data.response) {
             aiResponse = data.response;
+            console.log('Using response.response field');
         } else if (data.output) {
             aiResponse = data.output;
+            console.log('Using response.output field');
         } else if (data.message) {
             aiResponse = data.message;
+            console.log('Using response.message field');
         } else {
+            console.warn('Unknown response format, using JSON stringify');
             aiResponse = JSON.stringify(data);
         }
         
@@ -321,7 +319,21 @@ function updateSessionButton() {
 }
 
 function showModal(formType = 'signin') {
-    doSignup();
+    suModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    // Show the correct form
+    if (formType === 'signin') {
+        signinForm.hidden = false;
+        signupForm.hidden = true;
+        signinMsg.textContent = "";
+        setTimeout(() => signinEmail.focus(), 100);
+    } else {
+        signinForm.hidden = true;
+        signupForm.hidden = false;
+        suMsg.textContent = "";
+        setTimeout(() => suName.focus(), 100);
+    }
 }
 
 function hideModal() {
@@ -407,9 +419,9 @@ async function doSignin() {
 }
 
 async function doSignup() {
-    const name = "automail" + Date.now();
-    const email = name + "@mail.com";
-    const password = "password";
+    const name = suName.value.trim();
+    const email = suEmail.value.trim();
+    const password = suPass.value;
 
     if (!name || !email || !password) {
         suMsg.textContent = "Please fill in all fields.";
