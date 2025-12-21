@@ -10,15 +10,32 @@ This is a single-page chat application that integrates with n8n for AI-powered c
 - **Session Persistence**: Conversation history is stored in browser's localStorage
 - **Welcome Back**: Returning users see their previous conversations automatically
 - **n8n Integration**: All chat messages are sent to n8n webhook for AI processing
+- **Multi-language Support**: Language selector with 6 languages (English, Arabic, Russian, Chinese, Hindi, Urdu)
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## n8n Webhook Configuration
 
 ### Endpoint Setup
 
-1. Create a webhook node in your n8n workflow
-2. Configure the webhook URL (e.g., `https://n8n.oqta.ai/webhook/chat`)
-3. Update the `N8N_WEBHOOK_URL` in `script.js` with your webhook URL
+The application is configured to use the n8n webhook at:
+`https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000`
+
+#### For Vercel Deployment
+
+Set the environment variable in your Vercel project:
+
+```bash
+N8N_WEBHOOK_URL=https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000
+```
+
+Or via Vercel dashboard:
+1. Go to your project settings
+2. Navigate to Environment Variables
+3. Add `N8N_WEBHOOK_URL` with the webhook URL value
+
+#### For Local Development
+
+The application will use the hardcoded URL in `script.js` if no environment variable is set.
 
 ### Expected Request Format
 

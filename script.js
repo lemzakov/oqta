@@ -1,7 +1,8 @@
 // ===== Configuration =====
-// Update this URL to point to your n8n webhook endpoint
-// Example: "https://your-n8n-instance.com/webhook/chat"
-const N8N_WEBHOOK_URL = "https://n8n.oqta.ai/webhook/chat";
+// n8n webhook URL - can be overridden with environment variable
+const N8N_WEBHOOK_URL = typeof process !== 'undefined' && process.env?.N8N_WEBHOOK_URL 
+    ? process.env.N8N_WEBHOOK_URL 
+    : "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
 
 const SESSION_KEY = "oqta_session_id";
 const CONVERSATION_KEY = "oqta_conversation";
@@ -297,5 +298,24 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
         // New user - show landing page
         showLandingPage();
+    }
+    
+    // Language selector functionality
+    const languageSelect = document.getElementById('language-select');
+    if (languageSelect) {
+        languageSelect.addEventListener('change', (e) => {
+            const selectedLang = e.target.value;
+            console.log('Language changed to:', selectedLang);
+            // Store language preference
+            localStorage.setItem('oqta_language', selectedLang);
+            // Here you can add logic to change the UI language
+            // For now, we just store the preference
+        });
+        
+        // Load saved language preference
+        const savedLang = localStorage.getItem('oqta_language');
+        if (savedLang) {
+            languageSelect.value = savedLang;
+        }
     }
 });
