@@ -55,17 +55,25 @@ Your n8n workflow should return a JSON response with one of these formats:
 
 ```json
 {
-  "response": "AI assistant's response here"
+  "response": {
+    "body": {
+      "output": "Hello! I'm Leen, I help with company registration in the UAE. What's your name, and what kind of business are you planning to set up?"
+    },
+    "headers": {},
+    "statusCode": 200
+  }
 }
 ```
 
-or
+**Response Structure:**
+- `response.body.output`: The AI assistant's response message
+- `response.headers`: Optional response headers
+- `response.statusCode`: HTTP status code (200 for success)
 
-```json
-{
-  "message": "AI assistant's response here"
-}
-```
+**Alternative formats also supported:**
+- `{"response": "message"}` - Simple response format
+- `{"message": "message"}` - Alternative simple format
+- `{"output": "message"}` - Direct output format
 
 ## Session Management
 

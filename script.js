@@ -244,7 +244,16 @@ async function sendMessageToN8N(message) {
         }
         
         const data = await response.json();
-        return data.response || data.message || "I'm sorry, I couldn't process that request.";
+        console.log('Received from n8n:', data);
+        
+        // Parse the nested response format from n8n
+        // Expected format: { response: { body: { output: "message" }, headers: {}, statusCode: 200 } }
+        if (data && data.response && data.response.body && data.response.body.output) {
+            return data.response.body.output;
+        }
+        
+        // Fallback to other possible formats
+        return data.response || data.message || data.output || "I'm sorry, I couldn't process that request.";
     } catch (error) {
         console.error('Error sending message to n8n:', error);
         return "I'm having trouble connecting. Please try again in a moment.";
