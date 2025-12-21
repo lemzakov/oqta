@@ -26,7 +26,7 @@ let isLoading = false;
 
 // ===== Utility Functions =====
 function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
 }
 
 function getSessionId() {
@@ -162,10 +162,14 @@ function renderConversationHistory() {
         });
         
         // Show welcome back message at the top
-        conversationTitle.textContent = "Welcome Back!";
-        setTimeout(() => {
-            conversationTitle.textContent = "Chat with OQTA AI";
-        }, 3000);
+        if (conversationTitle) {
+            conversationTitle.textContent = "Welcome Back!";
+            setTimeout(() => {
+                if (conversationTitle) {
+                    conversationTitle.textContent = "Chat with OQTA AI";
+                }
+            }, 3000);
+        }
     }
     
     conversationMessages.scrollTop = conversationMessages.scrollHeight;

@@ -672,126 +672,7 @@ header {
     display: none;
 }
 
-.mobile--visible {
-    display: none;
-}
-
-/* ===== ��������� ���� ����������� ===== */
-.su-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.4);
-    z-index: 9999;
-    padding: 18px;
-    align-items: center;
-    justify-content: center;
-}
-
-    .su-modal:not([hidden]) {
-        display: flex;
-    }
-
-.su-sheet {
-    font-family: var(--font-body);
-    width: min(400px, 96vw);
-    background: #fff;
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    box-shadow: 0 12px 30px rgba(2, 6, 23, 0.15);
-    padding: 24px;
-    max-height: calc(100vh - 36px);
-    overflow: auto;
-}
-
-    .su-sheet h3 {
-        margin: 0 0 6px 0;
-        color: var(--color-text);
-        font-size: 17px;
-    }
-
-.su-sub {
-    margin: 0 0 24px 0;
-    color: var(--color-muted);
-    font-size: 13px;
-}
-
-.su-label {
-    display: block;
-    margin: 8px 0 6px;
-    font-size: 14px;
-    color: var(--color-text);
-}
-
-.su-input {
-    width: 100%;
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    padding: 16px 12px;
-    font-size: 16px;
-    line-height: 1.25;
-    outline: none;
-    margin-top: 8px;
-}
-
-    .su-input:focus {
-        border-color: var(--color-dark);
-        box-shadow: 0 0 0 3px rgba(30, 30, 30, 0.06);
-    }
-
-.su-row {
-    display: flex;
-    gap: 8px;
-    margin-top: 24px;
-}
-
-.su-btn {
-    flex: 1;
-    padding: 18px 14px;
-    font-weight: 700;
-    border-radius: 100px;
-    background: var(--color-dark);
-    color: #fff;
-    border: 1px solid var(--color-dark);
-    cursor: pointer;
-    font-size: 13px;
-}
-
-    .su-btn.ghost {
-        background: #fff;
-        color: var(--color-text);
-        border: 1px solid var(--color-border);
-    }
-
-.su-msg {
-    margin-top: 8px;
-    min-height: 18px;
-    color: var(--color-muted);
-    font-size: 13px;
-}
-
-/* ===== Welcome bar ===== */
-.welcome-bar {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #f0fdf4;
-    color: #14532d;
-    border: 1px solid #bbf7d0;
-    border-radius: 12px;
-    padding: 10px 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    z-index: 1000;
-}
-
-    .welcome-bar[hidden] {
-        display: none !important;
-    }
-
+/* ===== Clear/New Chat Button ===== */
 .clear-btn {
     border: 1px solid var(--color-dark);
     background: #fff;
@@ -809,33 +690,9 @@ header {
         color: #fff;
     }
 
-/* ����� ��� ������������ ����� ������� */
-.auth-form[hidden] {
-    display: none !important;
+.mobile--visible {
+    display: none;
 }
-
-.su-toggle {
-    padding-top: 16px;
-    border-top: 1px solid var(--color-border);
-    text-align: center;
-    font-size: 14px;
-    color: var(--color-muted);
-}
-
-.su-toggle-btn {
-    background: none;
-    border: none;
-    color: var(--color-dark);
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-    text-decoration: underline;
-    font-size: 14px;
-}
-
-    .su-toggle-btn:hover {
-        color: var(--color-text);
-    }
 
 @media (max-width: 768px) {
     .title h1 {
