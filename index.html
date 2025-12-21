@@ -95,11 +95,14 @@
                             <option value="ur">اردو</option>
                         </select>
                     </div>
-                    <button class="session" type="button">
+                    <button class="session" id="session-btn" type="button">
                         <span id="session-text">Sign In</span>
                     </button>
                 </div>
             </header>
+
+            <!-- Landing page content (shown when not logged in) -->
+            <div class="landing-content" id="landing-content">
 
             <div class="welcome">
                 <div class="welcome-inner">
@@ -201,6 +204,40 @@
                     </a>
                 </div>
             </div>
+            </div>
+            <!-- End of landing content -->
+
+            <!-- Conversation area (shown when logged in) -->
+            <div class="conversation-area" id="conversation-area">
+                <div class="conversation-header">
+                    <div class="conversation-title">Chat with OQTA AI</div>
+                    <button class="logout-btn" id="logout-btn" type="button">Logout</button>
+                </div>
+                <div class="conversation-messages" id="conversation-messages">
+                    <div class="message assistant">
+                        <div class="message-content">
+                            Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?
+                        </div>
+                    </div>
+                </div>
+                <div class="conversation-input">
+                    <div class="prompt-card">
+                        <div class="prompt-input-wrapper">
+                            <textarea class="prompt-textarea" id="chat-textarea" placeholder="Ask me anything about UAE company registration..." rows="1"></textarea>
+                        </div>
+                        <div class="prompt-actions">
+                            <div class="prompt-actions-left">
+                                <button class="action-btn add" type="button" aria-label="Add"></button>
+                            </div>
+                            <div class="prompt-actions-right">
+                                <button class="action-btn voice" type="button" aria-label="Voice"></button>
+                                <button class="action-btn dark send" id="chat-send-btn" type="button" aria-label="Send"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of conversation area -->
         </div>
     </div>
     <script>

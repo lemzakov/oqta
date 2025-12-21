@@ -10,6 +10,15 @@ const textarea = document.querySelector('.prompt-textarea');
 
 const suModal = document.getElementById('signup-modal');
 
+// Landing and conversation areas
+const landingContent = document.getElementById('landing-content');
+const conversationArea = document.getElementById('conversation-area');
+const conversationMessages = document.getElementById('conversation-messages');
+const chatTextarea = document.getElementById('chat-textarea');
+const chatSendBtn = document.getElementById('chat-send-btn');
+const logoutBtn = document.getElementById('logout-btn');
+const sessionBtn = document.getElementById('session-btn');
+
 // Sign In ��������
 const signinForm = document.getElementById('signin-form');
 const signinEmail = document.getElementById('signin-email');
@@ -79,6 +88,24 @@ function updateSessionButton() {
     const sessionText = document.getElementById('session-text');
     if (sessionText) {
         sessionText.textContent = LOGGED_IN ? 'Continue Your Session' : 'Sign In';
+    }
+    
+    // Show/hide session button based on logged-in state
+    if (sessionBtn) {
+        if (LOGGED_IN) {
+            sessionBtn.style.display = 'none';
+        } else {
+            sessionBtn.style.display = 'inline-flex';
+        }
+    }
+    
+    // Toggle between landing page and conversation area
+    if (LOGGED_IN) {
+        if (landingContent) landingContent.classList.add('hidden');
+        if (conversationArea) conversationArea.classList.add('active');
+    } else {
+        if (landingContent) landingContent.classList.remove('hidden');
+        if (conversationArea) conversationArea.classList.remove('active');
     }
 }
 
@@ -171,14 +198,12 @@ async function doSignin() {
 
         updateSessionButton();
 
-        signinMsg.textContent = "Success! Redirecting...";
+        signinMsg.textContent = "Success!";
 
-        // ��������� ������� � ����������
+        // Close modal and show conversation instead of redirecting
         setTimeout(() => {
             hideModal();
-            const messageToSend = PENDING_MESSAGE || "";
             PENDING_MESSAGE = "";
-            redirectToChat(messageToSend);
         }, 500);
 
     } catch (e) {
@@ -234,7 +259,7 @@ async function doSignup() {
 
         updateSessionButton();
 
-        suMsg.textContent = "Success! Redirecting...";
+        suMsg.textContent = "Success!";
 
         // Silent sign-in
         try {
@@ -248,12 +273,10 @@ async function doSignup() {
             console.error("Silent signin failed:", e);
         }
 
-        // ��������� ������� � ����������
+        // Close modal and show conversation instead of redirecting
         setTimeout(() => {
             hideModal();
-            const messageToSend = PENDING_MESSAGE || "";
             PENDING_MESSAGE = "";
-            redirectToChat(messageToSend);
         }, 500);
 
     } catch (e) {
@@ -267,6 +290,27 @@ function redirectToChat(text = "") {
     const token = CUSTOMER?.token || "";
     const url = buildRedirectURL(text, token);
     window.location.href = url;
+}
+
+// ===== Logout function =====
+function doLogout() {
+    deleteCookie(COOKIE_KEY);
+    CUSTOMER = null;
+    LOGGED_IN = false;
+    updateSessionButton();
+    // Clear conversation messages except the initial greeting
+    if (conversationMessages) {
+        conversationMessages.innerHTML = `
+            <div class="message assistant">
+                <div class="message-content">
+                    Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?
+                </div>
+            </div>
+        `;
+    }
+    if (chatTextarea) {
+        chatTextarea.value = '';
+    }
 }
 
 // ===== ���������� ������ "Continue Your Session" =====
@@ -290,7 +334,14 @@ sendBtn?.addEventListener('click', () => {
     }
 
     if (LOGGED_IN) {
-        // ���� ����������� - ���������� � �������
+        // Add message to conversation and redirect
+        if (conversationMessages) {
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+            conversationMessages.appendChild(userMsg);
+            conversationMessages.scrollTop = conversationMessages.scrollHeight;
+        }
         redirectToChat(text);
     } else {
         // ���� �� ����������� - ���������� ����� �����
@@ -333,6 +384,60 @@ suEmail?.addEventListener('keydown', (e) => {
 suPass?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') doSignup();
 });
+
+// ===== Logout button =====
+logoutBtn?.addEventListener('click', doLogout);
+
+// ===== Chat send button =====
+chatSendBtn?.addEventListener('click', () => {
+    const text = chatTextarea?.value.trim() || "";
+    
+    if (!text) {
+        return;
+    }
+    
+    // Add user message to conversation
+    if (conversationMessages) {
+        const userMsg = document.createElement('div');
+        userMsg.className = 'message user';
+        userMsg.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+        conversationMessages.appendChild(userMsg);
+        
+        // Scroll to bottom
+        conversationMessages.scrollTop = conversationMessages.scrollHeight;
+    }
+    
+    // Clear textarea
+    if (chatTextarea) {
+        chatTextarea.value = '';
+        chatTextarea.style.height = 'auto';
+    }
+    
+    // Redirect to chat with the message
+    redirectToChat(text);
+});
+
+// Auto-resize chat textarea
+if (chatTextarea) {
+    chatTextarea.addEventListener('input', () => {
+        chatTextarea.style.height = 'auto';
+        chatTextarea.style.height = chatTextarea.scrollHeight + 'px';
+    });
+    
+    chatTextarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatSendBtn?.click();
+        }
+    });
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 
 
 // ===== ������������� ��� �������� �������� =====
