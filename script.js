@@ -464,6 +464,39 @@ async function sendToN8N(message) {
     }
 }
 
+// ===== Database Integration =====
+async function saveMessageToDatabase(sessionId, userId, userEmail, userName, type, content) {
+    try {
+        const response = await fetch('/api/chat/message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                sessionId,
+                userId,
+                userEmail,
+                userName,
+                type,
+                content,
+                toolCalls: [],
+                additionalKwargs: {},
+                responseMetadata: {},
+                invalidToolCalls: []
+            })
+        });
+        
+        if (!response.ok) {
+            console.error('Failed to save message to database:', response.statusText);
+        } else {
+            console.log('Message saved to database');
+        }
+    } catch (error) {
+        console.error('Error saving message to database:', error);
+        // Don't throw - we don't want to break the chat if database save fails
+    }
+}
+
 // ===== Message Sending =====
 async function sendMessage(message) {
     if (!message || IS_SENDING) return;
@@ -484,6 +517,16 @@ async function sendMessage(message) {
         // Add user message to UI
         addMessageToConversationArea('user', message);
         
+        // Save user message to database
+        await saveMessageToDatabase(
+            SESSION.chat_id,
+            SESSION.user_id,
+            CUSTOMER?.email || "guest@oqta.ai",
+            CUSTOMER?.name || "Guest User",
+            'user',
+            message
+        );
+        
         // Clear input
         const textarea = document.getElementById('chat-textarea');
         if (textarea) {
@@ -502,6 +545,16 @@ async function sendMessage(message) {
         
         // Add AI response to UI
         addMessageToConversationArea('assistant', aiResponse);
+        
+        // Save AI response to database
+        await saveMessageToDatabase(
+            SESSION.chat_id,
+            SESSION.user_id,
+            CUSTOMER?.email || "guest@oqta.ai",
+            CUSTOMER?.name || "Guest User",
+            'ai',
+            aiResponse
+        );
         
     } catch (error) {
         removeTypingIndicator();
