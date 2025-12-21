@@ -1,431 +1,260 @@
-const OWUI_SIGNIN_URL = "https://chat.oqta.ai/api/v1/auths/signin";
-const OWUI_SIGNUP_URL = "https://chat.oqta.ai/api/v1/auths/signup";
-const CHAT_REDIRECT_URL = "https://chat.oqta.ai/sso.html";
-const COOKIE_KEY = "oqta_customer"; // JSON {name, email, token, ts}
+// ===== Configuration =====
+// Update this URL to point to your n8n webhook endpoint
+// Example: "https://your-n8n-instance.com/webhook/chat"
+const N8N_WEBHOOK_URL = "https://n8n.oqta.ai/webhook/chat";
+
+const SESSION_KEY = "oqta_session_id";
+const CONVERSATION_KEY = "oqta_conversation";
 const WELCOME_MESSAGE = "Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?";
+const WELCOME_BACK_MESSAGE = "Welcome back! Let's continue where we left off.";
 
-// ===== ��������� ��������� =====
-const continueSessionBtn = document.querySelector('.session');
-const sendBtn = document.querySelector('.action-btn.send');
-const textarea = document.querySelector('.prompt-textarea');
-
-const suModal = document.getElementById('signup-modal');
-
-// Landing and conversation areas
+// ===== DOM Elements =====
 const landingContent = document.getElementById('landing-content');
 const conversationArea = document.getElementById('conversation-area');
 const conversationMessages = document.getElementById('conversation-messages');
+const conversationTitle = document.getElementById('conversation-title');
 const chatTextarea = document.getElementById('chat-textarea');
 const chatSendBtn = document.getElementById('chat-send-btn');
-const logoutBtn = document.getElementById('logout-btn');
-const sessionBtn = document.getElementById('session-btn');
+const clearBtn = document.getElementById('clear-btn');
+const sendBtn = document.querySelector('.action-btn.send');
+const textarea = document.querySelector('.prompt-textarea');
 
-// Sign In ��������
-const signinForm = document.getElementById('signin-form');
-const signinEmail = document.getElementById('signin-email');
-const signinPass = document.getElementById('signin-pass');
-const signinCancel = document.getElementById('signin-cancel');
-const signinSubmit = document.getElementById('signin-submit');
-const signinMsg = document.getElementById('signin-msg');
+// ===== State Management =====
+let sessionId = null;
+let conversationHistory = [];
+let isLoading = false;
 
-// Sign Up ��������
-const signupForm = document.getElementById('signup-form');
-const suName = document.getElementById('su-name');
-const suEmail = document.getElementById('su-email');
-const suPass = document.getElementById('su-pass');
-const suCancel = document.getElementById('su-cancel');
-const suSubmit = document.getElementById('su-submit');
-const suMsg = document.getElementById('su-msg');
+// ===== Utility Functions =====
+function generateSessionId() {
+    return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+}
 
-// ������ ������������ ����
-const showSignupBtn = document.getElementById('show-signup');
-const showSigninBtn = document.getElementById('show-signin');
+function getSessionId() {
+    let id = localStorage.getItem(SESSION_KEY);
+    if (!id) {
+        id = generateSessionId();
+        localStorage.setItem(SESSION_KEY, id);
+    }
+    return id;
+}
 
-// ===== ��������� =====
-let LOGGED_IN = false;
-let CUSTOMER = null; // {name, email, token}
-let PENDING_MESSAGE = "";
-
-// ===== ������ � Cookie =====
-function setCookie(name, value, days = 30) {
+function saveConversation() {
     try {
-        // ���������� localStorage ������ cookies ��� ������������� � file://
-        localStorage.setItem(name, value);
-        console.log('Data saved to localStorage:', name);
+        localStorage.setItem(CONVERSATION_KEY, JSON.stringify(conversationHistory));
     } catch (e) {
-        console.error('Failed to save to localStorage:', e);
+        console.error('Failed to save conversation:', e);
     }
 }
 
-function getCookie(name) {
+function loadConversation() {
     try {
-        const value = localStorage.getItem(name);
-        console.log('Data retrieved from localStorage:', name, value ? 'found' : 'not found');
-        return value || "";
+        const saved = localStorage.getItem(CONVERSATION_KEY);
+        if (saved) {
+            conversationHistory = JSON.parse(saved);
+            return conversationHistory;
+        }
     } catch (e) {
-        console.error('Failed to get from localStorage:', e);
-        return "";
+        console.error('Failed to load conversation:', e);
     }
+    return [];
 }
 
-function deleteCookie(name) {
-    try {
-        localStorage.removeItem(name);
-        console.log('Data removed from localStorage:', name);
-    } catch (e) {
-        console.error('Failed to remove from localStorage:', e);
-    }
-}
-
-// ===== ������� ��� ���������� URL ��������� =====
-function buildRedirectURL(text, token) {
-    const params = new URLSearchParams();
-    if (token) params.append('token', token);
-    if (text) params.append('q', text);
-    return `${CHAT_REDIRECT_URL}?${params.toString()}`;
-}
-
-function updateSessionButton() {
-    const sessionText = document.getElementById('session-text');
-    if (sessionText) {
-        sessionText.textContent = LOGGED_IN ? 'Continue Your Session' : 'Sign In';
-    }
+function clearConversation() {
+    conversationHistory = [];
+    sessionId = generateSessionId();
+    localStorage.setItem(SESSION_KEY, sessionId);
+    localStorage.removeItem(CONVERSATION_KEY);
     
-    // Show/hide session button based on logged-in state
-    if (sessionBtn) {
-        if (LOGGED_IN) {
-            sessionBtn.style.display = 'none';
-        } else {
-            sessionBtn.style.display = 'inline-flex';
-        }
-    }
+    // Show landing page
+    showLandingPage();
+}
+
+// ===== UI Functions =====
+function showLandingPage() {
+    if (landingContent) landingContent.classList.remove('hidden');
+    if (conversationArea) conversationArea.classList.remove('active');
+}
+
+function showConversationArea() {
+    if (landingContent) landingContent.classList.add('hidden');
+    if (conversationArea) conversationArea.classList.add('active');
+}
+
+function addMessage(content, isUser = false) {
+    if (!conversationMessages) return;
     
-    // Toggle between landing page and conversation area
-    if (LOGGED_IN) {
-        if (landingContent) landingContent.classList.add('hidden');
-        if (conversationArea) conversationArea.classList.add('active');
-    } else {
-        if (landingContent) landingContent.classList.remove('hidden');
-        if (conversationArea) conversationArea.classList.remove('active');
-    }
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.textContent = content;
+    
+    messageDiv.appendChild(contentDiv);
+    conversationMessages.appendChild(messageDiv);
+    
+    // Scroll to bottom
+    conversationMessages.scrollTop = conversationMessages.scrollHeight;
+    
+    // Add to history
+    conversationHistory.push({
+        role: isUser ? 'user' : 'assistant',
+        content: content,
+        timestamp: Date.now()
+    });
+    
+    saveConversation();
 }
 
-// ===== ��������/������ ��������� ���� =====
-function showModal(formType = 'signin') {
-    doSignup();
- //   suModal.hidden = false;
-  //  document.body.style.overflow = 'hidden';
-
-    // ���������� ������ �����
-    if (formType === 'signin') {
-        signinForm.hidden = false;
-        signupForm.hidden = true;
-        signinMsg.textContent = "";
-        setTimeout(() => signinEmail.focus(), 100);
-    } else {
-        signinForm.hidden = true;
-        signupForm.hidden = false;
-        suMsg.textContent = "";
-        setTimeout(() => suName.focus(), 100);
-    }
-}
-
-function hideModal() {
-    suModal.hidden = true;
-    document.body.style.overflow = '';
-    // ������� �����
-    signinEmail.value = '';
-    signinPass.value = '';
-    suName.value = '';
-    suEmail.value = '';
-    suPass.value = '';
-}
-
-// ===== ������������ ����� ������� =====
-showSignupBtn?.addEventListener('click', () => {
-    signinForm.hidden = true;
-    signupForm.hidden = false;
-    suMsg.textContent = "";
-    setTimeout(() => suName.focus(), 100);
-});
-
-showSigninBtn?.addEventListener('click', () => {
-    signupForm.hidden = true;
-    signinForm.hidden = false;
-    signinMsg.textContent = "";
-    setTimeout(() => signinEmail.focus(), 100);
-});
-
-// ===== ���������� ����� (Sign In) =====
-async function doSignin() {
-    const email = signinEmail.value.trim();
-    const password = signinPass.value;
-
-    if (!email || !password) {
-        signinMsg.textContent = "Please fill in all fields.";
-        return;
-    }
-
-    try {
-        signinMsg.textContent = "Signing in�";
-
-        const response = await fetch(OWUI_SIGNIN_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ email, password })
-        });
-
-        if (!response.ok) {
-            const errorMsg = await response.text().catch(() => "");
-            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " � " + errorMsg : ""}`;
-            return;
-        }
-
-        const data = await response.json();
-        const token = data?.token || "";
-        const name = data?.name || email.split('@')[0]; // ���������� ��� �� ������ ��� email
-
-        if (!token) {
-            signinMsg.textContent = "No token returned. Check backend.";
-            return;
-        }
-
-        // ��������� � cookie
-        const payload = { name, email, token, ts: Date.now() };
-        setCookie(COOKIE_KEY, JSON.stringify(payload), 30);
-        CUSTOMER = payload;
-        LOGGED_IN = true;
-
-        updateSessionButton();
-
-        signinMsg.textContent = "Success!";
-
-        // Close modal and show conversation instead of redirecting
+function showWelcomeMessage(isReturning = false) {
+    const message = isReturning ? WELCOME_BACK_MESSAGE : WELCOME_MESSAGE;
+    addMessage(message, false);
+    
+    if (isReturning && conversationTitle) {
+        conversationTitle.textContent = "Welcome Back!";
         setTimeout(() => {
-            hideModal();
-            PENDING_MESSAGE = "";
-        }, 500);
-
-    } catch (e) {
-        console.error(e);
-        signinMsg.textContent = "Network error. Please try again.";
+            conversationTitle.textContent = "Chat with OQTA AI";
+        }, 3000);
     }
 }
 
-// ===== ���������� ����������� (Sign Up) =====
-async function doSignup() {
-    const name = "automail"+ Date.now();//suName.value.trim();
-    const email = name + "@mail.com";// signinEmail.value.trim();
-    const password = "password";//signinPass.value";
+function showTypingIndicator() {
+    if (!conversationMessages) return;
+    
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message assistant typing-indicator';
+    typingDiv.id = 'typing-indicator';
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'message-content';
+    contentDiv.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+    
+    typingDiv.appendChild(contentDiv);
+    conversationMessages.appendChild(typingDiv);
+    conversationMessages.scrollTop = conversationMessages.scrollHeight;
+}
 
-   // const name = suName.value.trim();
-   // const email = suEmail.value.trim();
-   // const password = suPass.value;
-
-    if (!name || !email || !password) {
-        suMsg.textContent = "Please fill in all fields.";
-        return;
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) {
+        indicator.remove();
     }
+}
 
-    try {
-        suMsg.textContent = "Creating your account�";
-
-        const response = await fetch(OWUI_SIGNUP_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ name, email, password })
+function renderConversationHistory() {
+    if (!conversationMessages) return;
+    
+    conversationMessages.innerHTML = '';
+    
+    if (conversationHistory.length === 0) {
+        showWelcomeMessage(false);
+    } else {
+        conversationHistory.forEach(msg => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${msg.role === 'user' ? 'user' : 'assistant'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = msg.content;
+            
+            messageDiv.appendChild(contentDiv);
+            conversationMessages.appendChild(messageDiv);
         });
-
-        if (!response.ok) {
-            const errorMsg = await response.text().catch(() => "");
-            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " � " + errorMsg : ""}`;
-            return;
-        }
-
-        const data = await response.json();
-        const token = data?.token || "";
-
-        if (!token) {
-            suMsg.textContent = "No token returned. Check backend.";
-            return;
-        }
-
-        // ��������� � cookie
-        const payload = { name, email, token, ts: Date.now() };
-        setCookie(COOKIE_KEY, JSON.stringify(payload), 30);
-        CUSTOMER = payload;
-        LOGGED_IN = true;
-
-        updateSessionButton();
-
-        suMsg.textContent = "Success!";
-
-        // Silent sign-in
-        try {
-            await fetch(OWUI_SIGNIN_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ token })
-            });
-        } catch (e) {
-            console.error("Silent signin failed:", e);
-        }
-
-        // Close modal and show conversation instead of redirecting
-        setTimeout(() => {
-            hideModal();
-            PENDING_MESSAGE = "";
-        }, 500);
-
-    } catch (e) {
-        console.error(e);
-        suMsg.textContent = "Network error. Please try again.";
-    }
-}
-
-// ===== �������� �� chat =====
-function redirectToChat(text = "") {
-    const token = CUSTOMER?.token || "";
-    const url = buildRedirectURL(text, token);
-    window.location.href = url;
-}
-
-// ===== Logout function =====
-function doLogout() {
-    deleteCookie(COOKIE_KEY);
-    CUSTOMER = null;
-    LOGGED_IN = false;
-    updateSessionButton();
-    // Clear conversation messages except the initial greeting
-    if (conversationMessages) {
-        conversationMessages.innerHTML = '';
-        const greetingMsg = document.createElement('div');
-        greetingMsg.className = 'message assistant';
-        const greetingContent = document.createElement('div');
-        greetingContent.className = 'message-content';
-        greetingContent.textContent = WELCOME_MESSAGE;
-        greetingMsg.appendChild(greetingContent);
-        conversationMessages.appendChild(greetingMsg);
-    }
-    if (chatTextarea) {
-        chatTextarea.value = '';
-    }
-}
-
-// ===== ���������� ������ "Continue Your Session" =====
-continueSessionBtn?.addEventListener('click', () => {
-    if (LOGGED_IN) {
-        // ���� ����������� - ���������� �� ���
-        redirectToChat();
-    } else {
-        // ���� �� ����������� - ���������� ����� �����
-        showModal('signin');
-    }
-});
-
-// ===== ���������� ������ Send =====
-sendBtn?.addEventListener('click', () => {
-    const text = textarea?.value.trim() || "";
-
-    if (!text) {
-        alert("Please enter your question first.");
-        return;
-    }
-
-    if (LOGGED_IN) {
-        // Add message to conversation and redirect
-        if (conversationMessages) {
-            const userMsg = document.createElement('div');
-            userMsg.className = 'message user';
-            const messageContent = document.createElement('div');
-            messageContent.className = 'message-content';
-            messageContent.textContent = text;
-            userMsg.appendChild(messageContent);
-            conversationMessages.appendChild(userMsg);
-            conversationMessages.scrollTop = conversationMessages.scrollHeight;
-        }
-        redirectToChat(text);
-    } else {
-        // ���� �� ����������� - ���������� ����� �����
-        PENDING_MESSAGE = text;
-        showModal('signin');
-    }
-});
-
-// ===== ����������� ���������� ���� =====
-signinSubmit?.addEventListener('click', doSignin);
-signinCancel?.addEventListener('click', () => {
-    PENDING_MESSAGE = ""; // ������� ����������� ���������
-    hideModal();
-});
-suSubmit?.addEventListener('click', doSignup);
-suCancel?.addEventListener('click', () => {
-    PENDING_MESSAGE = ""; // ������� ����������� ���������
-    hideModal();
-});
-
-// �������� �� ����� ��� �������
-suModal?.addEventListener('click', (e) => {
-    if (e.target === suModal) hideModal();
-});
-
-// ��������� Enter � ������
-signinEmail?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') signinPass.focus();
-});
-signinPass?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSignin();
-});
-
-suName?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') suEmail.focus();
-});
-suEmail?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') suPass.focus();
-});
-suPass?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSignup();
-});
-
-// ===== Logout button =====
-logoutBtn?.addEventListener('click', doLogout);
-
-// ===== Chat send button =====
-chatSendBtn?.addEventListener('click', () => {
-    const text = chatTextarea?.value.trim() || "";
-    
-    if (!text) {
-        return;
-    }
-    
-    // Add user message to conversation
-    if (conversationMessages) {
-        const userMsg = document.createElement('div');
-        userMsg.className = 'message user';
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        messageContent.textContent = text;
-        userMsg.appendChild(messageContent);
-        conversationMessages.appendChild(userMsg);
         
-        // Scroll to bottom
-        conversationMessages.scrollTop = conversationMessages.scrollHeight;
+        // Show welcome back message at the top
+        conversationTitle.textContent = "Welcome Back!";
+        setTimeout(() => {
+            conversationTitle.textContent = "Chat with OQTA AI";
+        }, 3000);
     }
     
-    // Clear textarea
+    conversationMessages.scrollTop = conversationMessages.scrollHeight;
+}
+
+// ===== n8n Chat Integration =====
+async function sendMessageToN8N(message) {
+    try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sessionId: sessionId,
+                message: message,
+                conversationHistory: conversationHistory
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.response || data.message || "I'm sorry, I couldn't process that request.";
+    } catch (error) {
+        console.error('Error sending message to n8n:', error);
+        return "I'm having trouble connecting. Please try again in a moment.";
+    }
+}
+
+async function handleSendMessage(text) {
+    if (!text || isLoading) return;
+    
+    isLoading = true;
+    
+    // Show conversation area if not already shown
+    showConversationArea();
+    
+    // Add user message
+    addMessage(text, true);
+    
+    // Clear input
     if (chatTextarea) {
         chatTextarea.value = '';
         chatTextarea.style.height = 'auto';
     }
+    if (textarea) {
+        textarea.value = '';
+        textarea.style.height = 'auto';
+    }
     
-    // Redirect to chat with the message
-    redirectToChat(text);
+    // Show typing indicator
+    showTypingIndicator();
+    
+    // Send to n8n and get response
+    const response = await sendMessageToN8N(text);
+    
+    // Remove typing indicator
+    removeTypingIndicator();
+    
+    // Add assistant response
+    addMessage(response, false);
+    
+    isLoading = false;
+}
+
+// ===== Event Listeners =====
+// Send button in conversation area
+chatSendBtn?.addEventListener('click', async () => {
+    const text = chatTextarea?.value.trim() || "";
+    await handleSendMessage(text);
 });
 
-// Auto-resize chat textarea
+// Send button in landing area
+sendBtn?.addEventListener('click', async () => {
+    const text = textarea?.value.trim() || "";
+    await handleSendMessage(text);
+});
+
+// Clear/New Chat button
+clearBtn?.addEventListener('click', () => {
+    if (confirm('Start a new conversation? This will clear your current chat.')) {
+        clearConversation();
+    }
+});
+
+// Auto-resize textareas
 if (chatTextarea) {
     chatTextarea.addEventListener('input', () => {
         chatTextarea.style.height = 'auto';
@@ -440,35 +269,29 @@ if (chatTextarea) {
     });
 }
 
-
-// ===== ������������� ��� �������� �������� =====
-window.addEventListener('DOMContentLoaded', async () => {
-    const raw = getCookie(COOKIE_KEY);
-
-    if (raw) {
-        try {
-            CUSTOMER = JSON.parse(raw) || null;
-        } catch (e) {
-            console.error("Failed to parse cookie:", e);
+if (textarea) {
+    textarea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendBtn?.click();
         }
+    });
+}
 
-        if (CUSTOMER?.token) {
-            LOGGED_IN = true;
-
-
-            // Silent sign-in
-            try {
-                await fetch(OWUI_SIGNIN_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ token: CUSTOMER.token })
-                });
-            } catch (e) {
-                console.error("Silent signin failed:", e);
-            }
-        }
+// ===== Initialization =====
+window.addEventListener('DOMContentLoaded', () => {
+    // Get or create session ID
+    sessionId = getSessionId();
+    
+    // Load conversation history
+    const history = loadConversation();
+    
+    if (history.length > 0) {
+        // Returning user - show conversation area
+        showConversationArea();
+        renderConversationHistory();
+    } else {
+        // New user - show landing page
+        showLandingPage();
     }
-
-    updateSessionButton();
 });

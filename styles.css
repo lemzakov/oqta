@@ -622,6 +622,43 @@ header {
     color: #ffffff;
 }
 
+.typing-indicator .message-content {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+}
+
+.typing-indicator .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 50%;
+    animation: typing 1.4s infinite;
+}
+
+.typing-indicator .dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator .dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typing {
+    0%, 60%, 100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-0.5rem);
+    }
+}
+
 .conversation-input {
     padding: 1rem 1.5rem;
     border-top: 1px solid var(--color-border);
@@ -755,19 +792,21 @@ header {
         display: none !important;
     }
 
-.logout-btn {
-    border: 1px solid #dc2626;
+.clear-btn {
+    border: 1px solid var(--color-dark);
     background: #fff;
-    color: #dc2626;
+    color: var(--color-dark);
     font-size: 13px;
     font-weight: 600;
     border-radius: 8px;
     padding: 6px 10px;
     cursor: pointer;
+    font-family: var(--font-body);
 }
 
-    .logout-btn:hover {
-        background: #fee2e2;
+    .clear-btn:hover {
+        background: var(--color-dark);
+        color: #fff;
     }
 
 /* ����� ��� ������������ ����� ������� */

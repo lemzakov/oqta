@@ -15,70 +15,7 @@
             <div class="lines" aria-hidden="true"></div>
             <img src="assets/bg.jpg" class="city">
 
-            <!-- Модальное окно авторизации -->
-            <div id="signup-modal" class="su-modal" hidden>
-                <div class="su-sheet" role="dialog" aria-modal="true">
-                    <!-- Sign In форма (по умолчанию) -->
-                    <div id="signin-form" class="auth-form">
-                        <h3>Sign in to your account</h3>
-                        <p class="su-sub">Welcome back! Please enter your details.</p>
 
-                        <label class="su-label">
-                            Email
-                            <input id="signin-email" class="su-input" type="email" autocomplete="email" placeholder="you@example.com">
-                        </label>
-
-                        <label class="su-label">
-                            Password
-                            <input id="signin-pass" class="su-input" type="password" autocomplete="current-password" placeholder="Your password">
-                        </label>
-
-                        <div class="su-row">
-                            <button id="signin-cancel" class="su-btn ghost" type="button">Cancel</button>
-                            <button id="signin-submit" class="su-btn" type="button">Sign in</button>
-                        </div>
-
-                        <div id="signin-msg" class="su-msg" aria-live="polite"></div>
-
-                        <div class="su-toggle">
-                            Don't have an account? <button type="button" class="su-toggle-btn" id="show-signup">Sign up</button>
-                        </div>
-                    </div>
-
-                    <!-- Sign Up форма (скрыта по умолчанию) -->
-                    <div id="signup-form" class="auth-form" hidden>
-                        <h3>Create your account</h3>
-                        <p class="su-sub">Sign up to continue</p>
-
-                        <label class="su-label">
-                            Full name
-                            <input id="su-name" class="su-input" type="text" autocomplete="name" placeholder="Your name">
-                        </label>
-
-                        <label class="su-label">
-                            Email
-                            <input id="su-email" class="su-input" type="email" autocomplete="email" placeholder="you@example.com">
-                        </label>
-
-                        <label class="su-label">
-                            Password
-                            <input id="su-pass" class="su-input" type="password" autocomplete="new-password" placeholder="Choose a strong password">
-                        </label>
-
-                        <div class="su-row">
-                            <button id="su-cancel" class="su-btn ghost" type="button">Cancel</button>
-                            <button id="su-submit" class="su-btn" type="button">Sign up</button>
-                        </div>
-
-                        <div id="su-msg" class="su-msg" aria-live="polite"></div>
-
-                        <div class="su-toggle">
-                            Already have an account? <button type="button" class="su-toggle-btn" id="show-signin">Sign in</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- -->
 
             <header>
                 <div class="logo">
@@ -95,9 +32,6 @@
                             <option value="ur">اردو</option>
                         </select>
                     </div>
-                    <button class="session" id="session-btn" type="button">
-                        <span id="session-text">Sign In</span>
-                    </button>
                 </div>
             </header>
 
@@ -207,18 +141,14 @@
             </div>
             <!-- End of landing content -->
 
-            <!-- Conversation area (shown when logged in) -->
+            <!-- Conversation area -->
             <div class="conversation-area" id="conversation-area">
                 <div class="conversation-header">
-                    <div class="conversation-title">Chat with OQTA AI</div>
-                    <button class="logout-btn" id="logout-btn" type="button">Logout</button>
+                    <div class="conversation-title" id="conversation-title">Chat with OQTA AI</div>
+                    <button class="clear-btn" id="clear-btn" type="button">New Chat</button>
                 </div>
                 <div class="conversation-messages" id="conversation-messages">
-                    <div class="message assistant">
-                        <div class="message-content">
-                            Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?
-                        </div>
-                    </div>
+                    <!-- Messages will be dynamically loaded here -->
                 </div>
                 <div class="conversation-input">
                     <div class="prompt-card">
