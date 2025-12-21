@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQTA Admin Panel</title>
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="page active">
+        <div class="login-container">
+            <div class="login-box">
+                <img src="/assets/oqta_logo.svg" alt="OQTA Logo" class="login-logo">
+                <h1>Admin Login</h1>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <div id="login-error" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-page" class="page">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/oqta_logo.svg" alt="OQTA Logo" class="sidebar-logo">
+                <h2>OQTA Admin</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#" data-page="dashboard" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" data-page="conversations" class="nav-link">Conversations</a></li>
+                <li><a href="#" data-page="settings" class="nav-link">Settings</a></li>
+                <li><a href="#" data-page="knowledge" class="nav-link">Knowledge Base</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-content" class="content-section active">
+                <h1>Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Conversations Today</h3>
+                        <p class="stat-value" id="stat-conversations-today">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Messages Today</h3>
+                        <p class="stat-value" id="stat-messages-today">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Messages</h3>
+                        <p class="stat-value" id="stat-total-messages">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>AI Tokens Used</h3>
+                        <p class="stat-value" id="stat-ai-tokens">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Amount Invoiced</h3>
+                        <p class="stat-value" id="stat-invoiced">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Amount Paid</h3>
+                        <p class="stat-value" id="stat-paid">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Deals in Progress</h3>
+                        <p class="stat-value" id="stat-deals">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversations Page -->
+            <div id="conversations-content" class="content-section">
+                <h1>Conversations</h1>
+                <div id="sessions-list" class="sessions-list">
+                    <p class="loading">Loading sessions...</p>
+                </div>
+                <div id="session-detail" class="session-detail" style="display: none;">
+                    <button id="back-to-sessions" class="btn btn-secondary">← Back to Sessions</button>
+                    <h2>Session Details</h2>
+                    <div id="session-info" class="session-info"></div>
+                    <div id="messages-list" class="messages-list"></div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-content" class="content-section">
+                <h1>Settings</h1>
+                <form id="settings-form" class="settings-form">
+                    <div class="form-group">
+                        <label for="whatsapp_number">WhatsApp Number</label>
+                        <input type="text" id="whatsapp_number" name="whatsapp_number" placeholder="+971501234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Phone Number</label>
+                        <input type="text" id="phone_number" name="phone_number" placeholder="+971501234567">
+                    </div>
+                    <div class="form-group">
+                        <label for="n8n_url">n8n URL</label>
+                        <input type="url" id="n8n_url" name="n8n_url" placeholder="https://...">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                    <div id="settings-message" class="success-message"></div>
+                </form>
+            </div>
+
+            <!-- Knowledge Base Page -->
+            <div id="knowledge-content" class="content-section">
+                <h1>Knowledge Base</h1>
+                <div class="knowledge-actions">
+                    <button id="upload-doc-btn" class="btn btn-primary">Upload Document</button>
+                </div>
+                <div id="documents-list" class="documents-list">
+                    <p class="loading">Loading documents...</p>
+                </div>
+
+                <!-- Upload Modal -->
+                <div id="upload-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Upload Document</h2>
+                        <form id="upload-form">
+                            <div class="form-group">
+                                <label for="doc-text">Document Text</label>
+                                <textarea id="doc-text" name="text" rows="10" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="doc-metadata">Metadata (JSON, optional)</label>
+                                <textarea id="doc-metadata" name="metadata" rows="3" placeholder='{"title": "...", "category": "..."}'></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/admin/js/admin.js"></script>
+</body>
+</html>
