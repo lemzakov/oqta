@@ -70,26 +70,28 @@ function setCookie(name, value, days = 30) {
     } catch (e) {
         console.error('Failed to save to localStorage:', e);
     }
+    return id;
 }
 
-function getCookie(name) {
+function saveConversation() {
     try {
-        const value = localStorage.getItem(name);
-        console.log('Data retrieved from localStorage:', name, value ? 'found' : 'not found');
-        return value || "";
+        localStorage.setItem(CONVERSATION_KEY, JSON.stringify(conversationHistory));
     } catch (e) {
-        console.error('Failed to get from localStorage:', e);
-        return "";
+        console.error('Failed to save conversation:', e);
     }
 }
 
-function deleteCookie(name) {
+function loadConversation() {
     try {
-        localStorage.removeItem(name);
-        console.log('Data removed from localStorage:', name);
+        const saved = localStorage.getItem(CONVERSATION_KEY);
+        if (saved) {
+            conversationHistory = JSON.parse(saved);
+            return conversationHistory;
+        }
     } catch (e) {
-        console.error('Failed to remove from localStorage:', e);
+        console.error('Failed to load conversation:', e);
     }
+    return [];
 }
 
 // ===== Session Management =====
@@ -371,10 +373,12 @@ async function doSignin() {
     const email = signinEmail.value.trim();
     const password = signinPass.value;
 
-    if (!email || !password) {
-        signinMsg.textContent = "Please fill in all fields.";
-        return;
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) {
+        indicator.remove();
     }
+}
 
     try {
         signinMsg.textContent = "Signing in...";
@@ -423,6 +427,8 @@ async function doSignin() {
         console.error(e);
         signinMsg.textContent = "Network error. Please try again.";
     }
+    
+    conversationMessages.scrollTop = conversationMessages.scrollHeight;
 }
 
 async function doSignup() {
@@ -444,19 +450,20 @@ async function doSignup() {
             credentials: "include",
             body: JSON.stringify({ name, email, password })
         });
-
+        
         if (!response.ok) {
             const errorMsg = await response.text().catch(() => "");
             suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
             return;
         }
-
+        
         const data = await response.json();
-        const token = data?.token || "";
-
-        if (!token) {
-            suMsg.textContent = "No token returned. Check backend.";
-            return;
+        console.log('Received from n8n:', data);
+        
+        // Parse the nested response format from n8n
+        // Expected format: { response: { body: { output: "message" }, headers: {}, statusCode: 200 } }
+        if (data && data.response && data.response.body && data.response.body.output) {
+            return data.response.body.output;
         }
 
         const payload = { name, email, token, ts: Date.now() };
@@ -577,14 +584,11 @@ signinPass?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') doSignin();
 });
 
-suName?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') suEmail.focus();
-});
-suEmail?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') suPass.focus();
-});
-suPass?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSignup();
+// Clear/New Chat button
+clearBtn?.addEventListener('click', () => {
+    if (confirm('Start a new conversation? This will clear your current chat.')) {
+        clearConversation();
+    }
 });
 
 // ===== Initialization =====
@@ -597,6 +601,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         } catch (e) {
             console.error("Failed to parse cookie:", e);
         }
+    });
+}
 
         if (CUSTOMER?.token) {
             LOGGED_IN = true;
