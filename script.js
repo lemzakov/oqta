@@ -607,7 +607,6 @@ async function doSignin() {
             const messageToSend = PENDING_MESSAGE || "";
             PENDING_MESSAGE = "";
             if (messageToSend) {
-                showChatWindow();
                 sendMessage(messageToSend);
             }
         }, 500);
@@ -676,7 +675,6 @@ async function doSignup() {
             const messageToSend = PENDING_MESSAGE || "";
             PENDING_MESSAGE = "";
             if (messageToSend) {
-                showChatWindow();
                 sendMessage(messageToSend);
             }
         }, 500);
@@ -692,7 +690,9 @@ async function doSignup() {
 // Continue Session Button
 continueSessionBtn?.addEventListener('click', () => {
     if (LOGGED_IN || SESSION) {
-        showChatWindow();
+        // Just focus the textarea since conversation area is already visible for returning users
+        const textarea = document.getElementById('chat-textarea');
+        if (textarea) textarea.focus();
     } else {
         showModal('signin');
     }
