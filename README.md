@@ -20,22 +20,7 @@ This is a single-page chat application that integrates with n8n for AI-powered c
 The application is configured to use the n8n webhook at:
 `https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000`
 
-#### For Vercel Deployment
-
-Set the environment variable in your Vercel project:
-
-```bash
-N8N_WEBHOOK_URL=https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000
-```
-
-Or via Vercel dashboard:
-1. Go to your project settings
-2. Navigate to Environment Variables
-3. Add `N8N_WEBHOOK_URL` with the webhook URL value
-
-#### For Local Development
-
-The application will use the hardcoded URL in `script.js` if no environment variable is set.
+This URL is hardcoded in `script.js` for simplicity. To use a different endpoint, update the `N8N_WEBHOOK_URL` constant in the script.
 
 ### Expected Request Format
 

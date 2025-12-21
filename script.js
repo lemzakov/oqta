@@ -1,8 +1,7 @@
 // ===== Configuration =====
-// n8n webhook URL - can be overridden with environment variable
-const N8N_WEBHOOK_URL = typeof process !== 'undefined' && process.env?.N8N_WEBHOOK_URL 
-    ? process.env.N8N_WEBHOOK_URL 
-    : "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
+// n8n webhook URL - default production endpoint
+// For Vercel: This can be replaced at build time with environment variable
+const N8N_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
 
 const SESSION_KEY = "oqta_session_id";
 const CONVERSATION_KEY = "oqta_conversation";
