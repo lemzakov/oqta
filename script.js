@@ -2,6 +2,7 @@ const OWUI_SIGNIN_URL = "https://chat.oqta.ai/api/v1/auths/signin";
 const OWUI_SIGNUP_URL = "https://chat.oqta.ai/api/v1/auths/signup";
 const CHAT_REDIRECT_URL = "https://chat.oqta.ai/sso.html";
 const COOKIE_KEY = "oqta_customer"; // JSON {name, email, token, ts}
+const WELCOME_MESSAGE = "Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?";
 
 // ===== ��������� ��������� =====
 const continueSessionBtn = document.querySelector('.session');
@@ -300,13 +301,14 @@ function doLogout() {
     updateSessionButton();
     // Clear conversation messages except the initial greeting
     if (conversationMessages) {
-        conversationMessages.innerHTML = `
-            <div class="message assistant">
-                <div class="message-content">
-                    Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?
-                </div>
-            </div>
-        `;
+        conversationMessages.innerHTML = '';
+        const greetingMsg = document.createElement('div');
+        greetingMsg.className = 'message assistant';
+        const greetingContent = document.createElement('div');
+        greetingContent.className = 'message-content';
+        greetingContent.textContent = WELCOME_MESSAGE;
+        greetingMsg.appendChild(greetingContent);
+        conversationMessages.appendChild(greetingMsg);
     }
     if (chatTextarea) {
         chatTextarea.value = '';
@@ -338,7 +340,10 @@ sendBtn?.addEventListener('click', () => {
         if (conversationMessages) {
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
-            userMsg.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = text;
+            userMsg.appendChild(messageContent);
             conversationMessages.appendChild(userMsg);
             conversationMessages.scrollTop = conversationMessages.scrollHeight;
         }
@@ -400,7 +405,10 @@ chatSendBtn?.addEventListener('click', () => {
     if (conversationMessages) {
         const userMsg = document.createElement('div');
         userMsg.className = 'message user';
-        userMsg.innerHTML = `<div class="message-content">${escapeHtml(text)}</div>`;
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        messageContent.textContent = text;
+        userMsg.appendChild(messageContent);
         conversationMessages.appendChild(userMsg);
         
         // Scroll to bottom
@@ -430,13 +438,6 @@ if (chatTextarea) {
             chatSendBtn?.click();
         }
     });
-}
-
-// Helper function to escape HTML
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 
 
