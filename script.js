@@ -1,41 +1,56 @@
-// ===== Configuration =====
-// n8n webhook URL - default production endpoint
-// For Vercel: This can be replaced at build time with environment variable
+const OWUI_SIGNIN_URL = "https://chat.oqta.ai/api/v1/auths/signin";
+const OWUI_SIGNUP_URL = "https://chat.oqta.ai/api/v1/auths/signup";
+const COOKIE_KEY = "oqta_customer"; // JSON {name, email, token, ts}
+const SESSION_KEY = "oqta_session"; // JSON {chat_id, user_id, messages, ts}
 const N8N_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
-
-const SESSION_KEY = "oqta_session_id";
-const CONVERSATION_KEY = "oqta_conversation";
-const USER_ID_KEY = "oqta_user_id";
-const CHAT_ID_KEY = "oqta_chat_id";
-const WELCOME_MESSAGE = "Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?";
-const WELCOME_BACK_MESSAGE = "Welcome back! Let's continue where we left off.";
+const DEFAULT_SYSTEM_PROMPT = "I want to register company"; // Can be customized based on user context
 
 // ===== DOM Elements =====
-const landingContent = document.getElementById('landing-content');
-const conversationArea = document.getElementById('conversation-area');
-const conversationMessages = document.getElementById('conversation-messages');
-const conversationTitle = document.getElementById('conversation-title');
-const chatTextarea = document.getElementById('chat-textarea');
-const chatSendBtn = document.getElementById('chat-send-btn');
-const clearBtn = document.getElementById('clear-btn');
+const continueSessionBtn = document.querySelector('.session');
 const sendBtn = document.querySelector('.action-btn.send');
 const textarea = document.querySelector('.prompt-textarea');
 
-// ===== State Management =====
-let sessionId = null;
-let userId = null;
-let chatId = null;
-let conversationHistory = [];
-let isLoading = false;
+// Chat window elements
+const chatWindow = document.getElementById('chat-window');
+const chatMessages = document.getElementById('chat-messages');
+const chatTextarea = document.getElementById('chat-textarea');
+const chatSendBtn = document.getElementById('chat-send-btn');
+const chatCloseBtn = document.getElementById('chat-close-btn');
 
-// ===== Utility Functions =====
-function generateSessionId() {
-    return 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
-}
+const suModal = document.getElementById('signup-modal');
 
+// Sign In elements
+const signinForm = document.getElementById('signin-form');
+const signinEmail = document.getElementById('signin-email');
+const signinPass = document.getElementById('signin-pass');
+const signinCancel = document.getElementById('signin-cancel');
+const signinSubmit = document.getElementById('signin-submit');
+const signinMsg = document.getElementById('signin-msg');
+
+// Sign Up elements
+const signupForm = document.getElementById('signup-form');
+const suName = document.getElementById('su-name');
+const suEmail = document.getElementById('su-email');
+const suPass = document.getElementById('su-pass');
+const suCancel = document.getElementById('su-cancel');
+const suSubmit = document.getElementById('su-submit');
+const suMsg = document.getElementById('su-msg');
+
+// Toggle buttons
+const showSignupBtn = document.getElementById('show-signup');
+const showSigninBtn = document.getElementById('show-signin');
+
+// ===== State Variables =====
+let LOGGED_IN = false;
+let CUSTOMER = null; // {name, email, token}
+let SESSION = null; // {chat_id, user_id, messages, ts}
+let PENDING_MESSAGE = "";
+let IS_SENDING = false;
+
+// ===== UUID Generation =====
 function generateUUID() {
     // Use crypto.randomUUID() if available (modern browsers)
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
     }
     
@@ -47,29 +62,13 @@ function generateUUID() {
     });
 }
 
-function getSessionId() {
-    let id = localStorage.getItem(SESSION_KEY);
-    if (!id) {
-        id = generateSessionId();
-        localStorage.setItem(SESSION_KEY, id);
-    }
-    return id;
-}
-
-function getUserId() {
-    let id = localStorage.getItem(USER_ID_KEY);
-    if (!id) {
-        id = generateUUID();
-        localStorage.setItem(USER_ID_KEY, id);
-    }
-    return id;
-}
-
-function getChatId() {
-    let id = localStorage.getItem(CHAT_ID_KEY);
-    if (!id) {
-        id = generateUUID();
-        localStorage.setItem(CHAT_ID_KEY, id);
+// ===== Storage Functions =====
+function setCookie(name, value, days = 30) {
+    try {
+        localStorage.setItem(name, value);
+        console.log('Data saved to localStorage:', name);
+    } catch (e) {
+        console.error('Failed to save to localStorage:', e);
     }
     return id;
 }
@@ -95,82 +94,284 @@ function loadConversation() {
     return [];
 }
 
-function clearConversation() {
-    conversationHistory = [];
-    sessionId = generateSessionId();
-    chatId = generateUUID();
-    localStorage.setItem(SESSION_KEY, sessionId);
-    localStorage.setItem(CHAT_ID_KEY, chatId);
-    localStorage.removeItem(CONVERSATION_KEY);
-    
-    // Show landing page
-    showLandingPage();
+// ===== Session Management =====
+function loadSession() {
+    const raw = getCookie(SESSION_KEY);
+    if (raw) {
+        try {
+            SESSION = JSON.parse(raw);
+            console.log('Session loaded:', SESSION);
+            return SESSION;
+        } catch (e) {
+            console.error('Failed to parse session:', e);
+        }
+    }
+    return null;
 }
 
-// ===== UI Functions =====
-function showLandingPage() {
-    if (landingContent) landingContent.classList.remove('hidden');
-    if (conversationArea) conversationArea.classList.remove('active');
-}
-
-function showConversationArea() {
-    if (landingContent) landingContent.classList.add('hidden');
-    if (conversationArea) conversationArea.classList.add('active');
-}
-
-function addMessage(content, isUser = false) {
-    if (!conversationMessages) return;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
-    
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
-    contentDiv.textContent = content;
-    
-    messageDiv.appendChild(contentDiv);
-    conversationMessages.appendChild(messageDiv);
-    
-    // Scroll to bottom
-    conversationMessages.scrollTop = conversationMessages.scrollHeight;
-    
-    // Add to history
-    conversationHistory.push({
-        role: isUser ? 'user' : 'assistant',
-        content: content,
-        timestamp: Date.now()
-    });
-    
-    saveConversation();
-}
-
-function showWelcomeMessage(isReturning = false) {
-    const message = isReturning ? WELCOME_BACK_MESSAGE : WELCOME_MESSAGE;
-    addMessage(message, false);
-    
-    if (isReturning && conversationTitle) {
-        conversationTitle.textContent = "Welcome Back!";
-        setTimeout(() => {
-            conversationTitle.textContent = "Chat with OQTA AI";
-        }, 3000);
+function saveSession() {
+    if (SESSION) {
+        SESSION.ts = Date.now();
+        setCookie(SESSION_KEY, JSON.stringify(SESSION), 30);
+        console.log('Session saved:', SESSION);
     }
 }
 
-function showTypingIndicator() {
-    if (!conversationMessages) return;
-    
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message assistant typing-indicator';
-    typingDiv.id = 'typing-indicator';
-    
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
-    contentDiv.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-    
-    typingDiv.appendChild(contentDiv);
-    conversationMessages.appendChild(typingDiv);
-    conversationMessages.scrollTop = conversationMessages.scrollHeight;
+function createNewSession() {
+    SESSION = {
+        chat_id: generateUUID(),
+        user_id: CUSTOMER?.token ? generateUUID() : 'anonymous-' + generateUUID(),
+        messages: [],
+        ts: Date.now()
+    };
+    saveSession();
+    console.log('New session created:', SESSION);
+    return SESSION;
 }
+
+// ===== Chat UI Functions =====
+function showChatWindow() {
+    chatWindow.hidden = false;
+    document.body.style.overflow = 'hidden';
+    
+    // Load existing messages if any
+    if (SESSION && SESSION.messages && SESSION.messages.length > 0) {
+        chatMessages.innerHTML = '';
+        SESSION.messages.forEach(msg => {
+            addMessageToUI(msg.role, msg.content, false);
+        });
+        scrollToBottom();
+    }
+    
+    setTimeout(() => chatTextarea.focus(), 100);
+}
+
+function hideChatWindow() {
+    chatWindow.hidden = true;
+    document.body.style.overflow = '';
+}
+
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addMessageToUI(role, content, save = true) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'chat-avatar';
+    avatarDiv.textContent = role === 'user' ? (CUSTOMER?.name?.charAt(0).toUpperCase() || 'U') : 'AI';
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'chat-bubble';
+    bubbleDiv.textContent = content;
+    
+    messageDiv.appendChild(avatarDiv);
+    messageDiv.appendChild(bubbleDiv);
+    chatMessages.appendChild(messageDiv);
+    
+    if (save && SESSION) {
+        SESSION.messages.push({ role, content, ts: Date.now() });
+        saveSession();
+    }
+    
+    scrollToBottom();
+}
+
+function showLoadingIndicator() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'chat-message assistant';
+    loadingDiv.id = 'loading-indicator';
+    
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'chat-avatar';
+    avatarDiv.textContent = 'AI';
+    
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'chat-bubble';
+    
+    const loadingContainer = document.createElement('div');
+    loadingContainer.className = 'chat-loading';
+    for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'chat-loading-dot';
+        loadingContainer.appendChild(dot);
+    }
+    
+    bubbleDiv.appendChild(loadingContainer);
+    loadingDiv.appendChild(avatarDiv);
+    loadingDiv.appendChild(bubbleDiv);
+    chatMessages.appendChild(loadingDiv);
+    
+    scrollToBottom();
+}
+
+function hideLoadingIndicator() {
+    const loadingDiv = document.getElementById('loading-indicator');
+    if (loadingDiv) {
+        loadingDiv.remove();
+    }
+}
+
+// ===== n8n Webhook Integration =====
+async function sendToN8N(message) {
+    if (!SESSION) {
+        createNewSession();
+    }
+    
+    const messageId = generateUUID();
+    
+    // Use the default system prompt (can be customized based on context)
+    const systemPrompt = DEFAULT_SYSTEM_PROMPT;
+    
+    // Prepare the request body in the format expected by n8n
+    const requestBody = {
+        systemPrompt: systemPrompt,
+        user_id: SESSION.user_id,
+        user_email: CUSTOMER?.email || "guest@oqta.ai",
+        user_name: CUSTOMER?.name || "Guest User",
+        user_role: CUSTOMER ? "user" : "guest",
+        chat_id: SESSION.chat_id,
+        message_id: messageId,
+        chatInput: message
+    };
+    
+    console.log('Sending to n8n:', requestBody);
+    
+    try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('n8n response:', data);
+        
+        // Parse the AI response - try common response formats
+        let aiResponse = '';
+        if (typeof data === 'string') {
+            aiResponse = data;
+        } else if (data.response) {
+            aiResponse = data.response;
+            console.log('Using response.response field');
+        } else if (data.output) {
+            aiResponse = data.output;
+            console.log('Using response.output field');
+        } else if (data.message) {
+            aiResponse = data.message;
+            console.log('Using response.message field');
+        } else {
+            console.warn('Unknown response format:', data);
+            aiResponse = "I received your message, but I'm having trouble formatting my response. Please try again or contact support.";
+        }
+        
+        return aiResponse;
+        
+    } catch (error) {
+        console.error('Error sending to n8n:', error);
+        throw error;
+    }
+}
+
+// ===== Message Sending =====
+async function sendMessage(message) {
+    if (!message || IS_SENDING) return;
+    
+    IS_SENDING = true;
+    chatSendBtn.disabled = true;
+    
+    try {
+        // Add user message to UI
+        addMessageToUI('user', message);
+        
+        // Clear input
+        chatTextarea.value = '';
+        chatTextarea.style.height = 'auto';
+        
+        // Show loading
+        showLoadingIndicator();
+        
+        // Send to n8n and wait for response
+        const aiResponse = await sendToN8N(message);
+        
+        // Hide loading
+        hideLoadingIndicator();
+        
+        // Add AI response to UI
+        addMessageToUI('assistant', aiResponse);
+        
+    } catch (error) {
+        hideLoadingIndicator();
+        addMessageToUI('assistant', 'Sorry, I encountered an error. Please try again.');
+        console.error('Error in sendMessage:', error);
+    } finally {
+        IS_SENDING = false;
+        chatSendBtn.disabled = false;
+        chatTextarea.focus();
+    }
+}
+
+// ===== Authentication Functions =====
+function updateSessionButton() {
+    const sessionText = document.getElementById('session-text');
+    if (sessionText) {
+        sessionText.textContent = LOGGED_IN ? 'Continue Your Session' : 'Sign In';
+    }
+}
+
+function showModal(formType = 'signin') {
+    suModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    // Show the correct form
+    if (formType === 'signin') {
+        signinForm.hidden = false;
+        signupForm.hidden = true;
+        signinMsg.textContent = "";
+        setTimeout(() => signinEmail.focus(), 100);
+    } else {
+        signinForm.hidden = true;
+        signupForm.hidden = false;
+        suMsg.textContent = "";
+        setTimeout(() => suName.focus(), 100);
+    }
+}
+
+function hideModal() {
+    suModal.hidden = true;
+    document.body.style.overflow = '';
+    signinEmail.value = '';
+    signinPass.value = '';
+    suName.value = '';
+    suEmail.value = '';
+    suPass.value = '';
+}
+
+showSignupBtn?.addEventListener('click', () => {
+    signinForm.hidden = true;
+    signupForm.hidden = false;
+    suMsg.textContent = "";
+    setTimeout(() => suName.focus(), 100);
+});
+
+showSigninBtn?.addEventListener('click', () => {
+    signupForm.hidden = true;
+    signinForm.hidden = false;
+    signinMsg.textContent = "";
+    setTimeout(() => signinEmail.focus(), 100);
+});
+
+async function doSignin() {
+    const email = signinEmail.value.trim();
+    const password = signinPass.value;
 
 function removeTypingIndicator() {
     const indicator = document.getElementById('typing-indicator');
@@ -179,68 +380,81 @@ function removeTypingIndicator() {
     }
 }
 
-function renderConversationHistory() {
-    if (!conversationMessages) return;
-    
-    conversationMessages.innerHTML = '';
-    
-    if (conversationHistory.length === 0) {
-        showWelcomeMessage(false);
-    } else {
-        conversationHistory.forEach(msg => {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${msg.role === 'user' ? 'user' : 'assistant'}`;
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = msg.content;
-            
-            messageDiv.appendChild(contentDiv);
-            conversationMessages.appendChild(messageDiv);
+    try {
+        signinMsg.textContent = "Signing in...";
+
+        const response = await fetch(OWUI_SIGNIN_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ email, password })
         });
-        
-        // Show welcome back message at the top
-        if (conversationTitle) {
-            conversationTitle.textContent = "Welcome Back!";
-            setTimeout(() => {
-                if (conversationTitle) {
-                    conversationTitle.textContent = "Chat with OQTA AI";
-                }
-            }, 3000);
+
+        if (!response.ok) {
+            const errorMsg = await response.text().catch(() => "");
+            signinMsg.textContent = `Sign in failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
+            return;
         }
+
+        const data = await response.json();
+        const token = data?.token || "";
+        const name = data?.name || email.split('@')[0];
+
+        if (!token) {
+            signinMsg.textContent = "No token returned. Check backend.";
+            return;
+        }
+
+        const payload = { name, email, token, ts: Date.now() };
+        setCookie(COOKIE_KEY, JSON.stringify(payload), 30);
+        CUSTOMER = payload;
+        LOGGED_IN = true;
+
+        updateSessionButton();
+        signinMsg.textContent = "Success!";
+
+        setTimeout(() => {
+            hideModal();
+            const messageToSend = PENDING_MESSAGE || "";
+            PENDING_MESSAGE = "";
+            if (messageToSend) {
+                showChatWindow();
+                sendMessage(messageToSend);
+            }
+        }, 500);
+
+    } catch (e) {
+        console.error(e);
+        signinMsg.textContent = "Network error. Please try again.";
     }
     
     conversationMessages.scrollTop = conversationMessages.scrollHeight;
 }
 
-// ===== n8n Chat Integration =====
-async function sendMessageToN8N(message) {
+async function doSignup() {
+    const name = suName.value.trim();
+    const email = suEmail.value.trim();
+    const password = suPass.value;
+
+    if (!name || !email || !password) {
+        suMsg.textContent = "Please fill in all fields.";
+        return;
+    }
+
     try {
-        const messageId = generateUUID();
-        
-        const requestBody = {
-            systemPrompt: message,
-            user_id: userId,
-            user_email: "guest@oqta.ai", // Default for anonymous users
-            user_name: "Guest User",
-            user_role: "user",
-            chat_id: chatId,
-            message_id: messageId,
-            chatInput: message
-        };
-        
-        console.log('Sending to n8n:', requestBody);
-        
-        const response = await fetch(N8N_WEBHOOK_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestBody)
+        suMsg.textContent = "Creating your account...";
+
+        const response = await fetch(OWUI_SIGNUP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ name, email, password })
         });
         
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorMsg = await response.text().catch(() => "");
+            suMsg.textContent = `Sign up failed (${response.status})${errorMsg ? " - " + errorMsg : ""}`;
+            return;
         }
         
         const data = await response.json();
@@ -251,62 +465,123 @@ async function sendMessageToN8N(message) {
         if (data && data.response && data.response.body && data.response.body.output) {
             return data.response.body.output;
         }
-        
-        // Fallback to other possible formats
-        return data.response || data.message || data.output || "I'm sorry, I couldn't process that request.";
-    } catch (error) {
-        console.error('Error sending message to n8n:', error);
-        return "I'm having trouble connecting. Please try again in a moment.";
-    }
-}
 
-async function handleSendMessage(text) {
-    if (!text || isLoading) return;
-    
-    isLoading = true;
-    
-    // Show conversation area if not already shown
-    showConversationArea();
-    
-    // Add user message
-    addMessage(text, true);
-    
-    // Clear input
-    if (chatTextarea) {
-        chatTextarea.value = '';
-        chatTextarea.style.height = 'auto';
+        const payload = { name, email, token, ts: Date.now() };
+        setCookie(COOKIE_KEY, JSON.stringify(payload), 30);
+        CUSTOMER = payload;
+        LOGGED_IN = true;
+
+        updateSessionButton();
+        suMsg.textContent = "Success!";
+
+        try {
+            await fetch(OWUI_SIGNIN_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ token })
+            });
+        } catch (e) {
+            console.error("Silent signin failed:", e);
+        }
+
+        setTimeout(() => {
+            hideModal();
+            const messageToSend = PENDING_MESSAGE || "";
+            PENDING_MESSAGE = "";
+            if (messageToSend) {
+                showChatWindow();
+                sendMessage(messageToSend);
+            }
+        }, 500);
+
+    } catch (e) {
+        console.error(e);
+        suMsg.textContent = "Network error. Please try again.";
     }
-    if (textarea) {
-        textarea.value = '';
-        textarea.style.height = 'auto';
-    }
-    
-    // Show typing indicator
-    showTypingIndicator();
-    
-    // Send to n8n and get response
-    const response = await sendMessageToN8N(text);
-    
-    // Remove typing indicator
-    removeTypingIndicator();
-    
-    // Add assistant response
-    addMessage(response, false);
-    
-    isLoading = false;
 }
 
 // ===== Event Listeners =====
-// Send button in conversation area
-chatSendBtn?.addEventListener('click', async () => {
-    const text = chatTextarea?.value.trim() || "";
-    await handleSendMessage(text);
+
+// Continue Session Button
+continueSessionBtn?.addEventListener('click', () => {
+    if (LOGGED_IN || SESSION) {
+        showChatWindow();
+    } else {
+        showModal('signin');
+    }
 });
 
-// Send button in landing area
-sendBtn?.addEventListener('click', async () => {
+// Main Send Button (from landing page)
+sendBtn?.addEventListener('click', () => {
     const text = textarea?.value.trim() || "";
-    await handleSendMessage(text);
+
+    if (!text) {
+        alert("Please enter your question first.");
+        return;
+    }
+
+    // Always show chat window directly
+    if (!SESSION) {
+        createNewSession();
+    }
+    
+    showChatWindow();
+    sendMessage(text);
+    textarea.value = '';
+});
+
+// Chat Window Send Button
+chatSendBtn?.addEventListener('click', () => {
+    const text = chatTextarea?.value.trim() || "";
+    if (text) {
+        sendMessage(text);
+    }
+});
+
+// Chat Textarea Enter Key
+chatTextarea?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = chatTextarea?.value.trim() || "";
+        if (text) {
+            sendMessage(text);
+        }
+    }
+});
+
+// Auto-resize chat textarea
+chatTextarea?.addEventListener('input', () => {
+    chatTextarea.style.height = 'auto';
+    chatTextarea.style.height = Math.min(chatTextarea.scrollHeight, 128) + 'px';
+});
+
+// Close Chat Window
+chatCloseBtn?.addEventListener('click', () => {
+    hideChatWindow();
+});
+
+// Sign in/up handlers
+signinSubmit?.addEventListener('click', doSignin);
+signinCancel?.addEventListener('click', () => {
+    PENDING_MESSAGE = "";
+    hideModal();
+});
+suSubmit?.addEventListener('click', doSignup);
+suCancel?.addEventListener('click', () => {
+    PENDING_MESSAGE = "";
+    hideModal();
+});
+
+suModal?.addEventListener('click', (e) => {
+    if (e.target === suModal) hideModal();
+});
+
+signinEmail?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') signinPass.focus();
+});
+signinPass?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doSignin();
 });
 
 // Clear/New Chat button
@@ -316,65 +591,39 @@ clearBtn?.addEventListener('click', () => {
     }
 });
 
-// Auto-resize textareas
-if (chatTextarea) {
-    chatTextarea.addEventListener('input', () => {
-        chatTextarea.style.height = 'auto';
-        chatTextarea.style.height = chatTextarea.scrollHeight + 'px';
-    });
-    
-    chatTextarea.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            chatSendBtn?.click();
-        }
-    });
-}
-
-if (textarea) {
-    textarea.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendBtn?.click();
-        }
-    });
-}
-
 // ===== Initialization =====
-window.addEventListener('DOMContentLoaded', () => {
-    // Get or create session ID, user ID, and chat ID
-    sessionId = getSessionId();
-    userId = getUserId();
-    chatId = getChatId();
-    
-    // Load conversation history
-    const history = loadConversation();
-    
-    if (history.length > 0) {
-        // Returning user - show conversation area
-        showConversationArea();
-        renderConversationHistory();
-    } else {
-        // New user - show landing page
-        showLandingPage();
-    }
-    
-    // Language selector functionality
-    const languageSelect = document.getElementById('language-select');
-    if (languageSelect) {
-        languageSelect.addEventListener('change', (e) => {
-            const selectedLang = e.target.value;
-            console.log('Language changed to:', selectedLang);
-            // Store language preference
-            localStorage.setItem('oqta_language', selectedLang);
-            // Here you can add logic to change the UI language
-            // For now, we just store the preference
-        });
-        
-        // Load saved language preference
-        const savedLang = localStorage.getItem('oqta_language');
-        if (savedLang) {
-            languageSelect.value = savedLang;
+window.addEventListener('DOMContentLoaded', async () => {
+    // Load customer data
+    const raw = getCookie(COOKIE_KEY);
+    if (raw) {
+        try {
+            CUSTOMER = JSON.parse(raw) || null;
+        } catch (e) {
+            console.error("Failed to parse cookie:", e);
+        }
+    });
+}
+
+        if (CUSTOMER?.token) {
+            LOGGED_IN = true;
+
+            try {
+                await fetch(OWUI_SIGNIN_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ token: CUSTOMER.token })
+                });
+            } catch (e) {
+                console.error("Silent signin failed:", e);
+            }
         }
     }
+
+    // Load session data
+    loadSession();
+
+    updateSessionButton();
+    
+    console.log('OQTA AI initialized', { LOGGED_IN, CUSTOMER, SESSION });
 });
