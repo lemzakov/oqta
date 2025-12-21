@@ -23,7 +23,7 @@ export const getSessions = async (req: Request, res: Response) => {
     ]);
 
     res.json({
-      sessions: sessions.map(session => ({
+      sessions: sessions.map((session: any) => ({
         id: session.id,
         userId: session.userId,
         userEmail: session.userEmail,
@@ -71,7 +71,7 @@ export const getSessionMessages = async (req: Request, res: Response) => {
         startedAt: session.startedAt,
         lastMessageAt: session.lastMessageAt,
       },
-      messages: session.messages.map(msg => ({
+      messages: session.messages.map((msg: any) => ({
         id: msg.id,
         type: msg.type,
         content: msg.content,

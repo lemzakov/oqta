@@ -6,7 +6,7 @@ export const getSettings = async (req: Request, res: Response) => {
     const settings = await prisma.setting.findMany();
     
     const settingsMap: Record<string, string> = {};
-    settings.forEach(setting => {
+    settings.forEach((setting: any) => {
       settingsMap[setting.key] = setting.value;
     });
 
