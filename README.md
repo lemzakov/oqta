@@ -28,22 +28,26 @@ The application sends POST requests to the n8n webhook with the following JSON s
 
 ```json
 {
-  "sessionId": "session_1234567890_abc123",
-  "message": "User's message here",
-  "conversationHistory": [
-    {
-      "role": "user",
-      "content": "Previous user message",
-      "timestamp": 1234567890000
-    },
-    {
-      "role": "assistant",
-      "content": "Previous assistant response",
-      "timestamp": 1234567890001
-    }
-  ]
+  "systemPrompt": "User's message here",
+  "user_id": "0856b2d6-2afb-4718-84a0-67e20dc58e07",
+  "user_email": "guest@oqta.ai",
+  "user_name": "Guest User",
+  "user_role": "user",
+  "chat_id": "47ed97d6-b7fb-4248-91d8-8f32a76ffdc6",
+  "message_id": "12077a93-6a27-46ac-915c-4fce0d64eb28",
+  "chatInput": "User's message here"
 }
 ```
+
+**Field Descriptions:**
+- `systemPrompt`: The user's message/question
+- `user_id`: Unique user ID (UUID, persists across sessions)
+- `user_email`: User email (default: "guest@oqta.ai" for anonymous users)
+- `user_name`: User name (default: "Guest User" for anonymous users)
+- `user_role`: User role (default: "user")
+- `chat_id`: Unique chat/conversation ID (UUID, resets on "New Chat")
+- `message_id`: Unique message ID (UUID, generated for each message)
+- `chatInput`: The user's message/question (same as systemPrompt)
 
 ### Expected Response Format
 
@@ -65,9 +69,12 @@ or
 
 ## Session Management
 
-- **Session ID**: Automatically generated and stored in localStorage as `oqta_session_id`
+- **User ID**: Unique UUID generated on first visit, stored in localStorage as `oqta_user_id`, persists across sessions
+- **Chat ID**: Unique UUID for each conversation, stored in localStorage as `oqta_chat_id`, resets on "New Chat"
+- **Session ID**: Legacy identifier, stored in localStorage as `oqta_session_id`
 - **Conversation History**: Stored in localStorage as `oqta_conversation`
-- **New Chat**: Users can start a fresh conversation using the "New Chat" button
+- **Language Preference**: Stored in localStorage as `oqta_language`
+- **New Chat**: Users can start a fresh conversation using the "New Chat" button (generates new chat_id)
 
 ## User Experience Flow
 

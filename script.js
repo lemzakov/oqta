@@ -5,6 +5,8 @@ const N8N_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-40
 
 const SESSION_KEY = "oqta_session_id";
 const CONVERSATION_KEY = "oqta_conversation";
+const USER_ID_KEY = "oqta_user_id";
+const CHAT_ID_KEY = "oqta_chat_id";
 const WELCOME_MESSAGE = "Hello! I'm OQTA AI assistant. How can I help you with your UAE company registration today?";
 const WELCOME_BACK_MESSAGE = "Welcome back! Let's continue where we left off.";
 
@@ -21,6 +23,8 @@ const textarea = document.querySelector('.prompt-textarea');
 
 // ===== State Management =====
 let sessionId = null;
+let userId = null;
+let chatId = null;
 let conversationHistory = [];
 let isLoading = false;
 
@@ -29,11 +33,37 @@ function generateSessionId() {
     return 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
 }
 
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+}
+
 function getSessionId() {
     let id = localStorage.getItem(SESSION_KEY);
     if (!id) {
         id = generateSessionId();
         localStorage.setItem(SESSION_KEY, id);
+    }
+    return id;
+}
+
+function getUserId() {
+    let id = localStorage.getItem(USER_ID_KEY);
+    if (!id) {
+        id = generateUUID();
+        localStorage.setItem(USER_ID_KEY, id);
+    }
+    return id;
+}
+
+function getChatId() {
+    let id = localStorage.getItem(CHAT_ID_KEY);
+    if (!id) {
+        id = generateUUID();
+        localStorage.setItem(CHAT_ID_KEY, id);
     }
     return id;
 }
@@ -62,7 +92,9 @@ function loadConversation() {
 function clearConversation() {
     conversationHistory = [];
     sessionId = generateSessionId();
+    chatId = generateUUID();
     localStorage.setItem(SESSION_KEY, sessionId);
+    localStorage.setItem(CHAT_ID_KEY, chatId);
     localStorage.removeItem(CONVERSATION_KEY);
     
     // Show landing page
@@ -178,16 +210,27 @@ function renderConversationHistory() {
 // ===== n8n Chat Integration =====
 async function sendMessageToN8N(message) {
     try {
+        const messageId = generateUUID();
+        
+        const requestBody = {
+            systemPrompt: message,
+            user_id: userId,
+            user_email: "guest@oqta.ai", // Default for anonymous users
+            user_name: "Guest User",
+            user_role: "user",
+            chat_id: chatId,
+            message_id: messageId,
+            chatInput: message
+        };
+        
+        console.log('Sending to n8n:', requestBody);
+        
         const response = await fetch(N8N_WEBHOOK_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                sessionId: sessionId,
-                message: message,
-                conversationHistory: conversationHistory
-            })
+            body: JSON.stringify(requestBody)
         });
         
         if (!response.ok) {
@@ -284,8 +327,10 @@ if (textarea) {
 
 // ===== Initialization =====
 window.addEventListener('DOMContentLoaded', () => {
-    // Get or create session ID
+    // Get or create session ID, user ID, and chat ID
     sessionId = getSessionId();
+    userId = getUserId();
+    chatId = getChatId();
     
     // Load conversation history
     const history = loadConversation();
