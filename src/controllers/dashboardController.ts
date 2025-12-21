@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 
+// Configuration constant for AI token calculation
+const AI_TOKENS_PER_MESSAGE = parseInt(process.env.AI_TOKENS_PER_MESSAGE || '2315', 10);
+
 export const getDashboardStats = async (req: Request, res: Response) => {
   try {
     const today = new Date();
@@ -27,8 +30,8 @@ export const getDashboardStats = async (req: Request, res: Response) => {
       },
     });
 
-    // AI tokens used (messages * 2315)
-    const aiTokens = totalMessages * 2315;
+    // AI tokens used (messages * AI_TOKENS_PER_MESSAGE)
+    const aiTokens = totalMessages * AI_TOKENS_PER_MESSAGE;
 
     // Invoice statistics
     const [totalInvoiced, totalPaid, dealsInProgress] = await Promise.all([

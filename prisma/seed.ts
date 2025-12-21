@@ -6,10 +6,23 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  // Create admin user if not exists
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@oqta.ai';
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  // Validate environment variables
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
 
+  if (!adminEmail || !adminPassword) {
+    console.error('❌ ERROR: ADMIN_EMAIL and ADMIN_PASSWORD environment variables must be set');
+    console.error('Please set these in your .env file before running the seed script');
+    process.exit(1);
+  }
+
+  // Validate password strength
+  if (adminPassword.length < 8) {
+    console.error('❌ ERROR: ADMIN_PASSWORD must be at least 8 characters long');
+    process.exit(1);
+  }
+
+  // Create admin user if not exists
   const existingAdmin = await prisma.adminUser.findUnique({
     where: { email: adminEmail },
   });

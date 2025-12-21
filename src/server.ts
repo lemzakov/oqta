@@ -48,6 +48,12 @@ app.get('/admin*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'admin', 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Export app for Vercel
+export default app;
+
+// Only listen if not in serverless environment
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}

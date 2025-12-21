@@ -11,14 +11,20 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
+    // Validate environment variables
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!adminEmail || !adminPassword || !jwtSecret) {
+      console.error('Required environment variables are not set: ADMIN_EMAIL, ADMIN_PASSWORD, JWT_SECRET');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
     // Check if admin user exists, create if not
     let admin = await prisma.adminUser.findUnique({ where: { email } });
     
     if (!admin) {
-      // Create admin user from environment variables
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@oqta.ai';
-      const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
-      
       if (email !== adminEmail) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
@@ -41,7 +47,7 @@ export const login = async (req: Request, res: Response) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: admin.id, email: admin.email },
-      process.env.JWT_SECRET || 'secret',
+      jwtSecret,
       { expiresIn: '24h' }
     );
 

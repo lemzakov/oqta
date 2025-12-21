@@ -1,3 +1,10 @@
+// Utility function to escape HTML and prevent XSS
+const escapeHtml = (text) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+};
+
 // API base URL
 const API_BASE = '/api';
 
@@ -170,12 +177,12 @@ const loadSessions = async () => {
         }
 
         sessionsList.innerHTML = data.sessions.map(session => `
-            <div class="session-item" data-session-id="${session.id}">
-                <h4>${session.userName || session.userEmail || 'Guest User'}</h4>
-                <p><strong>Session ID:</strong> ${session.id}</p>
-                <p><strong>Started:</strong> ${formatDate(session.startedAt)}</p>
-                <p><strong>Last Message:</strong> ${formatDate(session.lastMessageAt)}</p>
-                <p><strong>Messages:</strong> ${session.messageCount}</p>
+            <div class="session-item" data-session-id="${escapeHtml(session.id)}">
+                <h4>${escapeHtml(session.userName || session.userEmail || 'Guest User')}</h4>
+                <p><strong>Session ID:</strong> ${escapeHtml(session.id)}</p>
+                <p><strong>Started:</strong> ${escapeHtml(formatDate(session.startedAt))}</p>
+                <p><strong>Last Message:</strong> ${escapeHtml(formatDate(session.lastMessageAt))}</p>
+                <p><strong>Messages:</strong> ${escapeHtml(String(session.messageCount))}</p>
             </div>
         `).join('');
 
@@ -205,17 +212,17 @@ const loadSessionDetail = async (sessionId) => {
         const data = await apiCall(`/conversations/sessions/${sessionId}`);
         
         sessionInfo.innerHTML = `
-            <p><strong>Session ID:</strong> ${data.session.id}</p>
-            <p><strong>User:</strong> ${data.session.userName || data.session.userEmail || 'Guest User'}</p>
-            <p><strong>Started:</strong> ${formatDate(data.session.startedAt)}</p>
-            <p><strong>Last Message:</strong> ${formatDate(data.session.lastMessageAt)}</p>
+            <p><strong>Session ID:</strong> ${escapeHtml(data.session.id)}</p>
+            <p><strong>User:</strong> ${escapeHtml(data.session.userName || data.session.userEmail || 'Guest User')}</p>
+            <p><strong>Started:</strong> ${escapeHtml(formatDate(data.session.startedAt))}</p>
+            <p><strong>Last Message:</strong> ${escapeHtml(formatDate(data.session.lastMessageAt))}</p>
         `;
 
         messagesList.innerHTML = data.messages.map(msg => `
-            <div class="message ${msg.type}">
-                <div class="message-type">${msg.type}</div>
-                <div class="message-content">${msg.content}</div>
-                <div class="message-time">${formatDate(msg.createdAt)}</div>
+            <div class="message ${escapeHtml(msg.type)}">
+                <div class="message-type">${escapeHtml(msg.type)}</div>
+                <div class="message-content">${escapeHtml(msg.content)}</div>
+                <div class="message-time">${escapeHtml(formatDate(msg.createdAt))}</div>
             </div>
         `).join('');
     } catch (error) {
@@ -276,11 +283,11 @@ const loadDocuments = async () => {
         documentsList.innerHTML = data.documents.map(doc => `
             <div class="document-item">
                 <div class="document-content">
-                    <div class="doc-id">ID: ${doc.id}</div>
-                    <div class="doc-text">${doc.payload?.text || 'No text content'}</div>
-                    <div class="doc-metadata">${JSON.stringify(doc.payload || {})}</div>
+                    <div class="doc-id">ID: ${escapeHtml(String(doc.id))}</div>
+                    <div class="doc-text">${escapeHtml(doc.payload?.text || 'No text content')}</div>
+                    <div class="doc-metadata">${escapeHtml(JSON.stringify(doc.payload || {}))}</div>
                 </div>
-                <button class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.id}')">Delete</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteDocument('${escapeHtml(String(doc.id))}')">Delete</button>
             </div>
         `).join('');
     } catch (error) {
