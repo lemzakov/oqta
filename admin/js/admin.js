@@ -287,15 +287,20 @@ const loadDocuments = async () => {
                     <div class="doc-text">${escapeHtml(doc.payload?.text || 'No text content')}</div>
                     <div class="doc-metadata">${escapeHtml(JSON.stringify(doc.payload || {}))}</div>
                 </div>
-                <button class="btn btn-danger btn-sm" onclick="deleteDocument('${escapeHtml(String(doc.id))}')">Delete</button>
+                <button class="btn btn-danger btn-sm delete-doc-btn" data-doc-id="${escapeHtml(String(doc.id))}">Delete</button>
             </div>
         `).join('');
+        
+        // Add event listeners for delete buttons
+        document.querySelectorAll('.delete-doc-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteDocument(btn.dataset.docId));
+        });
     } catch (error) {
         documentsList.innerHTML = `<p class="error-message show">Failed to load documents: ${error.message}</p>`;
     }
 };
 
-window.deleteDocument = async (id) => {
+const deleteDocument = async (id) => {
     if (!confirm('Are you sure you want to delete this document?')) {
         return;
     }
