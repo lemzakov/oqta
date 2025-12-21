@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { getSessions, getSessionMessages } from '../controllers/conversationsController';
-import { authenticateToken } from '../middleware/auth';
+import { getSessions, getSessionMessages } from '../controllers/conversationsController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 

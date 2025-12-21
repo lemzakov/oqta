@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import prisma from '../utils/prisma';
+import prisma from '../utils/prisma.js';
 
 // Configuration constant for AI token calculation
 const AI_TOKENS_PER_MESSAGE = parseInt(process.env.AI_TOKENS_PER_MESSAGE || '2315', 10);

@@ -3,17 +3,22 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-import authRoutes from './routes/auth';
-import dashboardRoutes from './routes/dashboard';
-import conversationsRoutes from './routes/conversations';
-import settingsRoutes from './routes/settings';
-import knowledgeRoutes from './routes/knowledge';
-import chatRoutes from './routes/chat';
+import { fileURLToPath } from 'url';
+import authRoutes from './routes/auth.js';
+import dashboardRoutes from './routes/dashboard.js';
+import conversationsRoutes from './routes/conversations.js';
+import settingsRoutes from './routes/settings.js';
+import knowledgeRoutes from './routes/knowledge.js';
+import chatRoutes from './routes/chat.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(cors({
@@ -23,10 +28,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// Serve static files (existing frontend)
-app.use(express.static(path.join(__dirname, '..')));
-
-// API Routes
+// API Routes (before static files to ensure API takes precedence)
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/conversations', conversationsRoutes);
@@ -43,10 +45,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Serve admin panel
-app.get('/admin*', (req, res) => {
+// Serve static files for admin panel
+app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
+
+// Serve static files for assets
+app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
+
+// Serve admin panel HTML for /admin route
+app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'admin', 'index.html'));
 });
+
+// Serve static files (existing frontend) - place this after specific routes
+app.use(express.static(path.join(__dirname, '..')));
 
 // Export app for Vercel
 export default app;

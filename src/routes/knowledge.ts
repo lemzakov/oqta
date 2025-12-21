@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { listDocuments, uploadDocument, deleteDocument } from '../controllers/knowledgeController';
-import { authenticateToken } from '../middleware/auth';
+import { listDocuments, uploadDocument, deleteDocument } from '../controllers/knowledgeController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
