@@ -2,13 +2,26 @@ const OWUI_SIGNIN_URL = "https://chat.oqta.ai/api/v1/auths/signin";
 const OWUI_SIGNUP_URL = "https://chat.oqta.ai/api/v1/auths/signup";
 const COOKIE_KEY = "oqta_customer"; // JSON {name, email, token, ts}
 const SESSION_KEY = "oqta_session"; // JSON {chat_id, user_id, messages, ts}
+const USER_ID_KEY = "oqta_user_id"; // Persistent user ID (UUID)
+const CHAT_ID_KEY = "oqta_chat_id"; // Current chat ID (UUID)
+const CONVERSATION_KEY = "oqta_conversation"; // Conversation history
+const LANGUAGE_KEY = "oqta_language"; // Selected language
 const N8N_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
 const DEFAULT_SYSTEM_PROMPT = "I want to register company"; // Can be customized based on user context
+const WELCOME_MESSAGE = "Hello! Welcome to OQTA AI. How can I help you today?";
+const WELCOME_BACK_MESSAGE = "Welcome Back!";
 
 // ===== DOM Elements =====
 const continueSessionBtn = document.querySelector('.session');
 const sendBtn = document.querySelector('.action-btn.send');
 const textarea = document.querySelector('.prompt-textarea');
+
+// Conversation area elements
+const landingContent = document.getElementById('landing-content');
+const conversationArea = document.getElementById('conversation-area');
+const conversationMessages = document.getElementById('conversation-messages');
+const clearBtn = document.getElementById('clear-btn');
+const languageSelect = document.getElementById('language-select');
 
 // Chat window elements
 const chatWindow = document.getElementById('chat-window');
@@ -63,6 +76,15 @@ function generateUUID() {
 }
 
 // ===== Storage Functions =====
+function getCookie(name) {
+    try {
+        return localStorage.getItem(name);
+    } catch (e) {
+        console.error('Failed to get from localStorage:', e);
+        return null;
+    }
+}
+
 function setCookie(name, value, days = 30) {
     try {
         localStorage.setItem(name, value);
@@ -70,14 +92,15 @@ function setCookie(name, value, days = 30) {
     } catch (e) {
         console.error('Failed to save to localStorage:', e);
     }
-    return id;
 }
 
 function saveConversation() {
-    try {
-        localStorage.setItem(CONVERSATION_KEY, JSON.stringify(conversationHistory));
-    } catch (e) {
-        console.error('Failed to save conversation:', e);
+    if (SESSION && SESSION.messages) {
+        try {
+            localStorage.setItem(CONVERSATION_KEY, JSON.stringify(SESSION.messages));
+        } catch (e) {
+            console.error('Failed to save conversation:', e);
+        }
     }
 }
 
@@ -85,8 +108,7 @@ function loadConversation() {
     try {
         const saved = localStorage.getItem(CONVERSATION_KEY);
         if (saved) {
-            conversationHistory = JSON.parse(saved);
-            return conversationHistory;
+            return JSON.parse(saved);
         }
     } catch (e) {
         console.error('Failed to load conversation:', e);
@@ -94,39 +116,196 @@ function loadConversation() {
     return [];
 }
 
-// ===== Session Management =====
-function loadSession() {
-    const raw = getCookie(SESSION_KEY);
-    if (raw) {
-        try {
-            SESSION = JSON.parse(raw);
-            console.log('Session loaded:', SESSION);
-            return SESSION;
-        } catch (e) {
-            console.error('Failed to parse session:', e);
+function clearConversation() {
+    try {
+        // Generate new chat_id but keep user_id
+        const userId = localStorage.getItem(USER_ID_KEY);
+        localStorage.setItem(CHAT_ID_KEY, generateUUID());
+        localStorage.removeItem(CONVERSATION_KEY);
+        
+        // Reset session with new chat_id
+        if (SESSION) {
+            SESSION.chat_id = localStorage.getItem(CHAT_ID_KEY);
+            SESSION.messages = [];
+            saveSession();
         }
+        
+        // Clear UI
+        if (conversationMessages) {
+            conversationMessages.innerHTML = '';
+        }
+        
+        console.log('Conversation cleared, new chat started');
+    } catch (e) {
+        console.error('Failed to clear conversation:', e);
     }
-    return null;
+}
+
+// ===== Session Management =====
+function getUserId() {
+    let userId = localStorage.getItem(USER_ID_KEY);
+    if (!userId) {
+        userId = generateUUID();
+        localStorage.setItem(USER_ID_KEY, userId);
+        console.log('New user_id created:', userId);
+    }
+    return userId;
+}
+
+function getChatId() {
+    let chatId = localStorage.getItem(CHAT_ID_KEY);
+    if (!chatId) {
+        chatId = generateUUID();
+        localStorage.setItem(CHAT_ID_KEY, chatId);
+        console.log('New chat_id created:', chatId);
+    }
+    return chatId;
+}
+
+function loadSession() {
+    const userId = getUserId();
+    const chatId = getChatId();
+    const messages = loadConversation();
+    
+    SESSION = {
+        user_id: userId,
+        chat_id: chatId,
+        messages: messages,
+        ts: Date.now()
+    };
+    
+    console.log('Session loaded:', SESSION);
+    return SESSION;
 }
 
 function saveSession() {
     if (SESSION) {
         SESSION.ts = Date.now();
-        setCookie(SESSION_KEY, JSON.stringify(SESSION), 30);
+        localStorage.setItem(USER_ID_KEY, SESSION.user_id);
+        localStorage.setItem(CHAT_ID_KEY, SESSION.chat_id);
+        saveConversation();
         console.log('Session saved:', SESSION);
     }
 }
 
 function createNewSession() {
+    const userId = getUserId(); // Keep existing user_id or create new one
+    const chatId = generateUUID(); // Always new chat_id
+    localStorage.setItem(CHAT_ID_KEY, chatId);
+    
     SESSION = {
-        chat_id: generateUUID(),
-        user_id: CUSTOMER?.token ? generateUUID() : 'anonymous-' + generateUUID(),
+        chat_id: chatId,
+        user_id: userId,
         messages: [],
         ts: Date.now()
     };
     saveSession();
     console.log('New session created:', SESSION);
     return SESSION;
+}
+
+// ===== Conversation Area Functions =====
+function showConversationArea() {
+    if (landingContent) {
+        landingContent.classList.add('hidden');
+    }
+    if (conversationArea) {
+        conversationArea.classList.add('active');
+    }
+}
+
+function hideConversationArea() {
+    if (landingContent) {
+        landingContent.classList.remove('hidden');
+    }
+    if (conversationArea) {
+        conversationArea.classList.remove('active');
+    }
+}
+
+function addMessageToConversationArea(role, content, save = true) {
+    if (!conversationMessages) return;
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${role}`;
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = content;
+    
+    messageDiv.appendChild(messageContent);
+    conversationMessages.appendChild(messageDiv);
+    
+    if (save && SESSION) {
+        SESSION.messages.push({ role, content, ts: Date.now() });
+        saveSession();
+    }
+    
+    conversationMessages.scrollTop = conversationMessages.scrollHeight;
+}
+
+function showTypingIndicator() {
+    if (!conversationMessages) return;
+    
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message assistant typing-indicator';
+    typingDiv.id = 'typing-indicator';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    
+    for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        messageContent.appendChild(dot);
+    }
+    
+    typingDiv.appendChild(messageContent);
+    conversationMessages.appendChild(typingDiv);
+    conversationMessages.scrollTop = conversationMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+function loadConversationToUI() {
+    if (!conversationMessages || !SESSION) return;
+    
+    conversationMessages.innerHTML = '';
+    
+    if (SESSION.messages && SESSION.messages.length > 0) {
+        SESSION.messages.forEach(msg => {
+            addMessageToConversationArea(msg.role, msg.content, false);
+        });
+    }
+}
+
+function showWelcomeBackMessage() {
+    if (!conversationMessages) return;
+    
+    const welcomeDiv = document.createElement('div');
+    welcomeDiv.className = 'message assistant';
+    welcomeDiv.style.textAlign = 'center';
+    welcomeDiv.style.fontWeight = '600';
+    welcomeDiv.style.opacity = '0.8';
+    
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+    messageContent.textContent = WELCOME_BACK_MESSAGE;
+    
+    welcomeDiv.appendChild(messageContent);
+    conversationMessages.insertBefore(welcomeDiv, conversationMessages.firstChild);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        welcomeDiv.style.transition = 'opacity 0.5s';
+        welcomeDiv.style.opacity = '0';
+        setTimeout(() => welcomeDiv.remove(), 500);
+    }, 3000);
 }
 
 // ===== Chat UI Functions =====
@@ -255,11 +434,15 @@ async function sendToN8N(message) {
         const data = await response.json();
         console.log('n8n response:', data);
         
-        // Parse the AI response - try common response formats
+        // Parse the AI response - handle nested response formats
         let aiResponse = '';
         if (typeof data === 'string') {
             aiResponse = data;
-        } else if (data.response) {
+        } else if (data.response && data.response.body && data.response.body.output) {
+            // Handle nested format: { response: { body: { output: "message" } } }
+            aiResponse = data.response.body.output;
+            console.log('Using nested response.body.output field');
+        } else if (data.response && typeof data.response === 'string') {
             aiResponse = data.response;
             console.log('Using response.response field');
         } else if (data.output) {
@@ -286,36 +469,49 @@ async function sendMessage(message) {
     if (!message || IS_SENDING) return;
     
     IS_SENDING = true;
-    chatSendBtn.disabled = true;
+    const sendButton = document.getElementById('chat-send-btn');
+    if (sendButton) sendButton.disabled = true;
     
     try {
+        // Ensure session exists
+        if (!SESSION) {
+            loadSession();
+        }
+        
+        // Show conversation area if not visible
+        showConversationArea();
+        
         // Add user message to UI
-        addMessageToUI('user', message);
+        addMessageToConversationArea('user', message);
         
         // Clear input
-        chatTextarea.value = '';
-        chatTextarea.style.height = 'auto';
+        const textarea = document.getElementById('chat-textarea');
+        if (textarea) {
+            textarea.value = '';
+            textarea.style.height = 'auto';
+        }
         
-        // Show loading
-        showLoadingIndicator();
+        // Show typing indicator
+        showTypingIndicator();
         
         // Send to n8n and wait for response
         const aiResponse = await sendToN8N(message);
         
-        // Hide loading
-        hideLoadingIndicator();
+        // Hide typing indicator
+        removeTypingIndicator();
         
         // Add AI response to UI
-        addMessageToUI('assistant', aiResponse);
+        addMessageToConversationArea('assistant', aiResponse);
         
     } catch (error) {
-        hideLoadingIndicator();
-        addMessageToUI('assistant', 'Sorry, I encountered an error. Please try again.');
+        removeTypingIndicator();
+        addMessageToConversationArea('assistant', 'Sorry, I encountered an error. Please try again.');
         console.error('Error in sendMessage:', error);
     } finally {
         IS_SENDING = false;
-        chatSendBtn.disabled = false;
-        chatTextarea.focus();
+        if (sendButton) sendButton.disabled = false;
+        const textarea = document.getElementById('chat-textarea');
+        if (textarea) textarea.focus();
     }
 }
 
@@ -373,13 +569,6 @@ async function doSignin() {
     const email = signinEmail.value.trim();
     const password = signinPass.value;
 
-function removeTypingIndicator() {
-    const indicator = document.getElementById('typing-indicator');
-    if (indicator) {
-        indicator.remove();
-    }
-}
-
     try {
         signinMsg.textContent = "Signing in...";
 
@@ -427,8 +616,6 @@ function removeTypingIndicator() {
         console.error(e);
         signinMsg.textContent = "Network error. Please try again.";
     }
-    
-    conversationMessages.scrollTop = conversationMessages.scrollHeight;
 }
 
 async function doSignup() {
@@ -458,12 +645,11 @@ async function doSignup() {
         }
         
         const data = await response.json();
-        console.log('Received from n8n:', data);
+        const token = data?.token || "";
         
-        // Parse the nested response format from n8n
-        // Expected format: { response: { body: { output: "message" }, headers: {}, statusCode: 200 } }
-        if (data && data.response && data.response.body && data.response.body.output) {
-            return data.response.body.output;
+        if (!token) {
+            suMsg.textContent = "No token returned. Check backend.";
+            return;
         }
 
         const payload = { name, email, token, ts: Date.now() };
@@ -521,12 +707,11 @@ sendBtn?.addEventListener('click', () => {
         return;
     }
 
-    // Always show chat window directly
+    // Ensure session exists
     if (!SESSION) {
-        createNewSession();
+        loadSession();
     }
     
-    showChatWindow();
     sendMessage(text);
     textarea.value = '';
 });
@@ -591,6 +776,13 @@ clearBtn?.addEventListener('click', () => {
     }
 });
 
+// Language selector
+languageSelect?.addEventListener('change', (e) => {
+    const selectedLanguage = e.target.value;
+    localStorage.setItem(LANGUAGE_KEY, selectedLanguage);
+    console.log('Language changed to:', selectedLanguage);
+});
+
 // ===== Initialization =====
 window.addEventListener('DOMContentLoaded', async () => {
     // Load customer data
@@ -601,29 +793,43 @@ window.addEventListener('DOMContentLoaded', async () => {
         } catch (e) {
             console.error("Failed to parse cookie:", e);
         }
-    });
-}
+    }
 
-        if (CUSTOMER?.token) {
-            LOGGED_IN = true;
+    if (CUSTOMER?.token) {
+        LOGGED_IN = true;
 
-            try {
-                await fetch(OWUI_SIGNIN_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({ token: CUSTOMER.token })
-                });
-            } catch (e) {
-                console.error("Silent signin failed:", e);
-            }
+        try {
+            await fetch(OWUI_SIGNIN_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ token: CUSTOMER.token })
+            });
+        } catch (e) {
+            console.error("Silent signin failed:", e);
         }
     }
 
     // Load session data
     loadSession();
+    
+    // Load language preference
+    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+    if (savedLanguage && languageSelect) {
+        languageSelect.value = savedLanguage;
+    }
+    
+    // Check if user has existing conversation
+    const hasMessages = SESSION && SESSION.messages && SESSION.messages.length > 0;
+    
+    if (hasMessages) {
+        // Returning user - show conversation area
+        showConversationArea();
+        loadConversationToUI();
+        showWelcomeBackMessage();
+    }
 
     updateSessionButton();
     
-    console.log('OQTA AI initialized', { LOGGED_IN, CUSTOMER, SESSION });
+    console.log('OQTA AI initialized', { LOGGED_IN, CUSTOMER, SESSION, hasMessages });
 });
