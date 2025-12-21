@@ -34,6 +34,15 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/chat', chatRoutes);
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // Serve admin panel
 app.get('/admin*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'admin', 'index.html'));
