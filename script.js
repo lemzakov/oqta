@@ -919,21 +919,15 @@ function applyLanguage(lang) {
     const t = translations[lang] || translations.en;
     
     // Update UI elements if they exist
-    const elementsToTranslate = {
-        '.welcome span': (el) => el.innerHTML = `${t.welcome} <strong>OQTA </strong>AI`,
-        '.cta-text strong': (el) => el.textContent = t.startConsultation,
-        '.cta-text': (el) => {
-            const strong = el.querySelector('strong');
-            if (strong) {
-                el.innerHTML = `<strong>${t.startConsultation}</strong> ${t.consultationDesc}`;
-            }
-        }
-    };
+    const welcomeSpan = document.querySelector('.welcome span');
+    if (welcomeSpan) {
+        welcomeSpan.innerHTML = `${t.welcome} <strong>OQTA </strong>AI`;
+    }
     
-    Object.entries(elementsToTranslate).forEach(([selector, updateFn]) => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(updateFn);
-    });
+    const ctaText = document.querySelector('.cta-text');
+    if (ctaText) {
+        ctaText.innerHTML = `<strong>${t.startConsultation}</strong> ${t.consultationDesc}`;
+    }
     
     console.log('Language applied:', lang);
 }
