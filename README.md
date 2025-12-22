@@ -2,16 +2,26 @@
 
 ## Overview
 
-This is a single-page chat application that integrates with n8n for AI-powered conversations about UAE company registration.
+This is a chat application that integrates with n8n for AI-powered conversations about UAE company registration. It includes both a public-facing chat interface and a comprehensive admin panel.
 
 ## Features
 
+### Public Chat Interface
 - **Single Page Application**: No authentication required - users can start chatting immediately
 - **Session Persistence**: Conversation history is stored in browser's localStorage
 - **Welcome Back**: Returning users see their previous conversations automatically
 - **n8n Integration**: All chat messages are sent to n8n webhook for AI processing
 - **Multi-language Support**: Language selector with 6 languages (English, Arabic, Russian, Chinese, Hindi, Urdu)
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+### Admin Panel
+- **Authentication**: Secure login for administrators
+- **Dashboard**: Real-time statistics and metrics
+- **Conversations Management**: View and browse all user sessions
+- **Settings**: Configure application settings (WhatsApp, phone, n8n URL)
+- **Knowledge Base**: Manage documents in Qdrant vector database
+
+For admin panel setup instructions, see [ADMIN_SETUP.md](ADMIN_SETUP.md).
 
 ## n8n Webhook Configuration
 

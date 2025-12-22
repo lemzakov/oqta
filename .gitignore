@@ -1,5 +1,16 @@
-﻿################################################################################
+################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
 /.vs
+
+# Node.js
+node_modules/
+dist/
+.env
+public/
+
+# Prisma
+generated/
+
+/generated/prisma
