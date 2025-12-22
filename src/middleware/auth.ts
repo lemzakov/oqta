@@ -40,3 +40,6 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
     res.status(403).json({ error: 'Invalid token.' });
   }
 };
+
+// Alias for admin authentication (same as authenticateToken)
+export const authenticateAdmin = authenticateToken;
