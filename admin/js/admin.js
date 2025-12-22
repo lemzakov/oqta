@@ -218,13 +218,19 @@ const loadSessionDetail = async (sessionId) => {
             <p><strong>Last Message:</strong> ${escapeHtml(formatDate(data.session.lastMessageAt))}</p>
         `;
 
-        messagesList.innerHTML = data.messages.map(msg => `
-            <div class="message ${escapeHtml(msg.type)}">
-                <div class="message-type">${escapeHtml(msg.type)}</div>
-                <div class="message-content">${escapeHtml(msg.content)}</div>
-                <div class="message-time">${escapeHtml(formatDate(msg.createdAt))}</div>
-            </div>
-        `).join('');
+        messagesList.innerHTML = data.messages.map(msg => {
+            // n8n uses "human" for user messages and "ai" for AI messages
+            const messageType = msg.type === 'human' ? 'user' : msg.type;
+            const displayType = messageType === 'user' ? 'User' : messageType === 'ai' ? 'AI' : messageType;
+            
+            return `
+                <div class="message ${escapeHtml(messageType)}">
+                    <div class="message-type">${escapeHtml(displayType)}</div>
+                    <div class="message-content">${escapeHtml(msg.content)}</div>
+                    <div class="message-time">${escapeHtml(formatDate(msg.createdAt))}</div>
+                </div>
+            `;
+        }).join('');
     } catch (error) {
         sessionInfo.innerHTML = `<p class="error-message show">Failed to load session: ${error.message}</p>`;
     }

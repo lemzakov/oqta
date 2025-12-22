@@ -465,37 +465,8 @@ async function sendToN8N(message) {
 }
 
 // ===== Database Integration =====
-async function saveMessageToDatabase(sessionId, userId, userEmail, userName, type, content) {
-    try {
-        const response = await fetch('/api/chat/message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                sessionId,
-                userId,
-                userEmail,
-                userName,
-                type,
-                content,
-                toolCalls: [],
-                additionalKwargs: {},
-                responseMetadata: {},
-                invalidToolCalls: []
-            })
-        });
-        
-        if (!response.ok) {
-            console.error('Failed to save message to database:', response.statusText);
-        } else {
-            console.log('Message saved to database');
-        }
-    } catch (error) {
-        console.error('Error saving message to database:', error);
-        // Don't throw - we don't want to break the chat if database save fails
-    }
-}
+// Note: n8n manages the n8n_chat_histories table directly
+// We don't write to it from the frontend - only read from admin panel
 
 // ===== Message Sending =====
 async function sendMessage(message) {
@@ -517,16 +488,6 @@ async function sendMessage(message) {
         // Add user message to UI
         addMessageToConversationArea('user', message);
         
-        // Save user message to database
-        await saveMessageToDatabase(
-            SESSION.chat_id,
-            SESSION.user_id,
-            CUSTOMER?.email || "guest@oqta.ai",
-            CUSTOMER?.name || "Guest User",
-            'user',
-            message
-        );
-        
         // Clear input
         const textarea = document.getElementById('chat-textarea');
         if (textarea) {
@@ -538,6 +499,7 @@ async function sendMessage(message) {
         showTypingIndicator();
         
         // Send to n8n and wait for response
+        // Note: n8n will save both the user message and AI response to n8n_chat_histories table
         const aiResponse = await sendToN8N(message);
         
         // Hide typing indicator
@@ -545,16 +507,6 @@ async function sendMessage(message) {
         
         // Add AI response to UI
         addMessageToConversationArea('assistant', aiResponse);
-        
-        // Save AI response to database
-        await saveMessageToDatabase(
-            SESSION.chat_id,
-            SESSION.user_id,
-            CUSTOMER?.email || "guest@oqta.ai",
-            CUSTOMER?.name || "Guest User",
-            'ai',
-            aiResponse
-        );
         
     } catch (error) {
         removeTypingIndicator();
@@ -822,10 +774,21 @@ signinPass?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') doSignin();
 });
 
-// Clear/New Chat button
+// Clear/New Chat button - Reset session and reload page
 clearBtn?.addEventListener('click', () => {
-    if (confirm('Start a new conversation? This will clear your current chat.')) {
-        clearConversation();
+    if (confirm('Start a new conversation? This will clear your current chat and reload the page.')) {
+        // Generate new chat_id but keep user_id
+        const userId = localStorage.getItem(USER_ID_KEY);
+        const newChatId = generateUUID();
+        
+        localStorage.setItem(CHAT_ID_KEY, newChatId);
+        localStorage.removeItem(CONVERSATION_KEY);
+        localStorage.removeItem(SESSION_KEY);
+        
+        console.log('New chat started with ID:', newChatId);
+        
+        // Reload the page to reset everything
+        window.location.reload();
     }
 });
 
@@ -834,7 +797,46 @@ languageSelect?.addEventListener('change', (e) => {
     const selectedLanguage = e.target.value;
     localStorage.setItem(LANGUAGE_KEY, selectedLanguage);
     console.log('Language changed to:', selectedLanguage);
+    
+    // You can add translation logic here or send to n8n with the language preference
+    // For now, just save the preference
 });
+
+// Detect and set browser language on first visit
+function detectAndSetBrowserLanguage() {
+    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+    
+    // If user hasn't selected a language yet, detect from browser
+    if (!savedLanguage) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        let detectedLang = 'en'; // default
+        
+        // Map browser language codes to our supported languages
+        if (browserLang.startsWith('ar')) {
+            detectedLang = 'ar'; // Arabic
+        } else if (browserLang.startsWith('ru')) {
+            detectedLang = 'ru'; // Russian
+        } else if (browserLang.startsWith('zh')) {
+            detectedLang = 'zh'; // Chinese
+        } else if (browserLang.startsWith('hi')) {
+            detectedLang = 'hi'; // Hindi
+        } else if (browserLang.startsWith('ur')) {
+            detectedLang = 'ur'; // Urdu
+        }
+        
+        localStorage.setItem(LANGUAGE_KEY, detectedLang);
+        if (languageSelect) {
+            languageSelect.value = detectedLang;
+        }
+        console.log('Browser language detected:', browserLang, '→ Set to:', detectedLang);
+    } else {
+        // Load saved language preference
+        if (languageSelect) {
+            languageSelect.value = savedLanguage;
+        }
+        console.log('Loaded saved language:', savedLanguage);
+    }
+}
 
 // ===== Initialization =====
 window.addEventListener('DOMContentLoaded', async () => {
@@ -866,11 +868,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load session data
     loadSession();
     
-    // Load language preference
-    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
-    if (savedLanguage && languageSelect) {
-        languageSelect.value = savedLanguage;
-    }
+    // Detect and set browser language
+    detectAndSetBrowserLanguage();
     
     // Check if user has existing conversation
     const hasMessages = SESSION && SESSION.messages && SESSION.messages.length > 0;

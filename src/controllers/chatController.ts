@@ -1,15 +1,20 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma.js';
 
+// Note: n8n_chat_histories table is managed by n8n
+// We only create/update sessions here, not individual messages
+// Messages are written directly by n8n workflow
+
 export const saveMessage = async (req: Request, res: Response) => {
   try {
-    const { sessionId, userId, userEmail, userName, type, content, toolCalls = [], additionalKwargs = {}, responseMetadata = {}, invalidToolCalls = [] } = req.body;
+    const { sessionId, userId, userEmail, userName } = req.body;
 
-    if (!sessionId || !type || !content) {
-      return res.status(400).json({ error: 'sessionId, type, and content are required' });
+    if (!sessionId) {
+      return res.status(400).json({ error: 'sessionId is required' });
     }
 
-    // Find or create session
+    // Find or create session only
+    // n8n will write messages to n8n_chat_histories table directly
     let session = await prisma.session.findUnique({
       where: { id: sessionId },
     });
@@ -33,26 +38,9 @@ export const saveMessage = async (req: Request, res: Response) => {
       });
     }
 
-    // Save message - using the JSONB message field to store all data
-    const messageData = {
-      type,
-      content,
-      tool_calls: toolCalls,
-      additional_kwargs: additionalKwargs,
-      response_metadata: responseMetadata,
-      invalid_tool_calls: invalidToolCalls,
-    };
-
-    const message = await prisma.chatHistory.create({
-      data: {
-        sessionId,
-        message: messageData,
-      },
-    });
-
-    res.json({ success: true, message });
+    res.json({ success: true, session });
   } catch (error) {
-    console.error('Save message error:', error);
-    res.status(500).json({ error: 'Failed to save message' });
+    console.error('Save session error:', error);
+    res.status(500).json({ error: 'Failed to save session' });
   }
 };

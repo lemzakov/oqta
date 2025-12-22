@@ -60,6 +60,7 @@ export const getSessionMessages = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Session not found' });
     }
 
+    // Read messages from n8n_chat_histories table (managed by n8n)
     const messages = await prisma.chatHistory.findMany({
       where: { sessionId },
       orderBy: {
@@ -77,11 +78,12 @@ export const getSessionMessages = async (req: Request, res: Response) => {
         lastMessageAt: session.lastMessageAt,
       },
       messages: messages.map((msg: any) => {
-        // Parse the JSONB message field
+        // Parse the JSONB message field from n8n format
+        // n8n stores messages like: { "type": "ai|human", "content": "...", "tool_calls": [], ... }
         const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
         return {
           id: msg.id,
-          type: messageData.type || 'user',
+          type: messageData.type || 'human', // n8n uses "human" instead of "user"
           content: messageData.content || '',
           createdAt: msg.createdAt,
           toolCalls: messageData.tool_calls || [],
