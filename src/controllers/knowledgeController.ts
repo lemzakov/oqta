@@ -123,7 +123,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
     console.warn('WARNING: Using placeholder random embeddings. Replace with a proper embedding model for production use.');
     
     // Get collection info to determine vector size
-    let vectorSize = 384; // Default to 384 (common for all-MiniLM-L6-v2)
+    let vectorSize = 3072; // Default to 3072 (OpenAI text-embedding-3-large)
     try {
       const collectionInfo = await qdrantClient.getCollection(COLLECTION_NAME);
       if (collectionInfo.config?.params?.vectors) {
