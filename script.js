@@ -777,8 +777,7 @@ signinPass?.addEventListener('keydown', (e) => {
 // Clear/New Chat button - Reset session and reload page
 clearBtn?.addEventListener('click', () => {
     if (confirm('Start a new conversation? This will clear your current chat and reload the page.')) {
-        // Generate new chat_id but keep user_id
-        const userId = localStorage.getItem(USER_ID_KEY);
+        // Generate new chat_id (user_id is preserved in localStorage automatically)
         const newChatId = generateUUID();
         
         localStorage.setItem(CHAT_ID_KEY, newChatId);
