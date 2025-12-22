@@ -1,4 +1,7 @@
-// Vercel serverless function wrapper for Express app
+// Vercel serverless function handler
 import app from '../dist/server.js';
 
-export default app;
+export default async (req, res) => {
+  // Handle the request with Express app
+  return app(req, res);
+};

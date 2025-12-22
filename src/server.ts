@@ -45,8 +45,12 @@ async function initializeDatabase() {
 
 // Middleware
 app.use(cors({
-  origin: true,
-  credentials: true
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '', process.env.FRONTEND_URL || '']
+    : true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
 app.use(express.json());
 app.use(cookieParser());
