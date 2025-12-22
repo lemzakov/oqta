@@ -252,10 +252,26 @@
                     <div class="modal-content">
                         <span class="close">&times;</span>
                         <h2>Upload Document</h2>
-                        <form id="upload-form">
+                        <form id="upload-form" enctype="multipart/form-data">
                             <div class="form-group">
+                                <label>Upload Method</label>
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: inline-block; margin-right: 20px;">
+                                        <input type="radio" name="upload-method" value="file" checked> File Upload
+                                    </label>
+                                    <label style="display: inline-block;">
+                                        <input type="radio" name="upload-method" value="text"> Text Input
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" id="file-upload-group">
+                                <label for="doc-file">Choose File (txt, md, pdf, doc, docx, csv, json)</label>
+                                <input type="file" id="doc-file" name="file" accept=".txt,.md,.pdf,.doc,.docx,.csv,.json,text/*">
+                                <small style="display: block; margin-top: 5px; color: #666;">Maximum file size: 10MB</small>
+                            </div>
+                            <div class="form-group" id="text-upload-group" style="display: none;">
                                 <label for="doc-text">Document Text</label>
-                                <textarea id="doc-text" name="text" rows="10" required></textarea>
+                                <textarea id="doc-text" name="text" rows="10"></textarea>
                             </div>
                             <div class="form-group">
                                 <label for="doc-metadata">Metadata (JSON, optional)</label>

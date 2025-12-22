@@ -338,10 +338,32 @@ window.addEventListener('click', (e) => {
     }
 });
 
+// Toggle between file upload and text input
+document.querySelectorAll('input[name="upload-method"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        const fileGroup = document.getElementById('file-upload-group');
+        const textGroup = document.getElementById('text-upload-group');
+        const fileInput = document.getElementById('doc-file');
+        const textInput = document.getElementById('doc-text');
+        
+        if (e.target.value === 'file') {
+            fileGroup.style.display = 'block';
+            textGroup.style.display = 'none';
+            fileInput.required = true;
+            textInput.required = false;
+        } else {
+            fileGroup.style.display = 'none';
+            textGroup.style.display = 'block';
+            fileInput.required = false;
+            textInput.required = true;
+        }
+    });
+});
+
 document.getElementById('upload-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const text = document.getElementById('doc-text').value;
+    const uploadMethod = document.querySelector('input[name="upload-method"]:checked').value;
     const metadataStr = document.getElementById('doc-metadata').value;
     
     let metadata = {};
@@ -355,12 +377,56 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
     }
 
     try {
-        await apiCall('/knowledge/documents', {
-            method: 'POST',
-            body: JSON.stringify({ text, metadata }),
-        });
+        let response;
+        
+        if (uploadMethod === 'file') {
+            // File upload
+            const fileInput = document.getElementById('doc-file');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('metadata', JSON.stringify(metadata));
+            
+            // Use fetch directly for FormData
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/knowledge/documents', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+            
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || errorData.details || 'Upload failed');
+            }
+            
+            response = await res.json();
+        } else {
+            // Text upload
+            const text = document.getElementById('doc-text').value;
+            
+            if (!text) {
+                alert('Please enter document text');
+                return;
+            }
+            
+            response = await apiCall('/knowledge/documents', {
+                method: 'POST',
+                body: JSON.stringify({ text, metadata }),
+            });
+        }
+        
         uploadModal.classList.remove('active');
         document.getElementById('upload-form').reset();
+        alert(`Document uploaded successfully! ${response.chunksUploaded} chunk(s) created.`);
         loadDocuments();
     } catch (error) {
         alert(`Failed to upload document: ${error.message}`);
