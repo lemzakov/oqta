@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 interface JWTPayload {
   userId: string;
+  id: string; // Alias for userId for backwards compatibility
   email: string;
 }
 
@@ -29,6 +30,10 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
 
   try {
     const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
+    // Ensure id is set for backwards compatibility
+    if (decoded.userId && !decoded.id) {
+      decoded.id = decoded.userId;
+    }
     req.user = decoded;
     next();
   } catch (error) {
