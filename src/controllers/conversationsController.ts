@@ -64,14 +64,6 @@ export const getSessionMessages = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
 
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-    });
-
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
     // Read messages from n8n_chat_histories table (managed by n8n)
     const messages = await prisma.chatHistory.findMany({
       where: { sessionId },
@@ -80,14 +72,27 @@ export const getSessionMessages = async (req: Request, res: Response) => {
       },
     });
 
+    if (messages.length === 0) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Try to get additional info from sessions table if available (optional)
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    // Get session metadata from messages
+    const firstMessage = messages[0];
+    const lastMessage = messages[messages.length - 1];
+
     res.json({
       session: {
-        id: session.id,
-        userId: session.userId,
-        userEmail: session.userEmail,
-        userName: session.userName,
-        startedAt: session.startedAt,
-        lastMessageAt: session.lastMessageAt,
+        id: sessionId,
+        userId: session?.userId || null,
+        userEmail: session?.userEmail || null,
+        userName: session?.userName || 'Guest User',
+        startedAt: firstMessage.createdAt,
+        lastMessageAt: lastMessage.createdAt,
       },
       messages: messages.map((msg: any) => {
         // Parse the JSONB message field from n8n format

@@ -11,6 +11,9 @@ import conversationsRoutes from './routes/conversations.js';
 import settingsRoutes from './routes/settings.js';
 import knowledgeRoutes from './routes/knowledge.js';
 import chatRoutes from './routes/chat.js';
+import customersRoutes from './routes/customers.js';
+import billingRoutes from './routes/billing.js';
+import freeZonesRoutes from './routes/free-zones.js';
 
 dotenv.config();
 
@@ -62,6 +65,9 @@ app.use('/api/conversations', conversationsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/customers', customersRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/free-zones', freeZonesRoutes);
 
 // Health check endpoint with database check
 app.get('/api/health', async (req, res) => {
