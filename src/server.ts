@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import prisma from './utils/prisma.js';
 import authRoutes from './routes/auth.js';
 import dashboardRoutes from './routes/dashboard.js';
 import conversationsRoutes from './routes/conversations.js';
@@ -19,6 +20,28 @@ const PORT = process.env.PORT || 3000;
 // Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Database initialization function
+async function initializeDatabase() {
+  try {
+    console.log('Checking database connection...');
+    await prisma.$connect();
+    console.log('✅ Database connected successfully');
+    
+    // Test if tables exist by trying to count admin users
+    try {
+      await prisma.adminUser.count();
+      console.log('✅ Database tables exist');
+    } catch (error) {
+      console.log('⚠️  Database tables might not exist. Please run migrations.');
+      console.log('Run: npx prisma migrate deploy');
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Database connection failed:', errorMessage);
+    console.error('Make sure DATABASE_URL is set correctly in environment variables');
+  }
+}
 
 // Middleware
 app.use(cors({
@@ -36,13 +59,27 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+// Health check endpoint with database check
+app.get('/api/health', async (req, res) => {
+  const health = {
+    status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+    environment: process.env.NODE_ENV || 'development',
+    database: 'unknown',
+    api: 'ok',
+    admin: 'ok'
+  };
+
+  // Check database connection
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    health.database = 'connected';
+  } catch (error) {
+    health.database = 'disconnected';
+    health.status = 'degraded';
+  }
+
+  res.json(health);
 });
 
 // Serve static files for admin panel
@@ -59,12 +96,27 @@ app.get('/admin', (req, res) => {
 // Serve static files (existing frontend) - place this after specific routes
 app.use(express.static(path.join(__dirname, '..')));
 
-// Export app for Vercel
+// Fallback route for SPA
+app.get('*', (req, res) => {
+  // Don't serve index.html for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
+});
+
+// Initialize database on startup
+initializeDatabase();
+
+// Export app for serverless environments
 export default app;
 
 // Only listen if not in serverless environment
 if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`   - Frontend: http://localhost:${PORT}/`);
+    console.log(`   - Admin Panel: http://localhost:${PORT}/admin`);
+    console.log(`   - Health Check: http://localhost:${PORT}/api/health`);
   });
 }
