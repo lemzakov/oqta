@@ -21,17 +21,10 @@ model AdminUser {
 }
 
 model ChatHistory {
-  id         String   @id @default(uuid())
-  sessionId  String   @map("session_id")
-  type       String
-  content    String   @db.Text
-  toolCalls  Json     @default("[]") @map("tool_calls")
-  additionalKwargs Json @default("{}") @map("additional_kwargs")
-  responseMetadata Json @default("{}") @map("response_metadata")
-  invalidToolCalls Json @default("[]") @map("invalid_tool_calls")
+  id         Int      @id @default(autoincrement())
+  sessionId  String   @map("session_id") @db.VarChar(255)
+  message    Json
   createdAt  DateTime @default(now()) @map("created_at")
-
-  session    Session  @relation(fields: [sessionId], references: [id])
 
   @@index([sessionId])
   @@map("n8n_chat_histories")
@@ -44,8 +37,6 @@ model Session {
   userName  String?  @map("user_name")
   startedAt DateTime @default(now()) @map("started_at")
   lastMessageAt DateTime @default(now()) @map("last_message_at")
-
-  messages  ChatHistory[]
 
   @@index([startedAt])
   @@map("sessions")

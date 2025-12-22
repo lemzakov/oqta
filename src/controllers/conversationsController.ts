@@ -6,32 +6,37 @@ export const getSessions = async (req: Request, res: Response) => {
     const { page = 1, limit = 20 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    const [sessions, total] = await Promise.all([
-      prisma.session.findMany({
-        orderBy: {
-          startedAt: 'desc',
-        },
-        skip,
-        take: Number(limit),
-        include: {
-          _count: {
-            select: { messages: true },
-          },
-        },
-      }),
-      prisma.session.count(),
-    ]);
+    // Get all sessions with message count
+    const sessions = await prisma.session.findMany({
+      orderBy: {
+        startedAt: 'desc',
+      },
+      skip,
+      take: Number(limit),
+    });
+
+    const total = await prisma.session.count();
+
+    // Get message counts for each session
+    const sessionsWithCounts = await Promise.all(
+      sessions.map(async (session) => {
+        const messageCount = await prisma.chatHistory.count({
+          where: { sessionId: session.id },
+        });
+        return {
+          id: session.id,
+          userId: session.userId,
+          userEmail: session.userEmail,
+          userName: session.userName,
+          startedAt: session.startedAt,
+          lastMessageAt: session.lastMessageAt,
+          messageCount,
+        };
+      })
+    );
 
     res.json({
-      sessions: sessions.map((session: any) => ({
-        id: session.id,
-        userId: session.userId,
-        userEmail: session.userEmail,
-        userName: session.userName,
-        startedAt: session.startedAt,
-        lastMessageAt: session.lastMessageAt,
-        messageCount: session._count.messages,
-      })),
+      sessions: sessionsWithCounts,
       total,
       page: Number(page),
       limit: Number(limit),
@@ -49,18 +54,18 @@ export const getSessionMessages = async (req: Request, res: Response) => {
 
     const session = await prisma.session.findUnique({
       where: { id: sessionId },
-      include: {
-        messages: {
-          orderBy: {
-            createdAt: 'asc',
-          },
-        },
-      },
     });
 
     if (!session) {
       return res.status(404).json({ error: 'Session not found' });
     }
+
+    const messages = await prisma.chatHistory.findMany({
+      where: { sessionId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
 
     res.json({
       session: {
@@ -71,16 +76,20 @@ export const getSessionMessages = async (req: Request, res: Response) => {
         startedAt: session.startedAt,
         lastMessageAt: session.lastMessageAt,
       },
-      messages: session.messages.map((msg: any) => ({
-        id: msg.id,
-        type: msg.type,
-        content: msg.content,
-        createdAt: msg.createdAt,
-        toolCalls: msg.toolCalls,
-        additionalKwargs: msg.additionalKwargs,
-        responseMetadata: msg.responseMetadata,
-        invalidToolCalls: msg.invalidToolCalls,
-      })),
+      messages: messages.map((msg: any) => {
+        // Parse the JSONB message field
+        const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+        return {
+          id: msg.id,
+          type: messageData.type || 'user',
+          content: messageData.content || '',
+          createdAt: msg.createdAt,
+          toolCalls: messageData.tool_calls || [],
+          additionalKwargs: messageData.additional_kwargs || {},
+          responseMetadata: messageData.response_metadata || {},
+          invalidToolCalls: messageData.invalid_tool_calls || [],
+        };
+      }),
     });
   } catch (error) {
     console.error('Get session messages error:', error);

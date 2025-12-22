@@ -33,16 +33,20 @@ export const saveMessage = async (req: Request, res: Response) => {
       });
     }
 
-    // Save message
+    // Save message - using the JSONB message field to store all data
+    const messageData = {
+      type,
+      content,
+      tool_calls: toolCalls,
+      additional_kwargs: additionalKwargs,
+      response_metadata: responseMetadata,
+      invalid_tool_calls: invalidToolCalls,
+    };
+
     const message = await prisma.chatHistory.create({
       data: {
         sessionId,
-        type,
-        content,
-        toolCalls,
-        additionalKwargs,
-        responseMetadata,
-        invalidToolCalls,
+        message: messageData,
       },
     });
 
