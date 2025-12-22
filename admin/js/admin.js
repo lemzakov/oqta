@@ -11,6 +11,32 @@ const API_BASE = '/api';
 // State
 let currentPage = 'dashboard';
 let authToken = null;
+let conversationAutoRefreshInterval = null;
+
+// Hamburger menu functionality
+const hamburgerMenu = document.getElementById('hamburger-menu');
+const sidebar = document.getElementById('sidebar');
+const mobileOverlay = document.getElementById('mobile-overlay');
+
+if (hamburgerMenu && sidebar && mobileOverlay) {
+    hamburgerMenu.addEventListener('click', () => {
+        sidebar.classList.toggle('mobile-open');
+        mobileOverlay.classList.toggle('active');
+    });
+
+    mobileOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('mobile-open');
+        mobileOverlay.classList.remove('active');
+    });
+
+    // Close mobile menu when clicking on a nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            mobileOverlay.classList.remove('active');
+        });
+    });
+}
 
 // Utility functions
 const apiCall = async (endpoint, options = {}) => {
@@ -114,6 +140,12 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 const navigateToPage = (page) => {
+    // Clear any existing auto-refresh intervals
+    if (conversationAutoRefreshInterval) {
+        clearInterval(conversationAutoRefreshInterval);
+        conversationAutoRefreshInterval = null;
+    }
+
     // Update nav links
     document.querySelectorAll('.nav-link').forEach(link => {
         if (link.dataset.page === page) {
@@ -137,6 +169,22 @@ const navigateToPage = (page) => {
             break;
         case 'conversations':
             loadSessions();
+            // Auto-refresh conversations every 10 seconds
+            conversationAutoRefreshInterval = setInterval(() => {
+                if (currentPage === 'conversations') {
+                    const sessionDetail = document.getElementById('session-detail');
+                    if (sessionDetail.style.display === 'block') {
+                        // Refresh session detail
+                        const sessionId = sessionDetail.dataset.sessionId;
+                        if (sessionId) {
+                            loadSessionDetail(sessionId, true);
+                        }
+                    } else {
+                        // Refresh sessions list
+                        loadSessions();
+                    }
+                }
+            }, 10000);
             break;
         case 'settings':
             loadSettings();
@@ -197,16 +245,19 @@ const loadSessions = async () => {
     }
 };
 
-const loadSessionDetail = async (sessionId) => {
+const loadSessionDetail = async (sessionId, silentRefresh = false) => {
     document.getElementById('sessions-list').style.display = 'none';
     const sessionDetail = document.getElementById('session-detail');
     sessionDetail.style.display = 'block';
+    sessionDetail.dataset.sessionId = sessionId; // Store for auto-refresh
 
     const sessionInfo = document.getElementById('session-info');
     const messagesList = document.getElementById('messages-list');
 
-    sessionInfo.innerHTML = '<p class="loading">Loading session...</p>';
-    messagesList.innerHTML = '';
+    if (!silentRefresh) {
+        sessionInfo.innerHTML = '<p class="loading">Loading session...</p>';
+        messagesList.innerHTML = '';
+    }
 
     try {
         const data = await apiCall(`/conversations/sessions/${sessionId}`);
@@ -232,7 +283,9 @@ const loadSessionDetail = async (sessionId) => {
             `;
         }).join('');
     } catch (error) {
-        sessionInfo.innerHTML = `<p class="error-message show">Failed to load session: ${error.message}</p>`;
+        if (!silentRefresh) {
+            sessionInfo.innerHTML = `<p class="error-message show">Failed to load session: ${error.message}</p>`;
+        }
     }
 };
 

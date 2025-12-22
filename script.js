@@ -851,14 +851,101 @@ clearBtn?.addEventListener('click', () => {
     }
 });
 
+// Language translations
+const translations = {
+    en: {
+        welcome: "WELCOME TO",
+        register: "Register",
+        your: "your",
+        uaeCompany: "UAE company",
+        inMinutes: "in minutes",
+        withAI: "with AI",
+        startConsultation: "Start Your Free Consultation Today!",
+        consultationDesc: "Ask questions, understand costs, and get expert tax advice - all free of charge. Let our AI guide you through the entire company registration process."
+    },
+    ar: {
+        welcome: "مرحبًا بك في",
+        register: "سجل",
+        your: "شركتك",
+        uaeCompany: "في الإمارات",
+        inMinutes: "في دقائق",
+        withAI: "بالذكاء الاصطناعي",
+        startConsultation: "ابدأ استشارتك المجانية اليوم!",
+        consultationDesc: "اطرح الأسئلة، افهم التكاليف، واحصل على نصائح ضريبية من الخبراء - كل ذلك مجانًا. دع الذكاء الاصطناعي يرشدك خلال عملية تسجيل الشركة بأكملها."
+    },
+    ru: {
+        welcome: "ДОБРО ПОЖАЛОВАТЬ В",
+        register: "Зарегистрируйте",
+        your: "свою",
+        uaeCompany: "компанию в ОАЭ",
+        inMinutes: "за минуты",
+        withAI: "с ИИ",
+        startConsultation: "Начните бесплатную консультацию сегодня!",
+        consultationDesc: "Задавайте вопросы, узнавайте о расходах и получайте консультации по налогам - всё бесплатно. Позвольте нашему ИИ провести вас через весь процесс регистрации компании."
+    },
+    zh: {
+        welcome: "欢迎来到",
+        register: "注册",
+        your: "您的",
+        uaeCompany: "阿联酋公司",
+        inMinutes: "只需几分钟",
+        withAI: "使用AI",
+        startConsultation: "立即开始免费咨询!",
+        consultationDesc: "提问、了解成本、获得专业税务建议 - 完全免费。让我们的AI引导您完成整个公司注册流程。"
+    },
+    hi: {
+        welcome: "में आपका स्वागत है",
+        register: "पंजीकरण करें",
+        your: "अपनी",
+        uaeCompany: "यूएई कंपनी",
+        inMinutes: "मिनटों में",
+        withAI: "AI के साथ",
+        startConsultation: "आज ही अपना मुफ्त परामर्श शुरू करें!",
+        consultationDesc: "प्रश्न पूछें, लागत समझें, और विशेषज्ञ कर सलाह प्राप्त करें - सब मुफ्त। हमारे AI को पूरी कंपनी पंजीकरण प्रक्रिया के माध्यम से मार्गदर्शन करने दें।"
+    },
+    ur: {
+        welcome: "میں خوش آمدید",
+        register: "رجسٹر کریں",
+        your: "اپنی",
+        uaeCompany: "یو اے ای کمپنی",
+        inMinutes: "منٹوں میں",
+        withAI: "AI کے ساتھ",
+        startConsultation: "آج ہی اپنا مفت مشاورت شروع کریں!",
+        consultationDesc: "سوالات پوچھیں، اخراجات سمجھیں، اور ماہر ٹیکس مشورہ حاصل کریں - سب مفت۔ ہماری AI کو پوری کمپنی رجسٹریشن کے عمل میں آپ کی رہنمائی کرنے دیں۔"
+    }
+};
+
+function applyLanguage(lang) {
+    const t = translations[lang] || translations.en;
+    
+    // Update UI elements if they exist
+    const elementsToTranslate = {
+        '.welcome span': (el) => el.innerHTML = `${t.welcome} <strong>OQTA </strong>AI`,
+        '.cta-text strong': (el) => el.textContent = t.startConsultation,
+        '.cta-text': (el) => {
+            const strong = el.querySelector('strong');
+            if (strong) {
+                el.innerHTML = `<strong>${t.startConsultation}</strong> ${t.consultationDesc}`;
+            }
+        }
+    };
+    
+    Object.entries(elementsToTranslate).forEach(([selector, updateFn]) => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(updateFn);
+    });
+    
+    console.log('Language applied:', lang);
+}
+
 // Language selector
 languageSelect?.addEventListener('change', (e) => {
     const selectedLanguage = e.target.value;
     localStorage.setItem(LANGUAGE_KEY, selectedLanguage);
     console.log('Language changed to:', selectedLanguage);
     
-    // You can add translation logic here or send to n8n with the language preference
-    // For now, just save the preference
+    // Apply language to UI immediately
+    applyLanguage(selectedLanguage);
 });
 
 // Detect and set browser language on first visit
@@ -887,12 +974,14 @@ function detectAndSetBrowserLanguage() {
         if (languageSelect) {
             languageSelect.value = detectedLang;
         }
+        applyLanguage(detectedLang);
         console.log('Browser language detected:', browserLang, '→ Set to:', detectedLang);
     } else {
         // Load saved language preference
         if (languageSelect) {
             languageSelect.value = savedLanguage;
         }
+        applyLanguage(savedLanguage);
         console.log('Loaded saved language:', savedLanguage);
     }
 }
