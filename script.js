@@ -837,6 +837,43 @@ function detectAndSetBrowserLanguage() {
     }
 }
 
+// ===== Load Settings from API =====
+async function loadContactSettings() {
+    try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+            const settings = await response.json();
+            
+            // Update phone number
+            if (settings.phone_number) {
+                const phoneLink = document.getElementById('contact-phone');
+                const phoneText = document.getElementById('contact-phone-text');
+                if (phoneLink && phoneText) {
+                    // Remove all non-digit characters for the tel: link
+                    const phoneDigits = settings.phone_number.replace(/\D/g, '');
+                    phoneLink.href = `tel:${phoneDigits}`;
+                    phoneText.textContent = settings.phone_number;
+                    console.log('Phone number loaded from settings:', settings.phone_number);
+                }
+            }
+            
+            // Update WhatsApp number
+            if (settings.whatsapp_number) {
+                const whatsappLink = document.getElementById('contact-whatsapp');
+                if (whatsappLink) {
+                    // Remove all non-digit characters for WhatsApp link
+                    const whatsappDigits = settings.whatsapp_number.replace(/\D/g, '');
+                    whatsappLink.href = `https://wa.me/${whatsappDigits}`;
+                    console.log('WhatsApp number loaded from settings:', settings.whatsapp_number);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load contact settings:', error);
+        // Keep default values if settings can't be loaded
+    }
+}
+
 // ===== Initialization =====
 window.addEventListener('DOMContentLoaded', async () => {
     // Load customer data
@@ -869,6 +906,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     
     // Detect and set browser language
     detectAndSetBrowserLanguage();
+    
+    // Load contact settings from database
+    loadContactSettings();
     
     // Check if user has existing conversation
     const hasMessages = SESSION && SESSION.messages && SESSION.messages.length > 0;

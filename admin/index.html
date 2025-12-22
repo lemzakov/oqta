@@ -43,6 +43,8 @@
             <ul class="nav-menu">
                 <li><a href="#" data-page="dashboard" class="nav-link active">Dashboard</a></li>
                 <li><a href="#" data-page="conversations" class="nav-link">Conversations</a></li>
+                <li><a href="#" data-page="registration-forms" class="nav-link">Registration Forms</a></li>
+                <li><a href="#" data-page="resources" class="nav-link">OQTA Resources</a></li>
                 <li><a href="#" data-page="settings" class="nav-link">Settings</a></li>
                 <li><a href="#" data-page="knowledge" class="nav-link">Knowledge Base</a></li>
             </ul>
@@ -101,6 +103,116 @@
                 </div>
             </div>
 
+            <!-- Registration Forms Page -->
+            <div id="registration-forms-content" class="content-section">
+                <h1>Registration Forms</h1>
+                <div class="info-card">
+                    <h2>Google Spreadsheet Integration</h2>
+                    <p>All registration forms (Free Zones, IFZA, Mainland) are stored in our Google Spreadsheet.</p>
+                    
+                    <div class="form-group">
+                        <label for="sheets-link">Spreadsheet Link:</label>
+                        <div class="link-box">
+                            <a href="https://docs.google.com/spreadsheets/d/1o_cGELELlV7lwejgfmaDP7IjKRkSpSun3hIdR34nXyI/edit?gid=1767577525#gid=1767577525" 
+                               target="_blank" 
+                               class="btn btn-primary">
+                                📊 Open Google Spreadsheet
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>How to Access</h3>
+                        <ol>
+                            <li>Contact the OQTA admin to get access to the spreadsheet</li>
+                            <li>Once granted access, click the button above to open the spreadsheet</li>
+                            <li>You can view and manage all registration forms from different zones</li>
+                        </ol>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Search for Specific Requests</h3>
+                        <p>To find a specific registration request:</p>
+                        <ol>
+                            <li>Open the spreadsheet using the button above</li>
+                            <li>Use <code>Ctrl+F</code> (or <code>Cmd+F</code> on Mac) to search</li>
+                            <li>Search by <strong>session_id</strong> from the Conversations page</li>
+                            <li>You can also search by user name, email, or company name</li>
+                        </ol>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Available Forms</h3>
+                        <ul>
+                            <li><strong>Free Zones</strong> - Registration forms for various free zone authorities</li>
+                            <li><strong>IFZA</strong> - International Free Zone Authority applications</li>
+                            <li><strong>Mainland</strong> - Mainland company registration forms</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OQTA Resources Page -->
+            <div id="resources-content" class="content-section">
+                <h1>OQTA Resources</h1>
+                <div class="info-card">
+                    <h2>Telegram Notifications</h2>
+                    <p>Get instant notifications for new user sessions via Telegram.</p>
+                    
+                    <div class="form-group">
+                        <label for="telegram-link">Telegram Group:</label>
+                        <div class="link-box">
+                            <a href="https://t.me/oqta_notifications" 
+                               target="_blank" 
+                               class="btn btn-primary">
+                                💬 Join Telegram Group
+                            </a>
+                        </div>
+                        <p class="help-text">Join this group to receive real-time notifications when new users start conversations.</p>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Dialog Summary Feature</h3>
+                        <p>You can generate AI-powered summaries of conversations directly from the Telegram bot.</p>
+                        
+                        <h4>How to use:</h4>
+                        <ol>
+                            <li>When you receive a notification about a new session in Telegram</li>
+                            <li>Click the <strong>"Make dialog summary"</strong> button in the notification</li>
+                            <li>The bot will analyze the conversation and provide a concise summary</li>
+                            <li>The summary includes:
+                                <ul>
+                                    <li>User's main request or inquiry</li>
+                                    <li>Key discussion points</li>
+                                    <li>Action items or next steps</li>
+                                    <li>User sentiment and engagement level</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Notification Types</h3>
+                        <ul>
+                            <li><strong>New Session Started</strong> - When a user initiates a new conversation</li>
+                            <li><strong>Form Submitted</strong> - When a user completes a registration form</li>
+                            <li><strong>High-Value Lead</strong> - When AI detects a potentially valuable business opportunity</li>
+                            <li><strong>User Requires Assistance</strong> - When AI cannot answer user's questions</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Best Practices</h3>
+                        <ul>
+                            <li>Review summaries regularly to identify trending inquiries</li>
+                            <li>Use summaries to improve AI responses and knowledge base</li>
+                            <li>Follow up on high-priority leads within 1 hour</li>
+                            <li>Mark resolved sessions to keep the group organized</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- Settings Page -->
             <div id="settings-content" class="content-section">
                 <h1>Settings</h1>
@@ -108,14 +220,17 @@
                     <div class="form-group">
                         <label for="whatsapp_number">WhatsApp Number</label>
                         <input type="text" id="whatsapp_number" name="whatsapp_number" placeholder="+971501234567">
+                        <p class="help-text">This number will be displayed on the landing page for customer contact</p>
                     </div>
                     <div class="form-group">
                         <label for="phone_number">Phone Number</label>
                         <input type="text" id="phone_number" name="phone_number" placeholder="+971501234567">
+                        <p class="help-text">This number will be displayed on the landing page for customer contact</p>
                     </div>
                     <div class="form-group">
                         <label for="n8n_url">n8n URL</label>
                         <input type="url" id="n8n_url" name="n8n_url" placeholder="https://...">
+                        <p class="help-text">n8n webhook URL for AI processing</p>
                     </div>
                     <button type="submit" class="btn btn-primary">Save Settings</button>
                     <div id="settings-message" class="success-message"></div>
