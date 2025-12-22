@@ -279,30 +279,99 @@ const loadDocuments = async () => {
     documentsList.innerHTML = '<p class="loading">Loading documents...</p>';
 
     try {
-        const data = await apiCall('/knowledge/documents?limit=100');
+        const data = await apiCall('/knowledge/documents?limit=1000');
         
         if (data.documents.length === 0) {
             documentsList.innerHTML = '<p class="loading">No documents found.</p>';
             return;
         }
 
-        documentsList.innerHTML = data.documents.map(doc => `
-            <div class="document-item">
-                <div class="document-content">
-                    <div class="doc-id">ID: ${escapeHtml(String(doc.id))}</div>
-                    <div class="doc-text">${escapeHtml(doc.payload?.text || 'No text content')}</div>
-                    <div class="doc-metadata">${escapeHtml(JSON.stringify(doc.payload || {}))}</div>
+        // Group documents by filename
+        const documentsByFile = {};
+        data.documents.forEach(doc => {
+            const filename = doc.payload?.filename || 'Unknown';
+            if (!documentsByFile[filename]) {
+                documentsByFile[filename] = {
+                    filename,
+                    chunks: [],
+                    totalChunks: doc.payload?.totalChunks || 0,
+                    uploadedAt: doc.payload?.uploadedAt
+                };
+            }
+            documentsByFile[filename].chunks.push(doc);
+        });
+
+        // Display grouped by file
+        documentsList.innerHTML = Object.values(documentsByFile).map(file => {
+            const chunkCount = file.chunks.length;
+            const totalChunks = file.totalChunks || chunkCount;
+            const uploadDate = file.uploadedAt ? formatDate(file.uploadedAt) : 'Unknown';
+            
+            return `
+                <div class="document-group">
+                    <div class="document-header">
+                        <h4>${escapeHtml(file.filename)}</h4>
+                        <div class="document-meta">
+                            <span class="chunk-info">${chunkCount} chunk${chunkCount !== 1 ? 's' : ''} ${totalChunks > chunkCount ? `of ${totalChunks}` : ''}</span>
+                            <span class="upload-date">Uploaded: ${uploadDate}</span>
+                        </div>
+                        <button class="btn btn-danger btn-sm delete-file-btn" data-filename="${escapeHtml(file.filename)}">Delete All</button>
+                    </div>
+                    <details class="document-chunks">
+                        <summary>View chunks</summary>
+                        <div class="chunks-list">
+                            ${file.chunks.map((doc, idx) => {
+                                const chunkText = doc.payload?.text || 'No text content';
+                                const cleanText = chunkText.length > 200 ? chunkText.substring(0, 200) + '...' : chunkText;
+                                const chunkIndex = doc.payload?.chunkIndex !== undefined ? doc.payload.chunkIndex : idx;
+                                
+                                return `
+                                    <div class="chunk-item">
+                                        <div class="chunk-header">
+                                            <span class="chunk-number">Chunk #${chunkIndex + 1}</span>
+                                            <button class="btn btn-danger btn-xs delete-chunk-btn" data-doc-id="${escapeHtml(String(doc.id))}">Delete</button>
+                                        </div>
+                                        <div class="chunk-text">${escapeHtml(cleanText)}</div>
+                                        <div class="chunk-id">ID: ${escapeHtml(String(doc.id))}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </details>
                 </div>
-                <button class="btn btn-danger btn-sm delete-doc-btn" data-doc-id="${escapeHtml(String(doc.id))}">Delete</button>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         
         // Add event listeners for delete buttons
-        document.querySelectorAll('.delete-doc-btn').forEach(btn => {
+        document.querySelectorAll('.delete-chunk-btn').forEach(btn => {
             btn.addEventListener('click', () => deleteDocument(btn.dataset.docId));
+        });
+        
+        document.querySelectorAll('.delete-file-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteFile(btn.dataset.filename));
         });
     } catch (error) {
         documentsList.innerHTML = `<p class="error-message show">Failed to load documents: ${error.message}</p>`;
+    }
+};
+
+const deleteFile = async (filename) => {
+    if (!confirm(`Are you sure you want to delete all chunks of "${filename}"?`)) {
+        return;
+    }
+
+    try {
+        const data = await apiCall('/knowledge/documents?limit=1000');
+        const chunks = data.documents.filter(doc => doc.payload?.filename === filename);
+        
+        // Delete all chunks
+        await Promise.all(chunks.map(chunk => 
+            apiCall(`/knowledge/documents/${chunk.id}`, { method: 'DELETE' })
+        ));
+        
+        loadDocuments();
+    } catch (error) {
+        alert(`Failed to delete file: ${error.message}`);
     }
 };
 

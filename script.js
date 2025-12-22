@@ -13,17 +13,19 @@ const WELCOME_BACK_MESSAGE = "Welcome Back!";
 
 // ===== DOM Elements =====
 const continueSessionBtn = document.querySelector('.session');
-const sendBtn = document.querySelector('.action-btn.send');
-const textarea = document.querySelector('.prompt-textarea');
+const landingTextarea = document.getElementById('landing-textarea');
+const landingSendBtn = document.getElementById('landing-send-btn');
 
 // Conversation area elements
 const landingContent = document.getElementById('landing-content');
 const conversationArea = document.getElementById('conversation-area');
 const conversationMessages = document.getElementById('conversation-messages');
+const conversationTextarea = document.getElementById('conversation-textarea');
+const conversationSendBtn = document.getElementById('conversation-send-btn');
 const clearBtn = document.getElementById('clear-btn');
 const languageSelect = document.getElementById('language-select');
 
-// Chat window elements
+// Chat window elements (if exists)
 const chatWindow = document.getElementById('chat-window');
 const chatMessages = document.getElementById('chat-messages');
 const chatTextarea = document.getElementById('chat-textarea');
@@ -473,8 +475,9 @@ async function sendMessage(message) {
     if (!message || IS_SENDING) return;
     
     IS_SENDING = true;
-    const sendButton = document.getElementById('chat-send-btn');
-    if (sendButton) sendButton.disabled = true;
+    // Disable both send buttons
+    if (landingSendBtn) landingSendBtn.disabled = true;
+    if (conversationSendBtn) conversationSendBtn.disabled = true;
     
     try {
         // Ensure session exists
@@ -489,10 +492,13 @@ async function sendMessage(message) {
         addMessageToConversationArea('user', message);
         
         // Clear input
-        const textarea = document.getElementById('chat-textarea');
-        if (textarea) {
-            textarea.value = '';
-            textarea.style.height = 'auto';
+        if (landingTextarea) {
+            landingTextarea.value = '';
+            landingTextarea.style.height = 'auto';
+        }
+        if (conversationTextarea) {
+            conversationTextarea.value = '';
+            conversationTextarea.style.height = 'auto';
         }
         
         // Show typing indicator
@@ -514,9 +520,9 @@ async function sendMessage(message) {
         console.error('Error in sendMessage:', error);
     } finally {
         IS_SENDING = false;
-        if (sendButton) sendButton.disabled = false;
-        const textarea = document.getElementById('chat-textarea');
-        if (textarea) textarea.focus();
+        if (landingSendBtn) landingSendBtn.disabled = false;
+        if (conversationSendBtn) conversationSendBtn.disabled = false;
+        if (conversationTextarea) conversationTextarea.focus();
     }
 }
 
@@ -703,14 +709,16 @@ continueSessionBtn?.addEventListener('click', () => {
     }
 });
 
-// Main Send Button (from landing page)
-sendBtn?.addEventListener('click', () => {
-    const text = textarea?.value.trim() || "";
+// Landing Page Send Button
+landingSendBtn?.addEventListener('click', () => {
+    const text = landingTextarea?.value.trim() || "";
 
     if (!text) {
         alert("Please enter your question first.");
         return;
     }
+
+    console.log('Sending message from landing page:', text);
 
     // Ensure session exists
     if (!SESSION) {
@@ -718,7 +726,59 @@ sendBtn?.addEventListener('click', () => {
     }
     
     sendMessage(text);
-    textarea.value = '';
+    landingTextarea.value = '';
+    landingTextarea.style.height = 'auto';
+});
+
+// Landing Page Textarea Enter Key
+landingTextarea?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = landingTextarea?.value.trim() || "";
+        if (text) {
+            console.log('Sending message from landing page (Enter):', text);
+            sendMessage(text);
+            landingTextarea.value = '';
+            landingTextarea.style.height = 'auto';
+        }
+    }
+});
+
+// Auto-resize landing textarea
+landingTextarea?.addEventListener('input', () => {
+    landingTextarea.style.height = 'auto';
+    landingTextarea.style.height = Math.min(landingTextarea.scrollHeight, 128) + 'px';
+});
+
+// Conversation Area Send Button
+conversationSendBtn?.addEventListener('click', () => {
+    const text = conversationTextarea?.value.trim() || "";
+    if (text) {
+        console.log('Sending message from conversation area:', text);
+        sendMessage(text);
+        conversationTextarea.value = '';
+        conversationTextarea.style.height = 'auto';
+    }
+});
+
+// Conversation Area Textarea Enter Key
+conversationTextarea?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = conversationTextarea?.value.trim() || "";
+        if (text) {
+            console.log('Sending message from conversation area (Enter):', text);
+            sendMessage(text);
+            conversationTextarea.value = '';
+            conversationTextarea.style.height = 'auto';
+        }
+    }
+});
+
+// Auto-resize conversation textarea
+conversationTextarea?.addEventListener('input', () => {
+    conversationTextarea.style.height = 'auto';
+    conversationTextarea.style.height = Math.min(conversationTextarea.scrollHeight, 128) + 'px';
 });
 
 // Chat Window Send Button
