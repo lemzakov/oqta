@@ -3,40 +3,52 @@ import prisma from '../utils/prisma.js';
 
 export const getSessions = async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
+    const { page = 1, limit = 50 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    // Get all sessions with message count
-    const sessions = await prisma.session.findMany({
-      orderBy: {
-        startedAt: 'desc',
-      },
-      skip,
-      take: Number(limit),
-    });
+    // Get all unique session IDs from n8n_chat_histories table
+    // Group by session_id to get all conversations
+    const uniqueSessions = await prisma.$queryRaw<Array<{ session_id: string; message_count: bigint; first_message_at: Date; last_message_at: Date }>>`
+      SELECT 
+        session_id,
+        COUNT(*) as message_count,
+        MIN(created_at) as first_message_at,
+        MAX(created_at) as last_message_at
+      FROM n8n_chat_histories
+      GROUP BY session_id
+      ORDER BY last_message_at DESC
+      LIMIT ${Number(limit)}
+      OFFSET ${skip}
+    `;
 
-    const total = await prisma.session.count();
+    // Get total count of unique sessions
+    const totalResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(DISTINCT session_id) as count
+      FROM n8n_chat_histories
+    `;
+    const total = Number(totalResult[0]?.count || 0);
 
-    // Get message counts for each session
-    const sessionsWithCounts = await Promise.all(
-      sessions.map(async (session) => {
-        const messageCount = await prisma.chatHistory.count({
-          where: { sessionId: session.id },
+    // Try to get additional info from sessions table if available
+    const sessionsWithDetails = await Promise.all(
+      uniqueSessions.map(async (sessionData) => {
+        const sessionInfo = await prisma.session.findFirst({
+          where: { id: sessionData.session_id },
         });
+
         return {
-          id: session.id,
-          userId: session.userId,
-          userEmail: session.userEmail,
-          userName: session.userName,
-          startedAt: session.startedAt,
-          lastMessageAt: session.lastMessageAt,
-          messageCount,
+          id: sessionData.session_id,
+          userId: sessionInfo?.userId || null,
+          userEmail: sessionInfo?.userEmail || null,
+          userName: sessionInfo?.userName || 'Guest User',
+          startedAt: sessionData.first_message_at,
+          lastMessageAt: sessionData.last_message_at,
+          messageCount: Number(sessionData.message_count),
         };
       })
     );
 
     res.json({
-      sessions: sessionsWithCounts,
+      sessions: sessionsWithDetails,
       total,
       page: Number(page),
       limit: Number(limit),
