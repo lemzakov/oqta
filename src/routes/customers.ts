@@ -8,8 +8,12 @@ import {
   linkSessionToCustomer,
   unlinkSessionFromCustomer,
 } from '../controllers/customersController.js';
+import { authenticateAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// Protect all customer routes with admin authentication
+router.use(authenticateAdmin);
 
 router.get('/', getCustomers);
 router.get('/:id', getCustomer);

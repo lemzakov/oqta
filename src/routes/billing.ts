@@ -7,8 +7,12 @@ import {
   sendInvoice,
   deleteInvoice,
 } from '../controllers/billingController.js';
+import { authenticateAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// Protect all billing routes with admin authentication
+router.use(authenticateAdmin);
 
 router.get('/', getInvoices);
 router.get('/:id', getInvoice);
