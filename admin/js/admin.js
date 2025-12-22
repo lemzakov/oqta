@@ -186,6 +186,15 @@ const navigateToPage = (page) => {
                 }
             }, 10000);
             break;
+        case 'customers':
+            loadCustomers();
+            break;
+        case 'billing':
+            loadInvoices();
+            break;
+        case 'free-zones':
+            loadFreeZones();
+            break;
         case 'settings':
             loadSettings();
             break;
@@ -554,6 +563,196 @@ document.getElementById('upload-form').addEventListener('submit', async (e) => {
         alert(`Failed to upload document: ${error.message}`);
     }
 });
+
+// Customers Page
+const loadCustomers = async () => {
+    const customersList = document.getElementById('customers-list');
+    customersList.innerHTML = '<p class="loading">Loading customers...</p>';
+    
+    try {
+        const data = await apiCall('/customers');
+        
+        if (data.customers.length === 0) {
+            customersList.innerHTML = '<p class="no-data">No customers found.</p>';
+            return;
+        }
+        
+        customersList.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Company</th>
+                        <th>Sessions</th>
+                        <th>Invoices</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.customers.map(customer => `
+                        <tr>
+                            <td>${escapeHtml(customer.name)}</td>
+                            <td>${escapeHtml(customer.email || '-')}</td>
+                            <td>${escapeHtml(customer.phone || '-')}</td>
+                            <td>${escapeHtml(customer.company || '-')}</td>
+                            <td>${customer._count.sessions}</td>
+                            <td>${customer._count.invoices}</td>
+                            <td>${formatDate(customer.createdAt)}</td>
+                            <td>
+                                <button class="btn btn-small" onclick="viewCustomer('${customer.id}')">View</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        customersList.innerHTML = `<p class="error-message show">Failed to load customers: ${error.message}</p>`;
+    }
+};
+
+// Billing Page  
+const loadInvoices = async () => {
+    const invoicesList = document.getElementById('invoices-list');
+    invoicesList.innerHTML = '<p class="loading">Loading invoices...</p>';
+    
+    try {
+        const statusFilter = document.getElementById('invoice-status-filter')?.value || '';
+        const params = statusFilter ? `?status=${statusFilter}` : '';
+        const data = await apiCall(`/billing${params}`);
+        
+        if (data.invoices.length === 0) {
+            invoicesList.innerHTML = '<p class="no-data">No invoices found.</p>';
+            return;
+        }
+        
+        invoicesList.innerHTML = `
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.invoices.map(invoice => `
+                        <tr>
+                            <td>${escapeHtml(invoice.invoiceNumber)}</td>
+                            <td>${invoice.customer ? escapeHtml(invoice.customer.name) : '-'}</td>
+                            <td>${invoice.amount} ${invoice.currency}</td>
+                            <td><span class="status-badge status-${invoice.status}">${invoice.status}</span></td>
+                            <td>${invoice.dueDate ? formatDate(invoice.dueDate) : '-'}</td>
+                            <td>${formatDate(invoice.createdAt)}</td>
+                            <td>
+                                ${invoice.status === 'draft' ? `<button class="btn btn-small btn-primary" onclick="sendInvoice('${invoice.id}')">Send Invoice</button>` : ''}
+                                <button class="btn btn-small" onclick="viewInvoice('${invoice.id}')">View</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    } catch (error) {
+        invoicesList.innerHTML = `<p class="error-message show">Failed to load invoices: ${error.message}</p>`;
+    }
+};
+
+const sendInvoice = async (invoiceId) => {
+    if (!confirm('Are you sure you want to send this invoice to the customer?')) {
+        return;
+    }
+    
+    try {
+        await apiCall(`/billing/${invoiceId}/send`, { method: 'POST' });
+        alert('Invoice sent successfully!');
+        loadInvoices();
+    } catch (error) {
+        alert(`Failed to send invoice: ${error.message}`);
+    }
+};
+
+// Free Zones Page
+const loadFreeZones = async () => {
+    const freeZonesList = document.querySelector('#free-zones-list .free-zones-grid');
+    freeZonesList.innerHTML = '<p class="loading">Loading free zone integrations...</p>';
+    
+    try {
+        const data = await apiCall('/free-zones');
+        
+        if (data.freeZones.length === 0) {
+            freeZonesList.innerHTML = '<p class="no-data">No free zone integrations configured yet.</p>';
+            return;
+        }
+        
+        freeZonesList.innerHTML = data.freeZones.map(fz => `
+            <div class="free-zone-card">
+                <div class="free-zone-header">
+                    <h3>${escapeHtml(fz.name)}</h3>
+                    <span class="status-badge ${fz.isActive ? 'status-active' : 'status-inactive'}">
+                        ${fz.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                </div>
+                <div class="free-zone-details">
+                    <p><strong>Code:</strong> ${escapeHtml(fz.code)}</p>
+                    <p><strong>API Endpoint:</strong> ${fz.apiEndpoint ? escapeHtml(fz.apiEndpoint.substring(0, 50)) + '...' : 'Not configured'}</p>
+                    <p><strong>Last Updated:</strong> ${formatDate(fz.updatedAt)}</p>
+                </div>
+                <div class="free-zone-actions">
+                    <button class="btn btn-small" onclick="editFreeZone('${fz.id}')">Edit</button>
+                    <button class="btn btn-small btn-danger" onclick="deleteFreeZone('${fz.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        freeZonesList.innerHTML = `<p class="error-message show">Failed to load free zones: ${error.message}</p>`;
+    }
+};
+
+const deleteFreeZone = async (freeZoneId) => {
+    if (!confirm('Are you sure you want to delete this free zone integration?')) {
+        return;
+    }
+    
+    try {
+        await apiCall(`/free-zones/${freeZoneId}`, { method: 'DELETE' });
+        alert('Free zone integration deleted successfully!');
+        loadFreeZones();
+    } catch (error) {
+        alert(`Failed to delete: ${error.message}`);
+    }
+};
+
+// Event listeners for new features
+document.getElementById('invoice-status-filter')?.addEventListener('change', () => {
+    loadInvoices();
+});
+
+// Add "Link to Customer" button in conversation detail
+const originalLoadSessionDetail = loadSessionDetail;
+loadSessionDetail = async (sessionId, silentRefresh = false) => {
+    await originalLoadSessionDetail(sessionId, silentRefresh);
+    
+    if (!silentRefresh) {
+        const sessionInfo = document.getElementById('session-info');
+        const linkButton = document.createElement('button');
+        linkButton.className = 'btn btn-secondary';
+        linkButton.textContent = '🔗 Link to Customer';
+        linkButton.style.marginTop = '10px';
+        linkButton.onclick = () => {
+            // TODO: Show modal to select/create customer and link this session
+            alert('Link to customer feature - UI to be implemented');
+        };
+        sessionInfo.appendChild(linkButton);
+    }
+};
 
 // Initialize
 (async () => {

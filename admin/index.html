@@ -52,6 +52,9 @@
             <ul class="nav-menu">
                 <li><a href="#" data-page="dashboard" class="nav-link active">Dashboard</a></li>
                 <li><a href="#" data-page="conversations" class="nav-link">Conversations</a></li>
+                <li><a href="#" data-page="customers" class="nav-link">Customers</a></li>
+                <li><a href="#" data-page="billing" class="nav-link">Billing</a></li>
+                <li><a href="#" data-page="free-zones" class="nav-link">Free Zones</a></li>
                 <li><a href="#" data-page="registration-forms" class="nav-link">Registration Forms</a></li>
                 <li><a href="#" data-page="resources" class="nav-link">OQTA Resources</a></li>
                 <li><a href="#" data-page="settings" class="nav-link">Settings</a></li>
@@ -219,6 +222,68 @@
                             <li>Mark resolved sessions to keep the group organized</li>
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            <!-- Customers Page -->
+            <div id="customers-content" class="content-section">
+                <h1>Customers</h1>
+                <div class="page-actions">
+                    <input type="text" id="customer-search" placeholder="Search customers..." class="search-input">
+                    <button id="add-customer-btn" class="btn btn-primary">+ Add Customer</button>
+                </div>
+                <div id="customers-list" class="customers-list">
+                    <p class="loading">Loading customers...</p>
+                </div>
+            </div>
+
+            <!-- Billing Page -->
+            <div id="billing-content" class="content-section">
+                <h1>Billing & Invoices</h1>
+                <div class="page-actions">
+                    <select id="invoice-status-filter" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="draft">Draft</option>
+                        <option value="sent">Sent</option>
+                        <option value="paid">Paid</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button id="create-invoice-btn" class="btn btn-primary">+ Create Invoice</button>
+                </div>
+                <div id="invoices-list" class="invoices-list">
+                    <p class="loading">Loading invoices...</p>
+                </div>
+            </div>
+
+            <!-- Free Zones Page -->
+            <div id="free-zones-content" class="content-section">
+                <h1>Free Zones Integrations</h1>
+                <p class="page-description">Manage integrations with free zones for automated processing and API connections.</p>
+                <div class="page-actions">
+                    <button id="add-free-zone-btn" class="btn btn-primary">+ Add Integration</button>
+                </div>
+                <div id="free-zones-list" class="free-zones-list">
+                    <div class="free-zones-grid">
+                        <p class="loading">Loading free zone integrations...</p>
+                    </div>
+                </div>
+                <div class="info-card" style="margin-top: 30px;">
+                    <h3>Supported Free Zones</h3>
+                    <div class="supported-zones">
+                        <ul>
+                            <li><strong>IFZA</strong> - International Free Zone Authority</li>
+                            <li><strong>Meydan</strong> - Meydan Free Zone</li>
+                            <li><strong>DAFZA</strong> - Dubai Airport Free Zone Authority</li>
+                            <li><strong>JAFZA</strong> - Jebel Ali Free Zone</li>
+                            <li><strong>UMQ FZ</strong> - Umm Al Quwain Free Trade Zone</li>
+                            <li><strong>RAKEZ</strong> - Ras Al Khaimah Economic Zone</li>
+                            <li><strong>SAIF Zone</strong> - Sharjah Airport International Free Zone</li>
+                            <li>And more... (configurable)</li>
+                        </ul>
+                    </div>
+                    <p style="margin-top: 15px; color: #666;">
+                        <em>Note: API integrations require configuration and credentials from respective free zone authorities.</em>
+                    </p>
                 </div>
             </div>
 
