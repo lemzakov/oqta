@@ -1178,7 +1178,7 @@ function detectAndSetBrowserLanguage() {
 // ===== Load Settings from API =====
 async function loadContactSettings() {
     try {
-        const response = await fetch('/api/settings');
+        const response = await fetch('/api/settings/public');
         if (response.ok) {
             const settings = await response.json();
             
