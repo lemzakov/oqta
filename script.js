@@ -865,8 +865,8 @@ const translations = {
     en: {
         welcome: "WELCOME TO",
         hero: {
-            title: "Register your UAE company in minutes with AI",
-            subheadline: "AI-guided setup, tax structure selection & cost breakdown — free consultation included",
+            title: "Register your company & get business license in UAE with AI",
+            subheadline: "AI-guided setup, tax structure selection & licensing — complete business registration in minutes",
             benefit1: "Ask for any tax-related advice",
             benefit2: "Understand your costs free of charge",
             benefit3: "Decide what business structure to register",
@@ -897,14 +897,16 @@ const translations = {
         },
         footer: {
             needAssistance: "Need assistance? Contact us:",
-            whatsapp: "WhatsApp"
+            whatsapp: "WhatsApp",
+            finalCTA: "Ready to start your business in UAE?",
+            finalCTAButton: "Get Started Now"
         }
     },
     ru: {
         welcome: "ДОБРО ПОЖАЛОВАТЬ В",
         hero: {
-            title: "Зарегистрируйте компанию в ОАЭ за минуты с помощью ИИ",
-            subheadline: "ИИ помогает выбрать структуру компании, юрисдикцию и рассчитать стоимость — бесплатная консультация включена",
+            title: "Зарегистрируйте компанию и получите бизнес-лицензию в ОАЭ с помощью ИИ",
+            subheadline: "ИИ помогает выбрать структуру компании, юрисдикцию и лицензирование — полная регистрация бизнеса за минуты",
             benefit1: "Получите консультацию по налогам",
             benefit2: "Узнайте стоимость абсолютно бесплатно",
             benefit3: "Выберите структуру бизнеса для регистрации",
@@ -935,14 +937,16 @@ const translations = {
         },
         footer: {
             needAssistance: "Нужна помощь? Свяжитесь с нами:",
-            whatsapp: "WhatsApp"
+            whatsapp: "WhatsApp",
+            finalCTA: "Готовы начать свой бизнес в ОАЭ?",
+            finalCTAButton: "Начать сейчас"
         }
     },
     ar: {
         welcome: "مرحبًا بك في",
         hero: {
-            title: "سجل شركتك في الإمارات في دقائق باستخدام الذكاء الاصطناعي",
-            subheadline: "إعداد موجه بالذكاء الاصطناعي، اختيار الهيكل الضريبي وتفصيل التكاليف — استشارة مجانية مشمولة",
+            title: "سجل شركتك واحصل على ترخيص الأعمال في الإمارات باستخدام الذكاء الاصطناعي",
+            subheadline: "إعداد موجه بالذكاء الاصطناعي، اختيار الهيكل الضريبي والترخيص — تسجيل الأعمال الكامل في دقائق",
             benefit1: "احصل على أي نصيحة ضريبية",
             benefit2: "افهم تكاليفك مجانًا",
             benefit3: "حدد هيكل العمل المناسب للتسجيل",
@@ -973,7 +977,9 @@ const translations = {
         },
         footer: {
             needAssistance: "هل تحتاج إلى مساعدة؟ اتصل بنا:",
-            whatsapp: "واتساب"
+            whatsapp: "واتساب",
+            finalCTA: "هل أنت مستعد لبدء عملك في الإمارات؟",
+            finalCTAButton: "ابدأ الآن"
         }
     }
 };
@@ -1044,11 +1050,11 @@ languageSelect?.addEventListener('change', (e) => {
 // ===== Primary CTA Handler =====
 const primaryCTA = document.getElementById('primary-cta');
 primaryCTA?.addEventListener('click', () => {
-    // Focus on the chat input
+    // Focus on the chat input without harsh scrolling
     const landingTextarea = document.getElementById('landing-textarea');
     if (landingTextarea) {
         landingTextarea.focus();
-        landingTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // No scrolling - chat is already visible inline
     }
 });
 
