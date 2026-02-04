@@ -1,0 +1,52 @@
+{
+  "name": "oqta",
+  "version": "1.0.0",
+  "description": "## Overview",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.ts",
+    "build": "npm run prisma:generate && tsc && npm run copy:static",
+    "vercel-build": "bash scripts/vercel-migrate.sh && tsc && npm run copy:static",
+    "copy:static": "copyfiles -u 0 index.html script.js styles.css public && copyfiles -u 0 'admin/**/*' public && copyfiles -u 0 'assets/**/*' public",
+    "start": "npm run migrate:deploy && npm run validate:db && node dist/server.js",
+    "migrate:deploy": "bash scripts/smart-migrate.sh || echo 'Migration script not found, skipping...'",
+    "validate:db": "ts-node scripts/validate-db.ts || node dist/scripts/validate-db.js || echo 'Database validation skipped'",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "postinstall": "prisma generate || echo 'Prisma generate failed'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@qdrant/js-client-rest": "^1.16.2",
+    "@types/multer": "^2.0.0",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "multer": "^2.0.2",
+    "prisma": "^5.22.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.0.3",
+    "copyfiles": "^2.4.1",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

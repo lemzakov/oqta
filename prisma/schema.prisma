@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model ChatHistory {
+  id         Int      @id @default(autoincrement())
+  sessionId  String   @map("session_id") @db.VarChar(255)
+  message    Json
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId])
+  @@map("n8n_chat_histories")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  userEmail String?  @map("user_email")
+  userName  String?  @map("user_name")
+  startedAt DateTime @default(now()) @map("started_at")
+  lastMessageAt DateTime @default(now()) @map("last_message_at")
+
+  @@index([startedAt])
+  @@map("sessions")
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+model Customer {
+  id          String    @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  company     String?
+  notes       String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  sessions    CustomerSession[]
+  invoices    Invoice[]
+
+  @@map("customers")
+}
+
+model CustomerSession {
+  id         String   @id @default(uuid())
+  customerId String   @map("customer_id")
+  sessionId  String   @map("session_id") @db.VarChar(255)
+  linkedAt   DateTime @default(now()) @map("linked_at")
+  linkedBy   String?  @map("linked_by") // Admin user who linked it
+  notes      String?  @db.Text
+  
+  // Relations
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@unique([customerId, sessionId])
+  @@index([sessionId])
+  @@map("customer_sessions")
+}
+
+model Invoice {
+  id          String    @id @default(uuid())
+  customerId  String?   @map("customer_id")
+  invoiceNumber String  @unique @map("invoice_number")
+  amount      Decimal   @db.Decimal(10, 2)
+  currency    String    @default("AED")
+  status      String    // "draft", "sent", "paid", "cancelled"
+  description String?   @db.Text
+  dueDate     DateTime? @map("due_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  sentAt      DateTime? @map("sent_at")
+  paidAt      DateTime? @map("paid_at")
+  
+  // Relations
+  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([customerId])
+  @@map("invoices")
+}
+
+model FreeZoneIntegration {
+  id          String   @id @default(uuid())
+  name        String   // "IFZA", "Meydan", "DAFZA", "JAFZA", "UMQ FZ", etc.
+  code        String   @unique // "ifza", "meydan", "dafza", etc.
+  apiEndpoint String?  @map("api_endpoint") @db.Text
+  apiKey      String?  @map("api_key") @db.Text
+  isActive    Boolean  @default(false) @map("is_active")
+  config      Json?    // Additional configuration
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive])
+  @@map("free_zone_integrations")
+}

@@ -13,17 +13,19 @@ const WELCOME_BACK_MESSAGE = "Welcome Back!";
 
 // ===== DOM Elements =====
 const continueSessionBtn = document.querySelector('.session');
-const sendBtn = document.querySelector('.action-btn.send');
-const textarea = document.querySelector('.prompt-textarea');
+const landingTextarea = document.getElementById('landing-textarea');
+const landingSendBtn = document.getElementById('landing-send-btn');
 
 // Conversation area elements
 const landingContent = document.getElementById('landing-content');
 const conversationArea = document.getElementById('conversation-area');
 const conversationMessages = document.getElementById('conversation-messages');
+const conversationTextarea = document.getElementById('conversation-textarea');
+const conversationSendBtn = document.getElementById('conversation-send-btn');
 const clearBtn = document.getElementById('clear-btn');
 const languageSelect = document.getElementById('language-select');
 
-// Chat window elements
+// Chat window elements (if exists)
 const chatWindow = document.getElementById('chat-window');
 const chatMessages = document.getElementById('chat-messages');
 const chatTextarea = document.getElementById('chat-textarea');
@@ -464,13 +466,18 @@ async function sendToN8N(message) {
     }
 }
 
+// ===== Database Integration =====
+// Note: n8n manages the n8n_chat_histories table directly
+// We don't write to it from the frontend - only read from admin panel
+
 // ===== Message Sending =====
 async function sendMessage(message) {
     if (!message || IS_SENDING) return;
     
     IS_SENDING = true;
-    const sendButton = document.getElementById('chat-send-btn');
-    if (sendButton) sendButton.disabled = true;
+    // Disable both send buttons
+    if (landingSendBtn) landingSendBtn.disabled = true;
+    if (conversationSendBtn) conversationSendBtn.disabled = true;
     
     try {
         // Ensure session exists
@@ -485,16 +492,20 @@ async function sendMessage(message) {
         addMessageToConversationArea('user', message);
         
         // Clear input
-        const textarea = document.getElementById('chat-textarea');
-        if (textarea) {
-            textarea.value = '';
-            textarea.style.height = 'auto';
+        if (landingTextarea) {
+            landingTextarea.value = '';
+            landingTextarea.style.height = 'auto';
+        }
+        if (conversationTextarea) {
+            conversationTextarea.value = '';
+            conversationTextarea.style.height = 'auto';
         }
         
         // Show typing indicator
         showTypingIndicator();
         
         // Send to n8n and wait for response
+        // Note: n8n will save both the user message and AI response to n8n_chat_histories table
         const aiResponse = await sendToN8N(message);
         
         // Hide typing indicator
@@ -509,9 +520,9 @@ async function sendMessage(message) {
         console.error('Error in sendMessage:', error);
     } finally {
         IS_SENDING = false;
-        if (sendButton) sendButton.disabled = false;
-        const textarea = document.getElementById('chat-textarea');
-        if (textarea) textarea.focus();
+        if (landingSendBtn) landingSendBtn.disabled = false;
+        if (conversationSendBtn) conversationSendBtn.disabled = false;
+        if (conversationTextarea) conversationTextarea.focus();
     }
 }
 
@@ -698,14 +709,16 @@ continueSessionBtn?.addEventListener('click', () => {
     }
 });
 
-// Main Send Button (from landing page)
-sendBtn?.addEventListener('click', () => {
-    const text = textarea?.value.trim() || "";
+// Landing Page Send Button
+landingSendBtn?.addEventListener('click', () => {
+    const text = landingTextarea?.value.trim() || "";
 
     if (!text) {
         alert("Please enter your question first.");
         return;
     }
+
+    console.log('Sending message from landing page:', text);
 
     // Ensure session exists
     if (!SESSION) {
@@ -713,7 +726,59 @@ sendBtn?.addEventListener('click', () => {
     }
     
     sendMessage(text);
-    textarea.value = '';
+    landingTextarea.value = '';
+    landingTextarea.style.height = 'auto';
+});
+
+// Landing Page Textarea Enter Key
+landingTextarea?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = landingTextarea?.value.trim() || "";
+        if (text) {
+            console.log('Sending message from landing page (Enter):', text);
+            sendMessage(text);
+            landingTextarea.value = '';
+            landingTextarea.style.height = 'auto';
+        }
+    }
+});
+
+// Auto-resize landing textarea
+landingTextarea?.addEventListener('input', () => {
+    landingTextarea.style.height = 'auto';
+    landingTextarea.style.height = Math.min(landingTextarea.scrollHeight, 128) + 'px';
+});
+
+// Conversation Area Send Button
+conversationSendBtn?.addEventListener('click', () => {
+    const text = conversationTextarea?.value.trim() || "";
+    if (text) {
+        console.log('Sending message from conversation area:', text);
+        sendMessage(text);
+        conversationTextarea.value = '';
+        conversationTextarea.style.height = 'auto';
+    }
+});
+
+// Conversation Area Textarea Enter Key
+conversationTextarea?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = conversationTextarea?.value.trim() || "";
+        if (text) {
+            console.log('Sending message from conversation area (Enter):', text);
+            sendMessage(text);
+            conversationTextarea.value = '';
+            conversationTextarea.style.height = 'auto';
+        }
+    }
+});
+
+// Auto-resize conversation textarea
+conversationTextarea?.addEventListener('input', () => {
+    conversationTextarea.style.height = 'auto';
+    conversationTextarea.style.height = Math.min(conversationTextarea.scrollHeight, 128) + 'px';
 });
 
 // Chat Window Send Button
@@ -769,19 +834,188 @@ signinPass?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') doSignin();
 });
 
-// Clear/New Chat button
+// Clear/New Chat button - Reset session and reload page
 clearBtn?.addEventListener('click', () => {
-    if (confirm('Start a new conversation? This will clear your current chat.')) {
-        clearConversation();
+    if (confirm('Start a new conversation? This will clear your current chat and reload the page.')) {
+        // Generate new chat_id (user_id is preserved in localStorage automatically)
+        const newChatId = generateUUID();
+        
+        localStorage.setItem(CHAT_ID_KEY, newChatId);
+        localStorage.removeItem(CONVERSATION_KEY);
+        localStorage.removeItem(SESSION_KEY);
+        
+        console.log('New chat started with ID:', newChatId);
+        
+        // Reload the page to reset everything
+        window.location.reload();
     }
 });
+
+// Language translations
+const translations = {
+    en: {
+        welcome: "WELCOME TO",
+        register: "Register",
+        your: "your",
+        uaeCompany: "UAE company",
+        inMinutes: "in minutes",
+        withAI: "with AI",
+        startConsultation: "Start Your Free Consultation Today!",
+        consultationDesc: "Ask questions, understand costs, and get expert tax advice - all free of charge. Let our AI guide you through the entire company registration process."
+    },
+    ar: {
+        welcome: "مرحبًا بك في",
+        register: "سجل",
+        your: "شركتك",
+        uaeCompany: "في الإمارات",
+        inMinutes: "في دقائق",
+        withAI: "بالذكاء الاصطناعي",
+        startConsultation: "ابدأ استشارتك المجانية اليوم!",
+        consultationDesc: "اطرح الأسئلة، افهم التكاليف، واحصل على نصائح ضريبية من الخبراء - كل ذلك مجانًا. دع الذكاء الاصطناعي يرشدك خلال عملية تسجيل الشركة بأكملها."
+    },
+    ru: {
+        welcome: "ДОБРО ПОЖАЛОВАТЬ В",
+        register: "Зарегистрируйте",
+        your: "свою",
+        uaeCompany: "компанию в ОАЭ",
+        inMinutes: "за минуты",
+        withAI: "с ИИ",
+        startConsultation: "Начните бесплатную консультацию сегодня!",
+        consultationDesc: "Задавайте вопросы, узнавайте о расходах и получайте консультации по налогам - всё бесплатно. Позвольте нашему ИИ провести вас через весь процесс регистрации компании."
+    },
+    zh: {
+        welcome: "欢迎来到",
+        register: "注册",
+        your: "您的",
+        uaeCompany: "阿联酋公司",
+        inMinutes: "只需几分钟",
+        withAI: "使用AI",
+        startConsultation: "立即开始免费咨询!",
+        consultationDesc: "提问、了解成本、获得专业税务建议 - 完全免费。让我们的AI引导您完成整个公司注册流程。"
+    },
+    hi: {
+        welcome: "में आपका स्वागत है",
+        register: "पंजीकरण करें",
+        your: "अपनी",
+        uaeCompany: "यूएई कंपनी",
+        inMinutes: "मिनटों में",
+        withAI: "AI के साथ",
+        startConsultation: "आज ही अपना मुफ्त परामर्श शुरू करें!",
+        consultationDesc: "प्रश्न पूछें, लागत समझें, और विशेषज्ञ कर सलाह प्राप्त करें - सब मुफ्त। हमारे AI को पूरी कंपनी पंजीकरण प्रक्रिया के माध्यम से मार्गदर्शन करने दें।"
+    },
+    ur: {
+        welcome: "میں خوش آمدید",
+        register: "رجسٹر کریں",
+        your: "اپنی",
+        uaeCompany: "یو اے ای کمپنی",
+        inMinutes: "منٹوں میں",
+        withAI: "AI کے ساتھ",
+        startConsultation: "آج ہی اپنا مفت مشاورت شروع کریں!",
+        consultationDesc: "سوالات پوچھیں، اخراجات سمجھیں، اور ماہر ٹیکس مشورہ حاصل کریں - سب مفت۔ ہماری AI کو پوری کمپنی رجسٹریشن کے عمل میں آپ کی رہنمائی کرنے دیں۔"
+    }
+};
+
+function applyLanguage(lang) {
+    const t = translations[lang] || translations.en;
+    
+    // Update UI elements if they exist
+    const welcomeSpan = document.querySelector('.welcome span');
+    if (welcomeSpan) {
+        welcomeSpan.innerHTML = `${t.welcome} <strong>OQTA </strong>AI`;
+    }
+    
+    const ctaText = document.querySelector('.cta-text');
+    if (ctaText) {
+        ctaText.innerHTML = `<strong>${t.startConsultation}</strong> ${t.consultationDesc}`;
+    }
+    
+    console.log('Language applied:', lang);
+}
 
 // Language selector
 languageSelect?.addEventListener('change', (e) => {
     const selectedLanguage = e.target.value;
     localStorage.setItem(LANGUAGE_KEY, selectedLanguage);
     console.log('Language changed to:', selectedLanguage);
+    
+    // Apply language to UI immediately
+    applyLanguage(selectedLanguage);
 });
+
+// Detect and set browser language on first visit
+function detectAndSetBrowserLanguage() {
+    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
+    
+    // If user hasn't selected a language yet, detect from browser
+    if (!savedLanguage) {
+        const browserLang = navigator.language || navigator.userLanguage;
+        let detectedLang = 'en'; // default
+        
+        // Map browser language codes to our supported languages
+        if (browserLang.startsWith('ar')) {
+            detectedLang = 'ar'; // Arabic
+        } else if (browserLang.startsWith('ru')) {
+            detectedLang = 'ru'; // Russian
+        } else if (browserLang.startsWith('zh')) {
+            detectedLang = 'zh'; // Chinese
+        } else if (browserLang.startsWith('hi')) {
+            detectedLang = 'hi'; // Hindi
+        } else if (browserLang.startsWith('ur')) {
+            detectedLang = 'ur'; // Urdu
+        }
+        
+        localStorage.setItem(LANGUAGE_KEY, detectedLang);
+        if (languageSelect) {
+            languageSelect.value = detectedLang;
+        }
+        applyLanguage(detectedLang);
+        console.log('Browser language detected:', browserLang, '→ Set to:', detectedLang);
+    } else {
+        // Load saved language preference
+        if (languageSelect) {
+            languageSelect.value = savedLanguage;
+        }
+        applyLanguage(savedLanguage);
+        console.log('Loaded saved language:', savedLanguage);
+    }
+}
+
+// ===== Load Settings from API =====
+async function loadContactSettings() {
+    try {
+        const response = await fetch('/api/settings');
+        if (response.ok) {
+            const settings = await response.json();
+            
+            // Update phone number
+            if (settings.phone_number) {
+                const phoneLink = document.getElementById('contact-phone');
+                const phoneText = document.getElementById('contact-phone-text');
+                if (phoneLink && phoneText) {
+                    // Remove all non-digit characters for the tel: link
+                    const phoneDigits = settings.phone_number.replace(/\D/g, '');
+                    phoneLink.href = `tel:${phoneDigits}`;
+                    phoneText.textContent = settings.phone_number;
+                    console.log('Phone number loaded from settings:', settings.phone_number);
+                }
+            }
+            
+            // Update WhatsApp number
+            if (settings.whatsapp_number) {
+                const whatsappLink = document.getElementById('contact-whatsapp');
+                if (whatsappLink) {
+                    // Remove all non-digit characters for WhatsApp link
+                    const whatsappDigits = settings.whatsapp_number.replace(/\D/g, '');
+                    whatsappLink.href = `https://wa.me/${whatsappDigits}`;
+                    console.log('WhatsApp number loaded from settings:', settings.whatsapp_number);
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Failed to load contact settings:', error);
+        // Keep default values if settings can't be loaded
+    }
+}
 
 // ===== Initialization =====
 window.addEventListener('DOMContentLoaded', async () => {
@@ -813,11 +1047,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     // Load session data
     loadSession();
     
-    // Load language preference
-    const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
-    if (savedLanguage && languageSelect) {
-        languageSelect.value = savedLanguage;
-    }
+    // Detect and set browser language
+    detectAndSetBrowserLanguage();
+    
+    // Load contact settings from database
+    loadContactSettings();
     
     // Check if user has existing conversation
     const hasMessages = SESSION && SESSION.messages && SESSION.messages.length > 0;

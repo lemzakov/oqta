@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OQTA Admin Panel</title>
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="/admin/css/admin.css">
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="login-page" class="page active">
+        <div class="login-container">
+            <div class="login-box">
+                <img src="/assets/oqta_logo.svg" alt="OQTA Logo" class="login-logo">
+                <h1>Admin Login</h1>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <div id="login-error" class="error-message"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-page" class="page">
+        <!-- Mobile Menu Toggle -->
+        <button class="hamburger-menu" id="hamburger-menu" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <div class="mobile-overlay" id="mobile-overlay"></div>
+        
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="/assets/oqta_logo.svg" alt="OQTA Logo" class="sidebar-logo">
+                <h2>OQTA Admin</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#" data-page="dashboard" class="nav-link active">Dashboard</a></li>
+                <li><a href="#" data-page="conversations" class="nav-link">Conversations</a></li>
+                <li><a href="#" data-page="customers" class="nav-link">Customers</a></li>
+                <li><a href="#" data-page="billing" class="nav-link">Billing</a></li>
+                <li><a href="#" data-page="free-zones" class="nav-link">Free Zones</a></li>
+                <li><a href="#" data-page="registration-forms" class="nav-link">Registration Forms</a></li>
+                <li><a href="#" data-page="resources" class="nav-link">OQTA Resources</a></li>
+                <li><a href="#" data-page="settings" class="nav-link">Settings</a></li>
+                <li><a href="#" data-page="knowledge" class="nav-link">Knowledge Base</a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-content" class="content-section active">
+                <h1>Dashboard</h1>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Conversations Today</h3>
+                        <p class="stat-value" id="stat-conversations-today">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Messages Today</h3>
+                        <p class="stat-value" id="stat-messages-today">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Messages</h3>
+                        <p class="stat-value" id="stat-total-messages">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>AI Tokens Used</h3>
+                        <p class="stat-value" id="stat-ai-tokens">-</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Amount Invoiced</h3>
+                        <p class="stat-value" id="stat-invoiced">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Amount Paid</h3>
+                        <p class="stat-value" id="stat-paid">$0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Deals in Progress</h3>
+                        <p class="stat-value" id="stat-deals">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversations Page -->
+            <div id="conversations-content" class="content-section">
+                <h1>Conversations</h1>
+                <div id="sessions-list" class="sessions-list">
+                    <p class="loading">Loading sessions...</p>
+                </div>
+                <div id="session-detail" class="session-detail" style="display: none;">
+                    <button id="back-to-sessions" class="btn btn-secondary">← Back to Sessions</button>
+                    <h2>Session Details</h2>
+                    <div id="session-info" class="session-info"></div>
+                    <div id="messages-list" class="messages-list"></div>
+                </div>
+            </div>
+
+            <!-- Registration Forms Page -->
+            <div id="registration-forms-content" class="content-section">
+                <h1>Registration Forms</h1>
+                <div class="info-card">
+                    <h2>Google Spreadsheet Integration</h2>
+                    <p>All registration forms (Free Zones, IFZA, Mainland) are stored in our Google Spreadsheet.</p>
+                    
+                    <div class="form-group">
+                        <label for="sheets-link">Spreadsheet Link:</label>
+                        <div class="link-box">
+                            <a href="https://docs.google.com/spreadsheets/d/1o_cGELELlV7lwejgfmaDP7IjKRkSpSun3hIdR34nXyI/edit?gid=1767577525#gid=1767577525" 
+                               target="_blank" 
+                               class="btn btn-primary">
+                                📊 Open Google Spreadsheet
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>How to Access</h3>
+                        <ol>
+                            <li>Contact the OQTA admin to get access to the spreadsheet</li>
+                            <li>Once granted access, click the button above to open the spreadsheet</li>
+                            <li>You can view and manage all registration forms from different zones</li>
+                        </ol>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Search for Specific Requests</h3>
+                        <p>To find a specific registration request:</p>
+                        <ol>
+                            <li>Open the spreadsheet using the button above</li>
+                            <li>Use <code>Ctrl+F</code> (or <code>Cmd+F</code> on Mac) to search</li>
+                            <li>Search by <strong>session_id</strong> from the Conversations page</li>
+                            <li>You can also search by user name, email, or company name</li>
+                        </ol>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Available Forms</h3>
+                        <ul>
+                            <li><strong>Free Zones</strong> - Registration forms for various free zone authorities</li>
+                            <li><strong>IFZA</strong> - International Free Zone Authority applications</li>
+                            <li><strong>Mainland</strong> - Mainland company registration forms</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OQTA Resources Page -->
+            <div id="resources-content" class="content-section">
+                <h1>OQTA Resources</h1>
+                <div class="info-card">
+                    <h2>Telegram Notifications</h2>
+                    <p>Get instant notifications for new user sessions via Telegram.</p>
+                    
+                    <div class="form-group">
+                        <label for="telegram-link">Telegram Group:</label>
+                        <div class="link-box">
+                            <a href="https://t.me/+ioJpIVBrx4w2YzRi" 
+                               target="_blank" 
+                               class="btn btn-primary">
+                                💬 Join Telegram Group
+                            </a>
+                        </div>
+                        <p class="help-text">Join this group to receive real-time notifications when new users start conversations.</p>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Dialog Summary Feature</h3>
+                        <p>You can generate AI-powered summaries of conversations directly from the Telegram bot.</p>
+                        
+                        <h4>How to use:</h4>
+                        <ol>
+                            <li>When you receive a notification about a new session in Telegram</li>
+                            <li>Click the <strong>"Make dialog summary"</strong> button in the notification</li>
+                            <li>The bot will analyze the conversation and provide a concise summary</li>
+                            <li>The summary includes:
+                                <ul>
+                                    <li>User's main request or inquiry</li>
+                                    <li>Key discussion points</li>
+                                    <li>Action items or next steps</li>
+                                    <li>User sentiment and engagement level</li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Notification Types</h3>
+                        <ul>
+                            <li><strong>New Session Started</strong> - When a user initiates a new conversation</li>
+                            <li><strong>Form Submitted</strong> - When a user completes a registration form</li>
+                            <li><strong>High-Value Lead</strong> - When AI detects a potentially valuable business opportunity</li>
+                            <li><strong>User Requires Assistance</strong> - When AI cannot answer user's questions</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-section">
+                        <h3>Best Practices</h3>
+                        <ul>
+                            <li>Review summaries regularly to identify trending inquiries</li>
+                            <li>Use summaries to improve AI responses and knowledge base</li>
+                            <li>Follow up on high-priority leads within 1 hour</li>
+                            <li>Mark resolved sessions to keep the group organized</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers Page -->
+            <div id="customers-content" class="content-section">
+                <h1>Customers</h1>
+                <div class="page-actions">
+                    <input type="text" id="customer-search" placeholder="Search customers..." class="search-input">
+                    <button id="add-customer-btn" class="btn btn-primary">+ Add Customer</button>
+                </div>
+                <div id="customers-list" class="customers-list">
+                    <p class="loading">Loading customers...</p>
+                </div>
+            </div>
+
+            <!-- Billing Page -->
+            <div id="billing-content" class="content-section">
+                <h1>Billing & Invoices</h1>
+                <div class="page-actions">
+                    <select id="invoice-status-filter" class="filter-select">
+                        <option value="">All Statuses</option>
+                        <option value="draft">Draft</option>
+                        <option value="sent">Sent</option>
+                        <option value="paid">Paid</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button id="create-invoice-btn" class="btn btn-primary">+ Create Invoice</button>
+                </div>
+                <div id="invoices-list" class="invoices-list">
+                    <p class="loading">Loading invoices...</p>
+                </div>
+            </div>
+
+            <!-- Free Zones Page -->
+            <div id="free-zones-content" class="content-section">
+                <h1>Free Zones Integrations</h1>
+                <p class="page-description">Manage integrations with free zones for automated processing and API connections.</p>
+                <div class="page-actions">
+                    <button id="add-free-zone-btn" class="btn btn-primary">+ Add Integration</button>
+                </div>
+                <div id="free-zones-list" class="free-zones-list">
+                    <div class="free-zones-grid">
+                        <p class="loading">Loading free zone integrations...</p>
+                    </div>
+                </div>
+                <div class="info-card" style="margin-top: 30px;">
+                    <h3>Supported Free Zones</h3>
+                    <div class="supported-zones">
+                        <ul>
+                            <li><strong>IFZA</strong> - International Free Zone Authority</li>
+                            <li><strong>Meydan</strong> - Meydan Free Zone</li>
+                            <li><strong>DAFZA</strong> - Dubai Airport Free Zone Authority</li>
+                            <li><strong>JAFZA</strong> - Jebel Ali Free Zone</li>
+                            <li><strong>UMQ FZ</strong> - Umm Al Quwain Free Trade Zone</li>
+                            <li><strong>RAKEZ</strong> - Ras Al Khaimah Economic Zone</li>
+                            <li><strong>SAIF Zone</strong> - Sharjah Airport International Free Zone</li>
+                            <li>And more... (configurable)</li>
+                        </ul>
+                    </div>
+                    <p style="margin-top: 15px; color: #666;">
+                        <em>Note: API integrations require configuration and credentials from respective free zone authorities.</em>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings-content" class="content-section">
+                <h1>Settings</h1>
+                <form id="settings-form" class="settings-form">
+                    <div class="form-group">
+                        <label for="whatsapp_number">WhatsApp Number</label>
+                        <input type="text" id="whatsapp_number" name="whatsapp_number" placeholder="+971501234567">
+                        <p class="help-text">This number will be displayed on the landing page for customer contact</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Phone Number</label>
+                        <input type="text" id="phone_number" name="phone_number" placeholder="+971501234567">
+                        <p class="help-text">This number will be displayed on the landing page for customer contact</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="n8n_url">n8n URL</label>
+                        <input type="url" id="n8n_url" name="n8n_url" placeholder="https://...">
+                        <p class="help-text">n8n webhook URL for AI processing</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                    <div id="settings-message" class="success-message"></div>
+                </form>
+            </div>
+
+            <!-- Knowledge Base Page -->
+            <div id="knowledge-content" class="content-section">
+                <h1>Knowledge Base</h1>
+                <div class="knowledge-actions">
+                    <button id="upload-doc-btn" class="btn btn-primary">Upload Document</button>
+                </div>
+                <div id="documents-list" class="documents-list">
+                    <p class="loading">Loading documents...</p>
+                </div>
+
+                <!-- Upload Modal -->
+                <div id="upload-modal" class="modal">
+                    <div class="modal-content">
+                        <span class="close">&times;</span>
+                        <h2>Upload Document</h2>
+                        <form id="upload-form" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label>Upload Method</label>
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display: inline-block; margin-right: 20px;">
+                                        <input type="radio" name="upload-method" value="file" checked> File Upload
+                                    </label>
+                                    <label style="display: inline-block;">
+                                        <input type="radio" name="upload-method" value="text"> Text Input
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group" id="file-upload-group">
+                                <label for="doc-file">Choose File (txt, md, pdf, doc, docx, csv, json)</label>
+                                <input type="file" id="doc-file" name="file" accept=".txt,.md,.pdf,.doc,.docx,.csv,.json,text/*">
+                                <small style="display: block; margin-top: 5px; color: #666;">Maximum file size: 10MB</small>
+                            </div>
+                            <div class="form-group" id="text-upload-group" style="display: none;">
+                                <label for="doc-text">Document Text</label>
+                                <textarea id="doc-text" name="text" rows="10"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="doc-metadata">Metadata (JSON, optional)</label>
+                                <textarea id="doc-metadata" name="metadata" rows="3" placeholder='{"title": "...", "category": "..."}'></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/admin/js/admin.js"></script>
+</body>
+</html>
