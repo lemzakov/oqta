@@ -28,12 +28,9 @@
                 <div class="header-right">
                     <div class="language-selector">
                         <select id="language-select" class="lang-select">
-                            <option value="en">English</option>
-                            <option value="ar">العربية</option>
-                            <option value="ru">Русский</option>
-                            <option value="zh">中文</option>
-                            <option value="hi">हिन्दी</option>
-                            <option value="ur">اردو</option>
+                            <option value="en">EN</option>
+                            <option value="ru">RU</option>
+                            <option value="ar">AR</option>
                         </select>
                     </div>
                 </div>
@@ -50,64 +47,121 @@
             </div>
 
             <section class="title">
-                <div class="title-row mobile--visible">
-                    <h1>Register</h1>
-                </div>
                 <div class="title-row">
-                    <h1 class="mobile--visible">your</h1>
-                    <h1 class="mobile--hidden">Register your</h1>
-                    <div class="uae-flag" aria-hidden="true">
-                        <div class="uae-card"></div>
-                        <div class="uae-inner-icon"></div>
-                    </div>
-                    <h1>UAE company</h1>
-                </div>
-                <div class="title-row">
-                    <h1>in minutes</h1>
-                    <div class="ai-icon" aria-hidden="true">
-                        <div class="ai-card"></div>
-                        <div class="ai-inner-icon"></div>
-                    </div>
-                    <h1 class="with-ai">with AI</h1>
+                    <h1 data-i18n="hero.title">Register your UAE company in minutes with AI</h1>
                 </div>
             </section>
 
-            <p class="subtitle">
-                🎯 <strong>Ask for any tax-related advice</strong> | 💰 <strong>Understand your costs free of charge</strong><br>
-                📋 <strong>Decide what business structure to register</strong> | 🤖 Get personalized AI recommendations<br>
-                <span class="subtitle-small">100% Safe & Secure | Relocate Your Business | Get Emirates ID | Provided by Authorized GTA Consultant</span>
+            <p class="subheadline" data-i18n="hero.subheadline">
+                AI-guided setup, tax structure selection & cost breakdown — free consultation included
             </p>
 
-            <div class="services-grid">
-                <div class="service-item" role="button" tabindex="0" aria-label="Set Up Holding Company">
-                    <span class="service-icon" aria-hidden="true">🏢</span>
-                    <span class="service-text">Set Up Holding Company</span>
+            <p class="subheadline" data-i18n="hero.subheadline">
+                AI-guided setup, tax structure selection & cost breakdown — free consultation included
+            </p>
+
+            <!-- Benefits list -->
+            <div class="benefits-list">
+                <div class="benefit-item">
+                    <span class="benefit-icon">🎯</span>
+                    <span class="benefit-text" data-i18n="hero.benefit1">Ask for any tax-related advice</span>
                 </div>
-                <div class="service-item" role="button" tabindex="0" aria-label="Get Tax Advice">
-                    <span class="service-icon" aria-hidden="true">💼</span>
-                    <span class="service-text">Get Tax Advice</span>
+                <div class="benefit-item">
+                    <span class="benefit-icon">💰</span>
+                    <span class="benefit-text" data-i18n="hero.benefit2">Understand your costs free of charge</span>
                 </div>
-                <div class="service-item" role="button" tabindex="0" aria-label="Relocate Business">
-                    <span class="service-icon" aria-hidden="true">✈️</span>
-                    <span class="service-text">Relocate Business</span>
+                <div class="benefit-item">
+                    <span class="benefit-icon">📋</span>
+                    <span class="benefit-text" data-i18n="hero.benefit3">Decide what business structure to register</span>
                 </div>
-                <div class="service-item" role="button" tabindex="0" aria-label="Obtain Emirates ID">
-                    <span class="service-icon" aria-hidden="true">🆔</span>
-                    <span class="service-text">Obtain Emirates ID</span>
-                </div>
-                <div class="service-item" role="button" tabindex="0" aria-label="Arrange Production Hub">
-                    <span class="service-icon" aria-hidden="true">🏭</span>
-                    <span class="service-text">Arrange Production Hub</span>
-                </div>
-                <div class="service-item" role="button" tabindex="0" aria-label="Open Branch Office">
-                    <span class="service-icon" aria-hidden="true">🌍</span>
-                    <span class="service-text">Open Branch Office</span>
+                <div class="benefit-item">
+                    <span class="benefit-icon">🤖</span>
+                    <span class="benefit-text" data-i18n="hero.benefit4">Get personalized AI recommendations</span>
                 </div>
             </div>
 
-            <p class="cta-text">
-                <strong>Start Your Free Consultation Today!</strong> Ask questions, understand costs, and get expert tax advice - all free of charge. Let our AI guide you through the entire company registration process.
-            </p>
+            <!-- Primary CTA -->
+            <div class="primary-cta-container">
+                <button class="primary-cta" id="primary-cta" data-i18n="hero.primaryCTA">Start Free Consultation</button>
+            </div>
+
+            <!-- Trust block -->
+            <div class="trust-block">
+                <div class="trust-item">
+                    <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span data-i18n="hero.trust1">Licensed UAE consultants</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span data-i18n="hero.trust2">300+ companies registered</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span data-i18n="hero.trust3">4.9/5 client rating</span>
+                </div>
+                <div class="trust-item">
+                    <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span data-i18n="hero.trust4">Official government procedures</span>
+                </div>
+            </div>
+
+            <!-- AI Chat Section -->
+            <div class="ai-chat-section">
+                <!-- Promise block -->
+                <div class="promise-block">
+                    <div class="promise-title" data-i18n="chat.promiseTitle">Answer 5 questions and get:</div>
+                    <div class="promise-list">
+                        <div class="promise-item">
+                            <svg class="promise-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span data-i18n="chat.promise1">company type</span>
+                        </div>
+                        <div class="promise-item">
+                            <svg class="promise-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span data-i18n="chat.promise2">jurisdiction</span>
+                        </div>
+                        <div class="promise-item">
+                            <svg class="promise-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span data-i18n="chat.promise3">total cost</span>
+                        </div>
+                        <div class="promise-item">
+                            <svg class="promise-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span data-i18n="chat.promise4">next steps</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick chips -->
+                <div class="quick-chips">
+                    <button class="chip" data-chip="saas" data-i18n="chat.chip1">SaaS / IT</button>
+                    <button class="chip" data-chip="trading" data-i18n="chat.chip2">Trading</button>
+                    <button class="chip" data-chip="holding" data-i18n="chat.chip3">Holding</button>
+                    <button class="chip" data-chip="crypto" data-i18n="chat.chip4">Crypto</button>
+                    <button class="chip" data-chip="consulting" data-i18n="chat.chip5">Consulting</button>
+                </div>
 
             <!-- Chat Window (Hidden by default) -->
             <div class="chat-window" id="chat-window" hidden>
@@ -135,7 +189,7 @@
             <div class="prompt">
                 <div class="prompt-card">
                     <div class="prompt-input-wrapper">
-                        <textarea class="prompt-textarea" id="landing-textarea" placeholder="I want to register a UAE company" rows="1"></textarea>
+                        <textarea class="prompt-textarea" id="landing-textarea" data-i18n-placeholder="chat.placeholder" placeholder="What business do you want to open in the UAE?" rows="1"></textarea>
                     </div>
                     <div class="prompt-actions">
                         <div class="prompt-actions-left">
@@ -149,8 +203,16 @@
                 </div>
             </div>
 
+            <!-- Secondary paths -->
+            <div class="secondary-paths">
+                <a href="#" class="secondary-link" data-action="open-company" data-i18n="hero.secondary1">I want to open a company</a>
+                <a href="#" class="secondary-link" data-action="relocate" data-i18n="hero.secondary2">I want to relocate</a>
+                <a href="#" class="secondary-link" data-action="tax-advice" data-i18n="hero.secondary3">I want tax advice</a>
+                <a href="#" class="secondary-link" data-action="emirates-id" data-i18n="hero.secondary4">I want Emirates ID</a>
+            </div>
+
             <div class="contact-info">
-                <p class="contact-text">Need assistance? Contact us:</p>
+                <p class="contact-text" data-i18n="footer.needAssistance">Need assistance? Contact us:</p>
                 <div class="contact-links">
                     <a href="tel:+971501234567" class="contact-link" id="contact-phone">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -162,7 +224,7 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                         </svg>
-                        <span>WhatsApp</span>
+                        <span data-i18n="footer.whatsapp">WhatsApp</span>
                     </a>
                 </div>
             </div>
@@ -181,7 +243,7 @@
                 <div class="conversation-input">
                     <div class="prompt-card">
                         <div class="prompt-input-wrapper">
-                            <textarea class="prompt-textarea" id="conversation-textarea" placeholder="Ask me anything about UAE company registration..." rows="1"></textarea>
+                            <textarea class="prompt-textarea" id="conversation-textarea" data-i18n-placeholder="chat.placeholder" placeholder="What business do you want to open in the UAE?" rows="1"></textarea>
                         </div>
                         <div class="prompt-actions">
                             <div class="prompt-actions-left">

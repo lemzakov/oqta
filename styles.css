@@ -224,9 +224,206 @@ header {
     margin: 0;
     font-size: 2.5rem;
     line-height: 1.2;
-    font-weight: 400;
+    font-weight: 600;
     color: var(--color-text);
     text-align: center;
+    max-width: 900px;
+}
+
+/* Subheadline */
+.subheadline {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.75);
+    text-align: center;
+}
+
+/* Benefits list */
+.benefits-list {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.benefit-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.benefit-text {
+    line-height: 1.4;
+}
+
+/* Primary CTA */
+.primary-cta-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 1.5rem;
+    text-align: center;
+}
+
+.primary-cta {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(135deg, #000000 0%, #1e1e1e 100%);
+    border: none;
+    border-radius: 2rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.primary-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.25);
+}
+
+/* Trust block */
+.trust-block {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+}
+
+.trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.trust-icon {
+    flex-shrink: 0;
+    color: #4caf50;
+}
+
+/* AI Chat Section */
+.ai-chat-section {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+/* Promise block */
+.promise-block {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.promise-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin-bottom: 0.75rem;
+}
+
+.promise-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+}
+
+.promise-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.promise-icon {
+    flex-shrink: 0;
+    color: #4caf50;
+}
+
+/* Quick chips */
+.quick-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.chip {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chip:hover {
+    background: var(--color-bg);
+    border-color: var(--color-dark);
+}
+
+/* Secondary paths */
+.secondary-paths {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 2rem;
+    padding-top: 1rem;
+}
+
+.secondary-link {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(0, 0, 0, 0.6);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.secondary-link:hover {
+    color: var(--color-text);
+    text-decoration: underline;
 }
 
 .gradient {
@@ -1207,5 +1404,58 @@ header {
     .chat-send-btn {
         width: 1.75rem;
         height: 1.75rem;
+    }
+
+    /* New responsive styles for Hero elements */
+    .subheadline {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .benefits-list {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .benefit-item {
+        font-size: 0.85rem;
+    }
+
+    .primary-cta {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+    }
+
+    .trust-block {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+
+    .trust-item {
+        font-size: 0.8rem;
+    }
+
+    .promise-list {
+        grid-template-columns: 1fr;
+    }
+
+    .quick-chips {
+        gap: 0.4rem;
+    }
+
+    .chip {
+        padding: 0.4rem 0.85rem;
+        font-size: 0.8rem;
+    }
+
+    .secondary-paths {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .secondary-link {
+        font-size: 0.85rem;
     }
 }
