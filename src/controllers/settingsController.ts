@@ -6,7 +6,7 @@ export const getSettings = async (req: Request, res: Response) => {
     const settings = await prisma.setting.findMany();
     
     const settingsMap: Record<string, string> = {};
-    settings.forEach((setting: any) => {
+    settings.forEach((setting) => {
       settingsMap[setting.key] = setting.value;
     });
 
@@ -14,6 +14,30 @@ export const getSettings = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Get settings error:', error);
     res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+};
+
+export const getPublicSettings = async (req: Request, res: Response) => {
+  try {
+    // Only return publicly safe settings (contact information)
+    const publicKeys = ['phone_number', 'whatsapp_number'];
+    const settings = await prisma.setting.findMany({
+      where: {
+        key: {
+          in: publicKeys
+        }
+      }
+    });
+    
+    const settingsMap: Record<string, string> = {};
+    settings.forEach((setting) => {
+      settingsMap[setting.key] = setting.value;
+    });
+
+    res.json(settingsMap);
+  } catch (error) {
+    console.error('Get public settings error:', error);
+    res.status(500).json({ error: 'Failed to fetch public settings' });
   }
 };
 

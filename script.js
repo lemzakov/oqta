@@ -213,6 +213,15 @@ function showConversationArea() {
     }
     if (conversationArea) {
         conversationArea.classList.add('active');
+        
+        // Add welcome message if no messages exist yet
+        if (SESSION?.messages && SESSION.messages.length === 0) {
+            const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
+            const t = translations[currentLang] || translations.en;
+            const welcomeMsg = t.chat.startMessage;
+            
+            addMessageToConversationArea('assistant', welcomeMsg, false);
+        }
     }
 }
 
@@ -855,81 +864,177 @@ clearBtn?.addEventListener('click', () => {
 const translations = {
     en: {
         welcome: "WELCOME TO",
-        register: "Register",
-        your: "your",
-        uaeCompany: "UAE company",
-        inMinutes: "in minutes",
-        withAI: "with AI",
-        startConsultation: "Start Your Free Consultation Today!",
-        consultationDesc: "Ask questions, understand costs, and get expert tax advice - all free of charge. Let our AI guide you through the entire company registration process."
-    },
-    ar: {
-        welcome: "مرحبًا بك في",
-        register: "سجل",
-        your: "شركتك",
-        uaeCompany: "في الإمارات",
-        inMinutes: "في دقائق",
-        withAI: "بالذكاء الاصطناعي",
-        startConsultation: "ابدأ استشارتك المجانية اليوم!",
-        consultationDesc: "اطرح الأسئلة، افهم التكاليف، واحصل على نصائح ضريبية من الخبراء - كل ذلك مجانًا. دع الذكاء الاصطناعي يرشدك خلال عملية تسجيل الشركة بأكملها."
+        hero: {
+            title: "Register your company & get business license in UAE with AI",
+            subheadline: "AI-guided setup, tax structure selection & licensing — complete business registration in minutes",
+            benefit1: "Ask for any tax-related advice",
+            benefit2: "Understand your costs free of charge",
+            benefit3: "Decide what business structure to register",
+            benefit4: "Get personalized AI recommendations",
+            primaryCTA: "Start Free Consultation",
+            trust1: "Licensed UAE consultants",
+            trust2: "300+ companies registered",
+            trust3: "4.9/5 client rating",
+            trust4: "Official government procedures",
+            secondary1: "I want to open a company",
+            secondary2: "I want to relocate",
+            secondary3: "I want tax advice",
+            secondary4: "I want Emirates ID"
+        },
+        chat: {
+            promiseTitle: "Answer 5 questions and get:",
+            promise1: "company type",
+            promise2: "jurisdiction",
+            promise3: "total cost",
+            promise4: "next steps",
+            placeholder: "What business do you want to open in the UAE?",
+            chip1: "SaaS / IT",
+            chip2: "Trading",
+            chip3: "Holding",
+            chip4: "Crypto",
+            chip5: "Consulting",
+            startMessage: "Hi! I'll help you register a UAE company. What type of business do you plan to open?"
+        },
+        footer: {
+            needAssistance: "Need assistance? Contact us:",
+            whatsapp: "WhatsApp",
+            finalCTA: "Ready to start your business in UAE?",
+            finalCTAButton: "Get Started Now"
+        }
     },
     ru: {
         welcome: "ДОБРО ПОЖАЛОВАТЬ В",
-        register: "Зарегистрируйте",
-        your: "свою",
-        uaeCompany: "компанию в ОАЭ",
-        inMinutes: "за минуты",
-        withAI: "с ИИ",
-        startConsultation: "Начните бесплатную консультацию сегодня!",
-        consultationDesc: "Задавайте вопросы, узнавайте о расходах и получайте консультации по налогам - всё бесплатно. Позвольте нашему ИИ провести вас через весь процесс регистрации компании."
+        hero: {
+            title: "Зарегистрируйте компанию и получите бизнес-лицензию в ОАЭ с помощью ИИ",
+            subheadline: "ИИ помогает выбрать структуру компании, юрисдикцию и лицензирование — полная регистрация бизнеса за минуты",
+            benefit1: "Получите консультацию по налогам",
+            benefit2: "Узнайте стоимость абсолютно бесплатно",
+            benefit3: "Выберите структуру бизнеса для регистрации",
+            benefit4: "Получите персональные рекомендации ИИ",
+            primaryCTA: "Начать бесплатную консультацию",
+            trust1: "Лицензированные консультанты в ОАЭ",
+            trust2: "300+ зарегистрированных компаний",
+            trust3: "Рейтинг клиентов 4.9/5",
+            trust4: "Официальные государственные процедуры",
+            secondary1: "Хочу открыть компанию",
+            secondary2: "Хочу релоцировать бизнес",
+            secondary3: "Нужна налоговая консультация",
+            secondary4: "Нужен Emirates ID"
+        },
+        chat: {
+            promiseTitle: "Ответьте на 5 вопросов и получите:",
+            promise1: "тип компании",
+            promise2: "юрисдикцию",
+            promise3: "расчёт стоимости",
+            promise4: "следующие шаги",
+            placeholder: "Какой бизнес вы хотите открыть в ОАЭ?",
+            chip1: "SaaS / IT",
+            chip2: "Торговля",
+            chip3: "Холдинг",
+            chip4: "Крипто",
+            chip5: "Консалтинг",
+            startMessage: "Привет! Я помогу зарегистрировать компанию в ОАЭ. Какой тип бизнеса вы планируете открыть?"
+        },
+        footer: {
+            needAssistance: "Нужна помощь? Свяжитесь с нами:",
+            whatsapp: "WhatsApp",
+            finalCTA: "Готовы начать свой бизнес в ОАЭ?",
+            finalCTAButton: "Начать сейчас"
+        }
     },
-    zh: {
-        welcome: "欢迎来到",
-        register: "注册",
-        your: "您的",
-        uaeCompany: "阿联酋公司",
-        inMinutes: "只需几分钟",
-        withAI: "使用AI",
-        startConsultation: "立即开始免费咨询!",
-        consultationDesc: "提问、了解成本、获得专业税务建议 - 完全免费。让我们的AI引导您完成整个公司注册流程。"
-    },
-    hi: {
-        welcome: "में आपका स्वागत है",
-        register: "पंजीकरण करें",
-        your: "अपनी",
-        uaeCompany: "यूएई कंपनी",
-        inMinutes: "मिनटों में",
-        withAI: "AI के साथ",
-        startConsultation: "आज ही अपना मुफ्त परामर्श शुरू करें!",
-        consultationDesc: "प्रश्न पूछें, लागत समझें, और विशेषज्ञ कर सलाह प्राप्त करें - सब मुफ्त। हमारे AI को पूरी कंपनी पंजीकरण प्रक्रिया के माध्यम से मार्गदर्शन करने दें।"
-    },
-    ur: {
-        welcome: "میں خوش آمدید",
-        register: "رجسٹر کریں",
-        your: "اپنی",
-        uaeCompany: "یو اے ای کمپنی",
-        inMinutes: "منٹوں میں",
-        withAI: "AI کے ساتھ",
-        startConsultation: "آج ہی اپنا مفت مشاورت شروع کریں!",
-        consultationDesc: "سوالات پوچھیں، اخراجات سمجھیں، اور ماہر ٹیکس مشورہ حاصل کریں - سب مفت۔ ہماری AI کو پوری کمپنی رجسٹریشن کے عمل میں آپ کی رہنمائی کرنے دیں۔"
+    ar: {
+        welcome: "مرحبًا بك في",
+        hero: {
+            title: "سجل شركتك واحصل على ترخيص الأعمال في الإمارات باستخدام الذكاء الاصطناعي",
+            subheadline: "إعداد موجه بالذكاء الاصطناعي، اختيار الهيكل الضريبي والترخيص — تسجيل الأعمال الكامل في دقائق",
+            benefit1: "احصل على أي نصيحة ضريبية",
+            benefit2: "افهم تكاليفك مجانًا",
+            benefit3: "حدد هيكل العمل المناسب للتسجيل",
+            benefit4: "احصل على توصيات مخصصة من الذكاء الاصطناعي",
+            primaryCTA: "ابدأ استشارة مجانية",
+            trust1: "مستشارون مرخصون في الإمارات",
+            trust2: "أكثر من 300 شركة مسجلة",
+            trust3: "تقييم العملاء 4.9/5",
+            trust4: "إجراءات حكومية رسمية",
+            secondary1: "أريد فتح شركة",
+            secondary2: "أريد نقل عملي",
+            secondary3: "أريد استشارة ضريبية",
+            secondary4: "أريد بطاقة الهوية الإماراتية"
+        },
+        chat: {
+            promiseTitle: "أجب على 5 أسئلة واحصل على:",
+            promise1: "نوع الشركة",
+            promise2: "الولاية القضائية",
+            promise3: "التكلفة الإجمالية",
+            promise4: "الخطوات التالية",
+            placeholder: "ما نوع العمل الذي تريد فتحه في الإمارات؟",
+            chip1: "تقنية المعلومات / SaaS",
+            chip2: "التجارة",
+            chip3: "الشركة القابضة",
+            chip4: "العملات الرقمية",
+            chip5: "الاستشارات",
+            startMessage: "مرحبًا! سأساعدك في تسجيل شركة في الإمارات. ما نوع العمل الذي تخطط لفتحه؟"
+        },
+        footer: {
+            needAssistance: "هل تحتاج إلى مساعدة؟ اتصل بنا:",
+            whatsapp: "واتساب",
+            finalCTA: "هل أنت مستعد لبدء عملك في الإمارات؟",
+            finalCTAButton: "ابدأ الآن"
+        }
     }
 };
 
 function applyLanguage(lang) {
     const t = translations[lang] || translations.en;
     
-    // Update UI elements if they exist
+    // Set dir attribute for RTL languages
+    const htmlElement = document.documentElement;
+    if (lang === 'ar') {
+        htmlElement.setAttribute('dir', 'rtl');
+    } else {
+        htmlElement.setAttribute('dir', 'ltr');
+    }
+    
+    // Update all elements with data-i18n attribute
+    document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const keys = key.split('.');
+        let value = t;
+        
+        // Navigate through nested object
+        for (const k of keys) {
+            value = value[k];
+            if (!value) break;
+        }
+        
+        if (value) {
+            element.textContent = value;
+        }
+    });
+    
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+        const key = element.getAttribute('data-i18n-placeholder');
+        const keys = key.split('.');
+        let value = t;
+        
+        for (const k of keys) {
+            value = value[k];
+            if (!value) break;
+        }
+        
+        if (value) {
+            element.setAttribute('placeholder', value);
+        }
+    });
+    
+    // Update welcome banner
     const welcomeSpan = document.querySelector('.welcome span');
     if (welcomeSpan) {
         welcomeSpan.innerHTML = `${t.welcome} <strong>OQTA </strong>AI`;
     }
     
-    const ctaText = document.querySelector('.cta-text');
-    if (ctaText) {
-        ctaText.innerHTML = `<strong>${t.startConsultation}</strong> ${t.consultationDesc}`;
-    }
-    
-    console.log('Language applied:', lang);
+    console.log('Language applied:', lang, 'dir:', htmlElement.getAttribute('dir'));
 }
 
 // Language selector
@@ -942,6 +1047,108 @@ languageSelect?.addEventListener('change', (e) => {
     applyLanguage(selectedLanguage);
 });
 
+// ===== Primary CTA Handler =====
+const primaryCTA = document.getElementById('primary-cta');
+primaryCTA?.addEventListener('click', () => {
+    // Focus on the chat input without harsh scrolling
+    const landingTextarea = document.getElementById('landing-textarea');
+    if (landingTextarea) {
+        landingTextarea.focus();
+        // No scrolling - chat is already visible inline
+    }
+});
+
+// ===== Quick Chips Handlers =====
+function handleChipClick(chipType) {
+    const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
+    const t = translations[currentLang] || translations.en;
+    
+    const chipMessages = {
+        en: {
+            saas: "I want to open an IT/SaaS company in the UAE",
+            trading: "I want to open a trading company in the UAE",
+            holding: "I want to set up a holding company in the UAE",
+            crypto: "I want to open a crypto-related business in the UAE",
+            consulting: "I want to open a consulting business in the UAE"
+        },
+        ru: {
+            saas: "Хочу открыть IT/SaaS компанию в ОАЭ",
+            trading: "Хочу открыть торговую компанию в ОАЭ",
+            holding: "Хочу создать холдинговую компанию в ОАЭ",
+            crypto: "Хочу открыть крипто-бизнес в ОАЭ",
+            consulting: "Хочу открыть консалтинговую компанию в ОАЭ"
+        },
+        ar: {
+            saas: "أريد فتح شركة تقنية معلومات / SaaS في الإمارات",
+            trading: "أريد فتح شركة تجارية في الإمارات",
+            holding: "أريد إنشاء شركة قابضة في الإمارات",
+            crypto: "أريد فتح عمل متعلق بالعملات الرقمية في الإمارات",
+            consulting: "أريد فتح شركة استشارية في الإمارات"
+        }
+    };
+    
+    const message = chipMessages[currentLang]?.[chipType] || chipMessages.en[chipType];
+    
+    // Send message to chat
+    const landingTextarea = document.getElementById('landing-textarea');
+    if (landingTextarea) {
+        landingTextarea.value = message;
+        // Trigger send
+        landingSendBtn?.click();
+    }
+}
+
+document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+        const chipType = e.target.getAttribute('data-chip');
+        handleChipClick(chipType);
+    });
+});
+
+// ===== Secondary Paths Handlers =====
+function handleSecondaryPath(action) {
+    const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
+    
+    const pathMessages = {
+        en: {
+            'open-company': "I want to open a company in the UAE",
+            'relocate': "I want to relocate my business to the UAE",
+            'tax-advice': "I need tax advice for UAE business",
+            'emirates-id': "I want to get Emirates ID"
+        },
+        ru: {
+            'open-company': "Хочу открыть компанию в ОАЭ",
+            'relocate': "Хочу релоцировать бизнес в ОАЭ",
+            'tax-advice': "Нужна консультация по налогам в ОАЭ",
+            'emirates-id': "Хочу получить Emirates ID"
+        },
+        ar: {
+            'open-company': "أريد فتح شركة في الإمارات",
+            'relocate': "أريد نقل عملي إلى الإمارات",
+            'tax-advice': "أحتاج إلى استشارة ضريبية لأعمال الإمارات",
+            'emirates-id': "أريد الحصول على بطاقة الهوية الإماراتية"
+        }
+    };
+    
+    const message = pathMessages[currentLang]?.[action] || pathMessages.en[action];
+    
+    // Send message to chat
+    const landingTextarea = document.getElementById('landing-textarea');
+    if (landingTextarea) {
+        landingTextarea.value = message;
+        // Trigger send
+        landingSendBtn?.click();
+    }
+}
+
+document.querySelectorAll('.secondary-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const action = e.target.getAttribute('data-action');
+        handleSecondaryPath(action);
+    });
+});
+
 // Detect and set browser language on first visit
 function detectAndSetBrowserLanguage() {
     const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
@@ -951,17 +1158,11 @@ function detectAndSetBrowserLanguage() {
         const browserLang = navigator.language || navigator.userLanguage;
         let detectedLang = 'en'; // default
         
-        // Map browser language codes to our supported languages
+        // Map browser language codes to our supported languages (EN, RU, AR only)
         if (browserLang.startsWith('ar')) {
             detectedLang = 'ar'; // Arabic
         } else if (browserLang.startsWith('ru')) {
             detectedLang = 'ru'; // Russian
-        } else if (browserLang.startsWith('zh')) {
-            detectedLang = 'zh'; // Chinese
-        } else if (browserLang.startsWith('hi')) {
-            detectedLang = 'hi'; // Hindi
-        } else if (browserLang.startsWith('ur')) {
-            detectedLang = 'ur'; // Urdu
         }
         
         localStorage.setItem(LANGUAGE_KEY, detectedLang);
@@ -983,7 +1184,7 @@ function detectAndSetBrowserLanguage() {
 // ===== Load Settings from API =====
 async function loadContactSettings() {
     try {
-        const response = await fetch('/api/settings');
+        const response = await fetch('/api/settings/public');
         if (response.ok) {
             const settings = await response.json();
             
