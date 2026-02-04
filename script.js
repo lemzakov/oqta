@@ -215,7 +215,7 @@ function showConversationArea() {
         conversationArea.classList.add('active');
         
         // Add welcome message if no messages exist yet
-        if (SESSION && SESSION.messages && SESSION.messages.length === 0) {
+        if (SESSION?.messages && SESSION.messages.length === 0) {
             const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
             const t = translations[currentLang] || translations.en;
             const welcomeMsg = t.chat.startMessage;
