@@ -14,6 +14,7 @@ import chatRoutes from './routes/chat.js';
 import customersRoutes from './routes/customers.js';
 import billingRoutes from './routes/billing.js';
 import freeZonesRoutes from './routes/free-zones.js';
+import analyticsRoutes from './routes/analytics.js';
 
 dotenv.config();
 
@@ -68,6 +69,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/customers', customersRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/free-zones', freeZonesRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check endpoint with database check
 app.get('/api/health', async (req, res) => {
@@ -107,7 +109,7 @@ app.get('/admin', (req, res) => {
 app.use(express.static(path.join(__dirname, '..')));
 
 // Fallback route for SPA
-app.get('*', (req, res) => {
+app.use((req, res, next) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
