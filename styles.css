@@ -148,6 +148,7 @@ header {
     cursor: pointer;
     font-family: var(--font-body);
     outline: none;
+    margin-right: 15px;
 }
 
     .lang-select:hover {
