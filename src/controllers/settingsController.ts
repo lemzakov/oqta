@@ -36,8 +36,8 @@ export const getPublicSettings = async (req: Request, res: Response) => {
         settingsMap[setting.key] = setting.value;
       });
     } catch (dbError) {
-      // Log database error but continue to return analytics config
-      console.warn('Database unavailable for public settings, returning analytics only:', dbError);
+      // Log database error but continue with analytics config from environment
+      console.warn('Database unavailable for public settings, continuing with analytics config from environment variables:', dbError);
     }
 
     // Always include analytics configuration from environment variables
@@ -46,7 +46,9 @@ export const getPublicSettings = async (req: Request, res: Response) => {
 
     res.json(settingsMap);
   } catch (error) {
-    console.error('Get public settings error:', error);
+    // This catches unexpected errors (e.g., JSON serialization issues)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Unexpected error in getPublicSettings:', errorMessage, error);
     res.status(500).json({ error: 'Failed to fetch public settings' });
   }
 };
