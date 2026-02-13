@@ -18,7 +18,7 @@
         // Load analytics configuration and initialize trackers
         (async function() {
             try {
-                const response = await fetch('/api/analytics/config');
+                const response = await fetch('/api/settings/public');
                 const config = await response.json();
                 
                 // Initialize Yandex Metrika
@@ -75,9 +75,9 @@
                 <div class="header-right">
                     <div class="language-selector">
                         <select id="language-select" class="lang-select">
-                            <option value="en">EN</option>
-                            <option value="ru">RU</option>
-                            <option value="ar">AR</option>
+                            <option value="en">🇬🇧 EN</option>
+                            <option value="ru">🇷🇺 RU</option>
+                            <option value="ar">🇦🇪 AR</option>
                         </select>
                     </div>
                 </div>

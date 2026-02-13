@@ -9,7 +9,7 @@ This implementation adds Yandex Metrika and Google Analytics (GA4) tracking to a
 ### Architecture
 
 1. **Environment Variables**: Analytics IDs are stored in `.env` file
-2. **API Endpoint**: `/api/analytics/config` serves the analytics configuration to the frontend
+2. **API Endpoint**: `/api/settings/public` serves the analytics configuration along with other public settings
 3. **Dynamic Loading**: JavaScript on each page fetches the config and initializes analytics trackers
 
 ### Implementation Details
@@ -64,12 +64,14 @@ Analytics tracking is enabled on:
 ### Test the API Endpoint
 
 ```bash
-curl http://localhost:3000/api/analytics/config
+curl http://localhost:3000/api/settings/public
 ```
 
-Expected response:
+Expected response (includes analytics config and other public settings):
 ```json
 {
+  "phone_number": "...",
+  "whatsapp_number": "...",
   "yandexMetrikaId": "12345678",
   "gaMeasurementId": "G-TEST123456"
 }

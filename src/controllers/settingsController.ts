@@ -19,24 +19,36 @@ export const getSettings = async (req: Request, res: Response) => {
 
 export const getPublicSettings = async (req: Request, res: Response) => {
   try {
-    // Only return publicly safe settings (contact information)
-    const publicKeys = ['phone_number', 'whatsapp_number'];
-    const settings = await prisma.setting.findMany({
-      where: {
-        key: {
-          in: publicKeys
-        }
-      }
-    });
-    
     const settingsMap: Record<string, string> = {};
-    settings.forEach((setting) => {
-      settingsMap[setting.key] = setting.value;
-    });
+    
+    // Try to fetch database settings but don't fail if database is unavailable
+    try {
+      const publicKeys = ['phone_number', 'whatsapp_number'];
+      const settings = await prisma.setting.findMany({
+        where: {
+          key: {
+            in: publicKeys
+          }
+        }
+      });
+      
+      settings.forEach((setting) => {
+        settingsMap[setting.key] = setting.value;
+      });
+    } catch (dbError) {
+      // Log database error but continue with analytics config from environment
+      console.warn('Database unavailable for public settings, continuing with analytics config from environment variables:', dbError);
+    }
+
+    // Always include analytics configuration from environment variables
+    settingsMap['yandexMetrikaId'] = process.env.YANDEX_METRIKA_ID || '';
+    settingsMap['gaMeasurementId'] = process.env.GA_MEASUREMENT_ID || '';
 
     res.json(settingsMap);
   } catch (error) {
-    console.error('Get public settings error:', error);
+    // This catches unexpected errors (e.g., JSON serialization issues)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Unexpected error in getPublicSettings:', errorMessage, error);
     res.status(500).json({ error: 'Failed to fetch public settings' });
   }
 };
