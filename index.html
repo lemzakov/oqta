@@ -18,7 +18,7 @@
         // Load analytics configuration and initialize trackers
         (async function() {
             try {
-                const response = await fetch('/api/analytics/config');
+                const response = await fetch('/api/settings/public');
                 const config = await response.json();
                 
                 // Initialize Yandex Metrika
