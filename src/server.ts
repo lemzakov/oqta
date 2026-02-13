@@ -109,7 +109,7 @@ app.get('/admin', (req, res) => {
 app.use(express.static(path.join(__dirname, '..')));
 
 // Fallback route for SPA
-app.get('*', (req, res) => {
+app.use((req, res, next) => {
   // Don't serve index.html for API routes
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
