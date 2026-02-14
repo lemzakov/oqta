@@ -9,7 +9,7 @@ export const getSessions = async (req: Request, res: Response) => {
     const { page = 1, limit = 10 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
-    // Get all unique session IDs from n8n_chat_histories table
+    // Get all unique session IDs from chat histories table
     // Group by session_id to get all conversations
     const uniqueSessions = await prisma.$queryRaw<Array<{ session_id: string; message_count: bigint; first_message_at: Date; last_message_at: Date }>>`
       SELECT 
@@ -77,7 +77,7 @@ export const getSessionMessages = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
 
-    // Read messages from n8n_chat_histories table (managed by n8n)
+    // Read messages from chat histories table (managed by Lemzakov AI Labs integration)
     const messages = await prisma.chatHistory.findMany({
       where: { sessionId },
       orderBy: {
@@ -119,12 +119,12 @@ export const getSessionMessages = async (req: Request, res: Response) => {
         createdAt: summary.createdAt,
       } : null,
       messages: messages.map((msg: any) => {
-        // Parse the JSONB message field from n8n format
-        // n8n stores messages like: { "type": "ai|human", "content": "...", "tool_calls": [], ... }
+        // Parse the JSONB message field from integration format
+        // Lemzakov AI Labs stores messages like: { "type": "ai|human", "content": "...", "tool_calls": [], ... }
         const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
         return {
           id: msg.id,
-          type: messageData.type || 'human', // n8n uses "human" instead of "user"
+          type: messageData.type || 'human',
           content: messageData.content || '',
           createdAt: msg.createdAt,
           toolCalls: messageData.tool_calls || [],
@@ -283,25 +283,25 @@ export const exportToGoogleSheets = async (req: Request, res: Response) => {
       }),
     };
 
-    // Get n8n URL from settings
-    const n8nUrlSetting = await prisma.setting.findUnique({
-      where: { key: 'n8n_url' },
+    // Get Lemzakov AI Labs Google Sheets integration URL from settings
+    const n8nSheetsUrlSetting = await prisma.setting.findUnique({
+      where: { key: 'n8n_sheets_url' },
     });
 
-    if (!n8nUrlSetting || !n8nUrlSetting.value) {
+    if (!n8nSheetsUrlSetting || !n8nSheetsUrlSetting.value) {
       return res.status(400).json({ 
-        error: 'n8n URL not configured. Please configure it in Settings.' 
+        error: 'Lemzakov AI Labs Google Sheets integration URL not configured. Please configure it in Settings.' 
       });
     }
 
-    // TODO: Trigger n8n webhook endpoint
+    // TODO: Trigger Lemzakov AI Labs webhook endpoint
     // For now, just return the data that would be sent
-    // The actual n8n endpoint will be configured later
+    // The actual webhook endpoint will be configured later
     res.json({
-      message: 'Export to Google Sheets endpoint ready. Configure n8n webhook URL in Settings.',
+      message: 'Export to Google Sheets endpoint ready. Configure Lemzakov AI Labs webhook URL in Settings.',
       data: exportData,
-      n8nUrl: n8nUrlSetting.value,
-      note: 'This endpoint will trigger the n8n workflow once the webhook URL is properly configured.',
+      n8nUrl: n8nSheetsUrlSetting.value,
+      note: 'This endpoint will trigger the Lemzakov AI Labs workflow once the webhook URL is properly configured.',
     });
   } catch (error) {
     console.error('Export to Google Sheets error:', error);

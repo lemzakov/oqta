@@ -377,6 +377,7 @@ const loadSettings = async () => {
         document.getElementById('whatsapp_number').value = settings.whatsapp_number || '';
         document.getElementById('phone_number').value = settings.phone_number || '';
         document.getElementById('n8n_url').value = settings.n8n_url || '';
+        document.getElementById('n8n_sheets_url').value = settings.n8n_sheets_url || '';
     } catch (error) {
         console.error('Failed to load settings:', error);
     }
@@ -389,6 +390,7 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         whatsapp_number: document.getElementById('whatsapp_number').value,
         phone_number: document.getElementById('phone_number').value,
         n8n_url: document.getElementById('n8n_url').value,
+        n8n_sheets_url: document.getElementById('n8n_sheets_url').value,
     };
 
     try {
