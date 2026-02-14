@@ -852,8 +852,6 @@ const exportToGoogleSheets = async (sessionId) => {
         
         if (data.success) {
             alert(`✓ ${data.message}`);
-        } else {
-            alert(`Export completed:\n\n${data.message || 'Session exported to Google Sheets'}`);
         }
     } catch (error) {
         console.error('Failed to export to Google Sheets:', error);

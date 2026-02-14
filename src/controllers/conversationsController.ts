@@ -284,7 +284,10 @@ export const exportToGoogleSheets = async (req: Request, res: Response) => {
         });
       }
 
-      const webhookData = await webhookResponse.json().catch(() => ({}));
+      const webhookData = await webhookResponse.json().catch((parseError) => {
+        console.warn('Failed to parse webhook response as JSON:', parseError);
+        return {};
+      });
       console.log('Successfully exported to Google Sheets:', { sessionId, response: webhookData });
 
       res.json({
