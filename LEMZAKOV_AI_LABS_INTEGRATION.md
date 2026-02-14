@@ -1,8 +1,8 @@
-# n8n Integration Guide
+# Lemzakov AI Labs Integration Guide
 
 ## Overview
 
-The OQTA application integrates with n8n for AI chat processing. The `n8n_chat_histories` table is **managed exclusively by n8n** - the frontend and admin panel only READ from this table, never write to it.
+The OQTA application integrates with Lemzakov AI Labs for AI chat processing. The `n8n_chat_histories` table is **managed exclusively by Lemzakov AI Labs** - the frontend and admin panel only READ from this table, never write to it.
 
 ## Database Schema
 
@@ -17,13 +17,13 @@ CREATE TABLE n8n_chat_histories (
 );
 ```
 
-**Managed by:** n8n workflow
+**Managed by:** Lemzakov AI Labs workflow
 **Read by:** Admin panel (via `/api/conversations/sessions/:sessionId` endpoint)
-**Written by:** n8n workflow only (NOT by frontend or admin API)
+**Written by:** Lemzakov AI Labs workflow only (NOT by frontend or admin API)
 
 ### Message Format
 
-n8n stores messages in JSONB format with the following structure:
+Lemzakov AI Labs stores messages in JSONB format with the following structure:
 
 #### User Message (type: "human")
 ```json
@@ -56,8 +56,8 @@ n8n stores messages in JSONB format with the following structure:
 // User message is added to localStorage only
 addMessageToConversationArea('user', message);
 
-// Message is sent to n8n webhook
-const aiResponse = await sendToN8N(message);
+// Message is sent to Lemzakov AI Labs webhook
+const aiResponse = await sendToLemzakovAI(message);
 
 // AI response is added to localStorage only
 addMessageToConversationArea('assistant', aiResponse);
@@ -66,10 +66,10 @@ addMessageToConversationArea('assistant', aiResponse);
 **Key Points:**
 - Frontend does NOT write to database
 - Messages are stored in localStorage for UI persistence
-- n8n webhook receives the message and processes it
-- n8n is responsible for writing BOTH user and AI messages to `n8n_chat_histories`
+- Lemzakov AI Labs webhook receives the message and processes it
+- Lemzakov AI Labs is responsible for writing BOTH user and AI messages to `n8n_chat_histories`
 
-### 2. n8n Webhook Payload
+### 2. Lemzakov AI Labs Webhook Payload
 
 ```json
 {
@@ -84,9 +84,9 @@ addMessageToConversationArea('assistant', aiResponse);
 }
 ```
 
-### 3. n8n Workflow Responsibilities
+### 3. Lemzakov AI Labs Workflow Responsibilities
 
-The n8n workflow must:
+The Lemzakov AI Labs workflow must:
 1. **Process the user message** with AI
 2. **Write the user message** to `n8n_chat_histories`:
    ```sql
@@ -110,7 +110,7 @@ The n8n workflow must:
 
 ### Purpose
 
-The `sessions` table links user sessions to their chat history and is managed by the application (not n8n).
+The `sessions` table links user sessions to their chat history and is managed by the application (not Lemzakov AI Labs).
 
 ```sql
 CREATE TABLE sessions (
@@ -171,7 +171,7 @@ The admin panel reads messages from `n8n_chat_histories`:
 
 ### Message Type Mapping
 
-The admin panel handles n8n's message types:
+The admin panel handles Lemzakov AI Labs message types:
 - `"human"` → displayed as "User"
 - `"ai"` → displayed as "AI"
 
@@ -214,7 +214,15 @@ const supportedLanguages = {
 };
 ```
 
-Language preference is saved to localStorage and can be sent to n8n for localized responses.
+Language preference is saved to localStorage and can be sent to Lemzakov AI Labs for localized responses.
+
+## Settings Configuration
+
+### Chat Integration
+Configure the **Lemzakov AI Labs - Chat Integration** URL in the admin settings panel. This is the webhook URL used for AI-powered chat processing.
+
+### Google Sheets Integration
+Configure the **Lemzakov AI Labs - Google Sheets Integration** URL in the admin settings panel. This is the webhook URL used for exporting conversation data to Google Sheets.
 
 ## Important Notes
 
@@ -222,31 +230,31 @@ Language preference is saved to localStorage and can be sent to n8n for localize
 - Read from `n8n_chat_histories` in admin panel
 - Link sessions to messages via `session_id`
 - Store UI state in localStorage
-- Send messages to n8n webhook
-- Let n8n handle all database writes to `n8n_chat_histories`
+- Send messages to Lemzakov AI Labs webhook
+- Let Lemzakov AI Labs handle all database writes to `n8n_chat_histories`
 
 ### ❌ DON'T
 - Write to `n8n_chat_histories` from frontend
 - Write to `n8n_chat_histories` from admin API
 - Modify existing messages
-- Delete messages (managed by n8n or database admin)
+- Delete messages (managed by Lemzakov AI Labs or database admin)
 
 ## Troubleshooting
 
 ### Messages Not Appearing in Admin Panel
 
-1. **Check n8n workflow** - Ensure it's writing to `n8n_chat_histories`
-2. **Verify session_id** - Must match between frontend and n8n
+1. **Check Lemzakov AI Labs workflow** - Ensure it's writing to `n8n_chat_histories`
+2. **Verify session_id** - Must match between frontend and Lemzakov AI Labs
 3. **Check message format** - Must be valid JSONB with `type` and `content` fields
-4. **Database connection** - Verify n8n can connect to PostgreSQL
+4. **Database connection** - Verify Lemzakov AI Labs can connect to PostgreSQL
 
 ### Session Not Found
 
-1. **Check sessions table** - May need to be created manually or by n8n
+1. **Check sessions table** - May need to be created manually or by Lemzakov AI Labs
 2. **Verify session_id** - UUID format required
 3. **Check database** - Ensure `sessions` table exists
 
-## Example n8n Workflow Nodes
+## Example Lemzakov AI Labs Workflow Nodes
 
 ### 1. Webhook Node (Trigger)
 - Receives payload from frontend
@@ -295,7 +303,7 @@ Returns AI response to frontend as JSON:
 | Frontend (script.js) | ❌ No | ❌ No |
 | Admin Panel | ✅ Yes | ❌ No |
 | Admin API | ✅ Yes | ❌ No |
-| n8n Workflow | ✅ Optional | ✅ Yes (Only) |
+| Lemzakov AI Labs Workflow | ✅ Optional | ✅ Yes (Only) |
 | Database Admin | ✅ Yes | ✅ Yes (maintenance) |
 
-The `n8n_chat_histories` table is the single source of truth for all chat messages and is managed exclusively by n8n.
+The `n8n_chat_histories` table is the single source of truth for all chat messages and is managed exclusively by Lemzakov AI Labs.
