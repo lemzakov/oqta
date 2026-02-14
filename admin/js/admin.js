@@ -169,22 +169,19 @@ const navigateToPage = (page) => {
             break;
         case 'conversations':
             loadSessions();
-            // Auto-refresh conversations every 10 seconds
+            // Auto-refresh conversations every 30 seconds (only when viewing list)
             conversationAutoRefreshInterval = setInterval(() => {
                 if (currentPage === 'conversations') {
                     const sessionDetail = document.getElementById('session-detail');
-                    if (sessionDetail.style.display === 'block') {
-                        // Refresh session detail
-                        const sessionId = sessionDetail.dataset.sessionId;
-                        if (sessionId) {
-                            loadSessionDetail(sessionId, true);
+                    // Only refresh if viewing the list, not when viewing a specific conversation
+                    if (sessionDetail.style.display !== 'block') {
+                        // Silently refresh only the first page
+                        if (currentSessionsPage === 1) {
+                            loadSessions(false);
                         }
-                    } else {
-                        // Refresh sessions list
-                        loadSessions();
                     }
                 }
-            }, 10000);
+            }, 30000); // Changed from 10 seconds to 30 seconds
             break;
         case 'customers':
             loadCustomers();
@@ -221,32 +218,91 @@ const loadDashboard = async () => {
 };
 
 // Conversations
-const loadSessions = async () => {
+let currentSessionsPage = 1;
+let totalSessionsPages = 1;
+
+const loadSessions = async (append = false) => {
     const sessionsList = document.getElementById('sessions-list');
-    sessionsList.innerHTML = '<p class="loading">Loading sessions...</p>';
+    
+    if (!append) {
+        sessionsList.innerHTML = '<p class="loading">Loading sessions...</p>';
+        currentSessionsPage = 1;
+    }
 
     try {
-        const data = await apiCall('/conversations/sessions?limit=50');
+        const data = await apiCall(`/conversations/sessions?page=${currentSessionsPage}&limit=10`);
         
-        if (data.sessions.length === 0) {
+        if (data.sessions.length === 0 && currentSessionsPage === 1) {
             sessionsList.innerHTML = '<p class="loading">No sessions found.</p>';
             return;
         }
 
-        sessionsList.innerHTML = data.sessions.map(session => `
-            <div class="session-item" data-session-id="${escapeHtml(session.id)}">
-                <h4>${escapeHtml(session.userName || session.userEmail || 'Guest User')}</h4>
-                <p><strong>Session ID:</strong> ${escapeHtml(session.id)}</p>
-                <p><strong>Started:</strong> ${escapeHtml(formatDate(session.startedAt))}</p>
-                <p><strong>Last Message:</strong> ${escapeHtml(formatDate(session.lastMessageAt))}</p>
-                <p><strong>Messages:</strong> ${escapeHtml(String(session.messageCount))}</p>
-            </div>
-        `).join('');
+        totalSessionsPages = data.totalPages;
 
-        // Add click handlers
+        const sessionsHTML = data.sessions.map(session => {
+            const hasSummary = session.summary !== null;
+            const summaryHTML = hasSummary ? `
+                <div class="session-summary">
+                    <p><strong>Customer:</strong> ${escapeHtml(session.summary.customerName || 'Unknown')}</p>
+                    <p><strong>Summary:</strong> ${escapeHtml(session.summary.summary)}</p>
+                    <p><strong>Next Action:</strong> ${escapeHtml(session.summary.nextAction || 'N/A')}</p>
+                </div>
+            ` : '';
+
+            return `
+                <div class="session-item" data-session-id="${escapeHtml(session.id)}">
+                    <div class="session-header">
+                        <h4>${escapeHtml(session.userName || session.userEmail || 'Guest User')}</h4>
+                        <div class="session-actions">
+                            <button class="btn btn-small btn-summary" data-session-id="${escapeHtml(session.id)}" onclick="generateSessionSummary('${escapeHtml(session.id)}'); event.stopPropagation();">
+                                ${hasSummary ? '🔄 Refresh Summary' : '✨ AI Summary'}
+                            </button>
+                            <button class="btn btn-small btn-export" data-session-id="${escapeHtml(session.id)}" onclick="exportToGoogleSheets('${escapeHtml(session.id)}'); event.stopPropagation();">
+                                📊 Copy to Google Sheets
+                            </button>
+                        </div>
+                    </div>
+                    <p><strong>Session ID:</strong> ${escapeHtml(session.id)}</p>
+                    <p><strong>Started:</strong> ${escapeHtml(formatDate(session.startedAt))}</p>
+                    <p><strong>Last Message:</strong> ${escapeHtml(formatDate(session.lastMessageAt))}</p>
+                    <p><strong>Messages:</strong> ${escapeHtml(String(session.messageCount))}</p>
+                    ${summaryHTML}
+                </div>
+            `;
+        }).join('');
+
+        if (append) {
+            // Remove the "Show More" button if it exists
+            const showMoreBtn = sessionsList.querySelector('.show-more-btn');
+            if (showMoreBtn) {
+                showMoreBtn.remove();
+            }
+            sessionsList.insertAdjacentHTML('beforeend', sessionsHTML);
+        } else {
+            sessionsList.innerHTML = sessionsHTML;
+        }
+
+        // Add "Show More" button if there are more pages
+        if (currentSessionsPage < totalSessionsPages) {
+            const showMoreBtn = document.createElement('button');
+            showMoreBtn.className = 'btn btn-secondary show-more-btn';
+            showMoreBtn.textContent = 'Show More';
+            showMoreBtn.style.marginTop = '20px';
+            showMoreBtn.style.width = '100%';
+            showMoreBtn.onclick = () => {
+                currentSessionsPage++;
+                loadSessions(true);
+            };
+            sessionsList.appendChild(showMoreBtn);
+        }
+
+        // Add click handlers to session items (not buttons)
         document.querySelectorAll('.session-item').forEach(item => {
-            item.addEventListener('click', () => {
-                loadSessionDetail(item.dataset.sessionId);
+            item.addEventListener('click', (e) => {
+                // Don't trigger if clicking on buttons
+                if (!e.target.classList.contains('btn')) {
+                    loadSessionDetail(item.dataset.sessionId);
+                }
             });
         });
     } catch (error) {
@@ -271,11 +327,22 @@ const loadSessionDetail = async (sessionId, silentRefresh = false) => {
     try {
         const data = await apiCall(`/conversations/sessions/${sessionId}`);
         
+        const summaryHTML = data.summary ? `
+            <div class="summary-card">
+                <h3>AI Summary</h3>
+                <p><strong>Customer Name:</strong> ${escapeHtml(data.summary.customerName || 'Unknown')}</p>
+                <p><strong>Summary:</strong> ${escapeHtml(data.summary.summary)}</p>
+                <p><strong>Next Action:</strong> ${escapeHtml(data.summary.nextAction || 'N/A')}</p>
+                <p class="summary-date"><small>Generated: ${escapeHtml(formatDate(data.summary.createdAt))}</small></p>
+            </div>
+        ` : '';
+
         sessionInfo.innerHTML = `
             <p><strong>Session ID:</strong> ${escapeHtml(data.session.id)}</p>
             <p><strong>User:</strong> ${escapeHtml(data.session.userName || data.session.userEmail || 'Guest User')}</p>
             <p><strong>Started:</strong> ${escapeHtml(formatDate(data.session.startedAt))}</p>
             <p><strong>Last Message:</strong> ${escapeHtml(formatDate(data.session.lastMessageAt))}</p>
+            ${summaryHTML}
         `;
 
         messagesList.innerHTML = data.messages.map(msg => {
@@ -734,6 +801,64 @@ const deleteFreeZone = async (freeZoneId) => {
 document.getElementById('invoice-status-filter')?.addEventListener('change', () => {
     loadInvoices();
 });
+
+// Function to generate AI summary for a session
+const generateSessionSummary = async (sessionId) => {
+    try {
+        const btn = document.querySelector(`button[data-session-id="${sessionId}"].btn-summary`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Generating...';
+        }
+
+        const data = await apiCall(`/conversations/sessions/${sessionId}/summary`, {
+            method: 'POST',
+        });
+
+        if (data.summary) {
+            alert(`Summary generated successfully!\n\nCustomer: ${data.summary.customerName}\nSummary: ${data.summary.summary}\nNext Action: ${data.summary.nextAction}`);
+            // Reload sessions to show the new summary
+            loadSessions(false);
+        }
+    } catch (error) {
+        alert(`Failed to generate summary: ${error.message}`);
+    } finally {
+        const btn = document.querySelector(`button[data-session-id="${sessionId}"].btn-summary`);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '✨ AI Summary';
+        }
+    }
+};
+
+// Function to export conversation to Google Sheets
+const exportToGoogleSheets = async (sessionId) => {
+    try {
+        const btn = document.querySelector(`button[data-session-id="${sessionId}"].btn-export`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Exporting...';
+        }
+
+        const data = await apiCall(`/conversations/sessions/${sessionId}/export-to-sheets`, {
+            method: 'POST',
+        });
+
+        alert(`Export to Google Sheets:\n\n${data.message}\n\nNote: ${data.note}`);
+    } catch (error) {
+        alert(`Failed to export: ${error.message}`);
+    } finally {
+        const btn = document.querySelector(`button[data-session-id="${sessionId}"].btn-export`);
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = '📊 Copy to Google Sheets';
+        }
+    }
+};
+
+// Make functions globally available
+window.generateSessionSummary = generateSessionSummary;
+window.exportToGoogleSheets = exportToGoogleSheets;
 
 // Add "Link to Customer" button in conversation detail
 const originalLoadSessionDetail = loadSessionDetail;

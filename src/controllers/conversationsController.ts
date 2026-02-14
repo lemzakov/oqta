@@ -1,9 +1,12 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma.js';
+import { generateObject } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 
 export const getSessions = async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 50 } = req.query;
+    const { page = 1, limit = 10 } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
     // Get all unique session IDs from n8n_chat_histories table
@@ -28,11 +31,15 @@ export const getSessions = async (req: Request, res: Response) => {
     `;
     const total = Number(totalResult[0]?.count || 0);
 
-    // Try to get additional info from sessions table if available
+    // Try to get additional info from sessions table and summaries
     const sessionsWithDetails = await Promise.all(
       uniqueSessions.map(async (sessionData) => {
         const sessionInfo = await prisma.session.findFirst({
           where: { id: sessionData.session_id },
+        });
+
+        const summary = await prisma.conversationSummary.findUnique({
+          where: { sessionId: sessionData.session_id },
         });
 
         return {
@@ -43,6 +50,12 @@ export const getSessions = async (req: Request, res: Response) => {
           startedAt: sessionData.first_message_at,
           lastMessageAt: sessionData.last_message_at,
           messageCount: Number(sessionData.message_count),
+          summary: summary ? {
+            customerName: summary.customerName,
+            summary: summary.summary,
+            nextAction: summary.nextAction,
+            createdAt: summary.createdAt,
+          } : null,
         };
       })
     );
@@ -81,6 +94,11 @@ export const getSessionMessages = async (req: Request, res: Response) => {
       where: { id: sessionId },
     });
 
+    // Get summary if available
+    const summary = await prisma.conversationSummary.findUnique({
+      where: { sessionId },
+    });
+
     // Get session metadata from messages
     const firstMessage = messages[0];
     const lastMessage = messages[messages.length - 1];
@@ -94,6 +112,12 @@ export const getSessionMessages = async (req: Request, res: Response) => {
         startedAt: firstMessage.createdAt,
         lastMessageAt: lastMessage.createdAt,
       },
+      summary: summary ? {
+        customerName: summary.customerName,
+        summary: summary.summary,
+        nextAction: summary.nextAction,
+        createdAt: summary.createdAt,
+      } : null,
       messages: messages.map((msg: any) => {
         // Parse the JSONB message field from n8n format
         // n8n stores messages like: { "type": "ai|human", "content": "...", "tool_calls": [], ... }
@@ -113,5 +137,174 @@ export const getSessionMessages = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Get session messages error:', error);
     res.status(500).json({ error: 'Failed to fetch session messages' });
+  }
+};
+
+export const generateSummary = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    // Check if summary already exists
+    const existingSummary = await prisma.conversationSummary.findUnique({
+      where: { sessionId },
+    });
+
+    if (existingSummary) {
+      return res.json({
+        summary: {
+          customerName: existingSummary.customerName,
+          summary: existingSummary.summary,
+          nextAction: existingSummary.nextAction,
+          createdAt: existingSummary.createdAt,
+        },
+        cached: true,
+      });
+    }
+
+    // Get conversation history
+    const messages = await prisma.chatHistory.findMany({
+      where: { sessionId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    if (messages.length === 0) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Format messages for AI
+    const conversationHistory = messages.map((msg: any) => {
+      const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+      const role = messageData.type === 'human' ? 'user' : 'assistant';
+      return {
+        role,
+        content: messageData.content || '',
+      };
+    });
+
+    // Check if OpenAI API key is configured
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OpenAI API key not configured' });
+    }
+
+    // Generate summary using Vercel AI SDK with GPT-4 mini
+    const summarySchema = z.object({
+      customerName: z.string().describe('The name of the customer or "Unknown" if not mentioned'),
+      summary: z.string().describe('A concise summary of the conversation in 2-3 sentences'),
+      nextAction: z.string().describe('What is expected next or what follow-up action is needed'),
+    });
+
+    const { object } = await generateObject({
+      model: openai('gpt-4o-mini'),
+      schema: summarySchema,
+      prompt: `You are analyzing a customer service conversation. Based on the following conversation history, provide a summary.
+
+Conversation:
+${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n\n')}
+
+Generate a summary that includes:
+1. Customer name (if mentioned, otherwise "Unknown")
+2. A brief summary of the conversation (2-3 sentences)
+3. What is expected next or what action should be taken`,
+    });
+
+    // Save summary to database
+    const savedSummary = await prisma.conversationSummary.create({
+      data: {
+        sessionId,
+        customerName: object.customerName,
+        summary: object.summary,
+        nextAction: object.nextAction,
+      },
+    });
+
+    res.json({
+      summary: {
+        customerName: savedSummary.customerName,
+        summary: savedSummary.summary,
+        nextAction: savedSummary.nextAction,
+        createdAt: savedSummary.createdAt,
+      },
+      cached: false,
+    });
+  } catch (error) {
+    console.error('Generate summary error:', error);
+    res.status(500).json({ error: 'Failed to generate summary' });
+  }
+};
+
+export const exportToGoogleSheets = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    // Get conversation data
+    const messages = await prisma.chatHistory.findMany({
+      where: { sessionId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    if (messages.length === 0) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Get session info
+    const session = await prisma.session.findUnique({
+      where: { id: sessionId },
+    });
+
+    // Get summary if available
+    const summary = await prisma.conversationSummary.findUnique({
+      where: { sessionId },
+    });
+
+    // Prepare data for export
+    const exportData = {
+      sessionId,
+      userName: session?.userName || 'Guest User',
+      userEmail: session?.userEmail || null,
+      startedAt: messages[0].createdAt,
+      lastMessageAt: messages[messages.length - 1].createdAt,
+      messageCount: messages.length,
+      summary: summary ? {
+        customerName: summary.customerName,
+        summary: summary.summary,
+        nextAction: summary.nextAction,
+      } : null,
+      messages: messages.map((msg: any) => {
+        const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+        return {
+          type: messageData.type || 'human',
+          content: messageData.content || '',
+          createdAt: msg.createdAt,
+        };
+      }),
+    };
+
+    // Get n8n URL from settings
+    const n8nUrlSetting = await prisma.setting.findUnique({
+      where: { key: 'n8n_url' },
+    });
+
+    if (!n8nUrlSetting || !n8nUrlSetting.value) {
+      return res.status(400).json({ 
+        error: 'n8n URL not configured. Please configure it in Settings.' 
+      });
+    }
+
+    // TODO: Trigger n8n webhook endpoint
+    // For now, just return the data that would be sent
+    // The actual n8n endpoint will be configured later
+    res.json({
+      message: 'Export to Google Sheets endpoint ready. Configure n8n webhook URL in Settings.',
+      data: exportData,
+      n8nUrl: n8nUrlSetting.value,
+      note: 'This endpoint will trigger the n8n workflow once the webhook URL is properly configured.',
+    });
+  } catch (error) {
+    console.error('Export to Google Sheets error:', error);
+    res.status(500).json({ error: 'Failed to export to Google Sheets' });
   }
 };

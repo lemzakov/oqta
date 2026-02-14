@@ -933,3 +933,100 @@ body {
 .btn-danger:hover {
     background-color: #c82333;
 }
+
+/* Session item styling */
+.session-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.session-header h4 {
+    margin: 0;
+    flex: 1;
+}
+
+.session-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.session-summary {
+    margin-top: 15px;
+    padding: 12px;
+    background-color: #e7f3ff;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+}
+
+.session-summary p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.session-summary p:first-child {
+    margin-top: 0;
+}
+
+.session-summary p:last-child {
+    margin-bottom: 0;
+}
+
+.summary-card {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #e7f3ff;
+    border-left: 4px solid #007bff;
+    border-radius: 4px;
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #007bff;
+    font-size: 18px;
+}
+
+.summary-card p {
+    margin: 10px 0;
+}
+
+.summary-date {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.show-more-btn {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+.btn-summary {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-summary:hover {
+    background-color: #218838;
+}
+
+.btn-export {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.btn-export:hover {
+    background-color: #138496;
+}
