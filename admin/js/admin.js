@@ -835,6 +835,8 @@ const generateSessionSummary = async (sessionId) => {
 
 // Function to export conversation to Google Sheets
 const exportToGoogleSheets = async (sessionId) => {
+    console.log('Export to Google Sheets triggered for session:', sessionId);
+    
     try {
         const btn = document.querySelector(`button[data-session-id="${sessionId}"].btn-export`);
         if (btn) {
@@ -846,8 +848,15 @@ const exportToGoogleSheets = async (sessionId) => {
             method: 'POST',
         });
 
-        alert(`Export to Google Sheets:\n\n${data.message}\n\nNote: ${data.note}`);
+        console.log('Export to Google Sheets response:', data);
+        
+        if (data.success) {
+            alert(`✓ ${data.message}`);
+        } else {
+            alert(`Export completed:\n\n${data.message || 'Session exported to Google Sheets'}`);
+        }
     } catch (error) {
+        console.error('Failed to export to Google Sheets:', error);
         alert(`Failed to export: ${error.message}`);
     } finally {
         const btn = document.querySelector(`button[data-session-id="${sessionId}"].btn-export`);

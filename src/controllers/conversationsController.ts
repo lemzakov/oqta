@@ -238,7 +238,7 @@ export const exportToGoogleSheets = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
 
-    // Get conversation data
+    // Verify session exists
     const messages = await prisma.chatHistory.findMany({
       where: { sessionId },
       orderBy: {
@@ -249,39 +249,6 @@ export const exportToGoogleSheets = async (req: Request, res: Response) => {
     if (messages.length === 0) {
       return res.status(404).json({ error: 'Session not found' });
     }
-
-    // Get session info
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-    });
-
-    // Get summary if available
-    const summary = await prisma.conversationSummary.findUnique({
-      where: { sessionId },
-    });
-
-    // Prepare data for export
-    const exportData = {
-      sessionId,
-      userName: session?.userName || 'Guest User',
-      userEmail: session?.userEmail || null,
-      startedAt: messages[0].createdAt,
-      lastMessageAt: messages[messages.length - 1].createdAt,
-      messageCount: messages.length,
-      summary: summary ? {
-        customerName: summary.customerName,
-        summary: summary.summary,
-        nextAction: summary.nextAction,
-      } : null,
-      messages: messages.map((msg: any) => {
-        const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
-        return {
-          type: messageData.type || 'human',
-          content: messageData.content || '',
-          createdAt: msg.createdAt,
-        };
-      }),
-    };
 
     // Get Lemzakov AI Labs Google Sheets integration URL from settings
     const n8nSheetsUrlSetting = await prisma.setting.findUnique({
@@ -294,15 +261,43 @@ export const exportToGoogleSheets = async (req: Request, res: Response) => {
       });
     }
 
-    // TODO: Trigger Lemzakov AI Labs webhook endpoint
-    // For now, just return the data that would be sent
-    // The actual webhook endpoint will be configured later
-    res.json({
-      message: 'Export to Google Sheets endpoint ready. Configure Lemzakov AI Labs webhook URL in Settings.',
-      data: exportData,
-      n8nUrl: n8nSheetsUrlSetting.value,
-      note: 'This endpoint will trigger the Lemzakov AI Labs workflow once the webhook URL is properly configured.',
-    });
+    const webhookUrl = n8nSheetsUrlSetting.value;
+    console.log('Exporting conversation to Google Sheets:', { sessionId, webhookUrl });
+
+    // Send session_id to the Lemzakov AI Labs webhook
+    const payload = { session_id: sessionId };
+    
+    try {
+      const webhookResponse = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!webhookResponse.ok) {
+        const errorText = await webhookResponse.text();
+        console.error('Webhook request failed:', { status: webhookResponse.status, error: errorText });
+        return res.status(500).json({ 
+          error: `Failed to export to Google Sheets. Webhook returned status ${webhookResponse.status}` 
+        });
+      }
+
+      const webhookData = await webhookResponse.json().catch(() => ({}));
+      console.log('Successfully exported to Google Sheets:', { sessionId, response: webhookData });
+
+      res.json({
+        success: true,
+        message: 'Successfully exported conversation to Google Sheets',
+        sessionId,
+      });
+    } catch (webhookError) {
+      console.error('Error calling webhook:', webhookError);
+      return res.status(500).json({ 
+        error: 'Failed to connect to Google Sheets webhook. Please check the webhook URL in Settings.' 
+      });
+    }
   } catch (error) {
     console.error('Export to Google Sheets error:', error);
     res.status(500).json({ error: 'Failed to export to Google Sheets' });
