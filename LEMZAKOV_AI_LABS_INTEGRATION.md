@@ -147,7 +147,7 @@ The admin panel reads messages from `n8n_chat_histories`:
   "messages": [
     {
       "id": 1,
-      "type": "human",  // n8n format
+      "type": "human",  // Lemzakov AI Labs format
       "content": "hi",
       "createdAt": "2024-12-22T08:01:00Z",
       "toolCalls": [],
@@ -157,7 +157,7 @@ The admin panel reads messages from `n8n_chat_histories`:
     },
     {
       "id": 2,
-      "type": "ai",  // n8n format
+      "type": "ai",  // Lemzakov AI Labs format
       "content": "Hello! I'm Leen...",
       "createdAt": "2024-12-22T08:01:05Z",
       "toolCalls": [],
