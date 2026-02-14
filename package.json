@@ -25,9 +25,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.29",
     "@prisma/client": "^5.22.0",
     "@qdrant/js-client-rest": "^1.16.2",
     "@types/multer": "^2.0.0",
+    "ai": "^6.0.86",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -35,7 +37,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
-    "prisma": "^5.22.0"
+    "prisma": "^5.22.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
