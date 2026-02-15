@@ -31,7 +31,7 @@ export const getSessions = async (req: Request, res: Response) => {
     `;
     const total = Number(totalResult[0]?.count || 0);
 
-    // Try to get additional info from sessions table and summaries
+    // Try to get additional info from sessions table, summaries, and linked customers
     const sessionsWithDetails = await Promise.all(
       uniqueSessions.map(async (sessionData) => {
         const sessionInfo = await prisma.session.findFirst({
@@ -40,6 +40,14 @@ export const getSessions = async (req: Request, res: Response) => {
 
         const summary = await prisma.conversationSummary.findUnique({
           where: { sessionId: sessionData.session_id },
+        });
+
+        // Check if session is linked to a customer
+        const customerSession = await prisma.customerSession.findFirst({
+          where: { sessionId: sessionData.session_id },
+          include: {
+            customer: true,
+          },
         });
 
         return {
@@ -56,6 +64,13 @@ export const getSessions = async (req: Request, res: Response) => {
             summary: summary.summary,
             nextAction: summary.nextAction,
             createdAt: summary.createdAt,
+          } : null,
+          customer: customerSession ? {
+            id: customerSession.customer.id,
+            name: customerSession.customer.name,
+            email: customerSession.customer.email,
+            phone: customerSession.customer.phone,
+            company: customerSession.customer.company,
           } : null,
         };
       })
@@ -322,5 +337,134 @@ export const exportToGoogleSheets = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Export to Google Sheets error:', error);
     res.status(500).json({ error: 'Failed to export to Google Sheets' });
+  }
+};
+
+/**
+ * Link a session to a customer
+ */
+export const linkSessionToCustomer = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+    const { customerId } = req.body;
+
+    if (!customerId) {
+      return res.status(400).json({ error: 'Customer ID is required' });
+    }
+
+    // Check if customer exists
+    const customer = await prisma.customer.findUnique({
+      where: { id: customerId },
+    });
+
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Check if already linked
+    const existing = await prisma.customerSession.findUnique({
+      where: {
+        customerId_sessionId: {
+          customerId,
+          sessionId,
+        },
+      },
+    });
+
+    if (existing) {
+      return res.json({ 
+        message: 'Session already linked to customer',
+        customerSession: existing,
+      });
+    }
+
+    // Create the link
+    const customerSession = await prisma.customerSession.create({
+      data: {
+        customerId,
+        sessionId,
+      },
+      include: {
+        customer: true,
+      },
+    });
+
+    res.json({
+      message: 'Session linked to customer successfully',
+      customerSession,
+    });
+  } catch (error) {
+    console.error('Link session to customer error:', error);
+    res.status(500).json({ error: 'Failed to link session to customer' });
+  }
+};
+
+/**
+ * Extract customer data from conversation using AI
+ */
+export const extractCustomerData = async (req: Request, res: Response) => {
+  try {
+    const { sessionId } = req.params;
+
+    // Get conversation history
+    const messages = await prisma.chatHistory.findMany({
+      where: { sessionId },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+
+    if (messages.length === 0) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // Format messages for AI
+    const conversationHistory = messages.map((msg: any) => {
+      const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+      const role = messageData.type === 'human' ? 'user' : 'assistant';
+      return {
+        role,
+        content: messageData.content || '',
+      };
+    });
+
+    // Check if OpenAI API key is configured
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OpenAI API key not configured' });
+    }
+
+    // Extract customer data using Vercel AI SDK
+    const customerDataSchema = z.object({
+      name: z.string().nullable().describe('The full name of the customer, or null if not mentioned'),
+      email: z.string().nullable().describe('The email address of the customer, or null if not mentioned'),
+      phone: z.string().nullable().describe('The phone number in international format (e.g., +971501234567), or null if not mentioned'),
+      company: z.string().nullable().describe('The company name or business name, or null if not mentioned'),
+      notes: z.string().nullable().describe('Any additional relevant information about the customer or their needs'),
+    });
+
+    const { object } = await generateObject({
+      model: openai('gpt-4o-mini'),
+      schema: customerDataSchema,
+      prompt: `You are extracting customer information from a conversation. Based on the following conversation history, extract the customer's details.
+
+Conversation:
+${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n\n')}
+
+Extract the following information if mentioned:
+1. Customer's full name
+2. Email address
+3. Phone number (in international format like +971501234567)
+4. Company or business name
+5. Any other relevant notes about the customer or their inquiry
+
+Return null for any field that is not mentioned in the conversation.`,
+    });
+
+    res.json({
+      customerData: object,
+    });
+  } catch (error) {
+    console.error('Extract customer data error:', error);
+    res.status(500).json({ error: 'Failed to extract customer data' });
   }
 };
