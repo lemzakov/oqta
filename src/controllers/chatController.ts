@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma.js';
 
-// Note: n8n_chat_histories table is managed by n8n
+// Note: Chat histories table is managed by Lemzakov AI Labs integration
 // We only create/update sessions here, not individual messages
-// Messages are written directly by n8n workflow
+// Messages are written directly by Lemzakov AI Labs workflow
 
 export const saveMessage = async (req: Request, res: Response) => {
   try {
@@ -14,7 +14,7 @@ export const saveMessage = async (req: Request, res: Response) => {
     }
 
     // Find or create session only
-    // n8n will write messages to n8n_chat_histories table directly
+    // Lemzakov AI Labs will write messages to chat histories table directly
     let session = await prisma.session.findUnique({
       where: { id: sessionId },
     });
