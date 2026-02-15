@@ -7,6 +7,19 @@ import { z } from 'zod';
 // Telegram Bot API base URL
 const TELEGRAM_API_BASE = 'https://api.telegram.org/bot';
 
+// Type definitions for Telegram API responses
+interface TelegramApiResponse {
+  ok: boolean;
+  result?: any;
+  description?: string;
+}
+
+interface MessageData {
+  type: string;
+  content: string;
+  [key: string]: any;
+}
+
 /**
  * Send a message via Telegram Bot API
  */
@@ -84,7 +97,9 @@ async function generateConversationSummary(sessionId: string) {
 
   // Format messages for AI
   const conversationHistory = messages.map((msg: any) => {
-    const messageData = typeof msg.message === 'string' ? JSON.parse(msg.message) : msg.message;
+    const messageData: MessageData = typeof msg.message === 'string' 
+      ? JSON.parse(msg.message) as MessageData
+      : msg.message as MessageData;
     const role = messageData.type === 'human' ? 'user' : 'assistant';
     return {
       role,
@@ -278,7 +293,7 @@ export const setWebhook = async (req: Request, res: Response) => {
       }),
     });
 
-    const data = await response.json() as any;
+    const data = await response.json() as TelegramApiResponse;
     
     if (data.ok) {
       res.json({ 
