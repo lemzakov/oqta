@@ -11,7 +11,8 @@ const API_BASE = '/api';
 // State
 let currentPage = 'dashboard';
 let authToken = null;
-let conversationAutoRefreshInterval = null;
+let lastSessionsRefresh = null; // Track when sessions were last refreshed
+let previousSessionIds = new Set(); // Track sessions from previous load to detect new ones
 
 // Hamburger menu functionality
 const hamburgerMenu = document.getElementById('hamburger-menu');
@@ -140,12 +141,6 @@ document.querySelectorAll('.nav-link').forEach(link => {
 });
 
 const navigateToPage = (page) => {
-    // Clear any existing auto-refresh intervals
-    if (conversationAutoRefreshInterval) {
-        clearInterval(conversationAutoRefreshInterval);
-        conversationAutoRefreshInterval = null;
-    }
-
     // Update nav links
     document.querySelectorAll('.nav-link').forEach(link => {
         if (link.dataset.page === page) {
@@ -169,19 +164,6 @@ const navigateToPage = (page) => {
             break;
         case 'conversations':
             loadSessions();
-            // Auto-refresh conversations every 30 seconds (only when viewing list)
-            conversationAutoRefreshInterval = setInterval(() => {
-                if (currentPage === 'conversations') {
-                    const sessionDetail = document.getElementById('session-detail');
-                    // Only refresh if viewing the list, not when viewing a specific conversation
-                    if (sessionDetail.style.display !== 'block') {
-                        // Silently refresh only the first page
-                        if (currentSessionsPage === 1) {
-                            loadSessions(false);
-                        }
-                    }
-                }
-            }, 30000); // Changed from 10 seconds to 30 seconds
             break;
         case 'customers':
             loadCustomers();
@@ -221,6 +203,28 @@ const loadDashboard = async () => {
 let currentSessionsPage = 1;
 let totalSessionsPages = 1;
 
+// Update the timestamp display
+const updateLastRefreshTimestamp = () => {
+    const timestampEl = document.getElementById('sessions-last-updated');
+    if (timestampEl && lastSessionsRefresh) {
+        const now = new Date();
+        const diffSeconds = Math.floor((now - lastSessionsRefresh) / 1000);
+        
+        let timeText;
+        if (diffSeconds < 60) {
+            timeText = 'just now';
+        } else if (diffSeconds < 3600) {
+            const minutes = Math.floor(diffSeconds / 60);
+            timeText = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        } else {
+            const hours = Math.floor(diffSeconds / 3600);
+            timeText = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        }
+        
+        timestampEl.textContent = `Last updated: ${timeText}`;
+    }
+};
+
 const loadSessions = async (append = false) => {
     const sessionsList = document.getElementById('sessions-list');
     
@@ -238,9 +242,28 @@ const loadSessions = async (append = false) => {
         }
 
         totalSessionsPages = data.totalPages;
+        
+        // Track which sessions are new
+        const currentSessionIds = new Set(data.sessions.map(s => s.id));
+        const newSessionIds = new Set();
+        
+        if (!append && previousSessionIds.size > 0) {
+            // Detect new sessions that weren't in the previous load
+            for (const id of currentSessionIds) {
+                if (!previousSessionIds.has(id)) {
+                    newSessionIds.add(id);
+                }
+            }
+        }
+        
+        // Update the previous sessions set for next comparison
+        if (!append) {
+            previousSessionIds = currentSessionIds;
+        }
 
         const sessionsHTML = data.sessions.map(session => {
             const hasSummary = session.summary !== null;
+            const isNew = newSessionIds.has(session.id);
             const summaryHTML = hasSummary ? `
                 <div class="session-summary">
                     <p><strong>Customer:</strong> ${escapeHtml(session.summary.customerName || 'Unknown')}</p>
@@ -250,7 +273,8 @@ const loadSessions = async (append = false) => {
             ` : '';
 
             return `
-                <div class="session-item" data-session-id="${escapeHtml(session.id)}">
+                <div class="session-item ${isNew ? 'session-new' : ''}" data-session-id="${escapeHtml(session.id)}">
+                    ${isNew ? '<div class="new-badge">NEW</div>' : ''}
                     <div class="session-header">
                         <h4>${escapeHtml(session.userName || session.userEmail || 'Guest User')}</h4>
                         <div class="session-actions">
@@ -305,6 +329,12 @@ const loadSessions = async (append = false) => {
                 }
             });
         });
+        
+        // Update the last refresh timestamp
+        if (!append) {
+            lastSessionsRefresh = new Date();
+            updateLastRefreshTimestamp();
+        }
     } catch (error) {
         sessionsList.innerHTML = `<p class="error-message show">Failed to load sessions: ${error.message}</p>`;
     }
@@ -369,6 +399,18 @@ document.getElementById('back-to-sessions').addEventListener('click', () => {
     document.getElementById('sessions-list').style.display = 'block';
     document.getElementById('session-detail').style.display = 'none';
 });
+
+// Add refresh button event listener
+document.getElementById('refresh-sessions-btn')?.addEventListener('click', () => {
+    loadSessions(false);
+});
+
+// Update timestamp display periodically
+setInterval(() => {
+    if (currentPage === 'conversations') {
+        updateLastRefreshTimestamp();
+    }
+}, 10000); // Update every 10 seconds
 
 // Settings
 const loadSettings = async () => {

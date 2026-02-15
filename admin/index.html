@@ -150,7 +150,15 @@
 
             <!-- Conversations Page -->
             <div id="conversations-content" class="content-section">
-                <h1>Conversations</h1>
+                <div class="page-header">
+                    <h1>Conversations</h1>
+                    <div class="conversation-controls">
+                        <button id="refresh-sessions-btn" class="btn btn-secondary">
+                            🔄 Refresh
+                        </button>
+                        <span id="sessions-last-updated" class="last-updated-text"></span>
+                    </div>
+                </div>
                 <div id="sessions-list" class="sessions-list">
                     <p class="loading">Loading sessions...</p>
                 </div>

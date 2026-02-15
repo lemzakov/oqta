@@ -1030,3 +1030,47 @@ body {
 .btn-export:hover {
     background-color: #138496;
 }
+
+/* Conversation page header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.conversation-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.last-updated-text {
+    color: #718096;
+    font-size: 14px;
+}
+
+/* New session indicator */
+.session-new {
+    position: relative;
+    background-color: #f0f9ff !important;
+    border-left: 4px solid #3b82f6;
+}
+
+.session-new:hover {
+    background-color: #e0f2fe !important;
+}
+
+.new-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #3b82f6;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
