@@ -52,6 +52,7 @@ export const getSessions = async (req: Request, res: Response) => {
           messageCount: Number(sessionData.message_count),
           summary: summary ? {
             customerName: summary.customerName,
+            phoneNumber: summary.phoneNumber,
             summary: summary.summary,
             nextAction: summary.nextAction,
             createdAt: summary.createdAt,
@@ -153,6 +154,7 @@ export const generateSummary = async (req: Request, res: Response) => {
       return res.json({
         summary: {
           customerName: existingSummary.customerName,
+          phoneNumber: existingSummary.phoneNumber,
           summary: existingSummary.summary,
           nextAction: existingSummary.nextAction,
           createdAt: existingSummary.createdAt,
@@ -191,6 +193,7 @@ export const generateSummary = async (req: Request, res: Response) => {
     // Generate summary using Vercel AI SDK with GPT-4 mini
     const summarySchema = z.object({
       customerName: z.string().describe('The name of the customer or "Unknown" if not mentioned'),
+      phoneNumber: z.string().nullable().describe('The phone number of the customer if mentioned in the conversation, in international format (e.g., +971501234567), or null if not mentioned'),
       summary: z.string().describe('A concise summary of the conversation in 2-3 sentences'),
       nextAction: z.string().describe('What is expected next or what follow-up action is needed'),
     });
@@ -205,15 +208,29 @@ ${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n\n')}
 
 Generate a summary that includes:
 1. Customer name (if mentioned, otherwise "Unknown")
-2. A brief summary of the conversation (2-3 sentences)
-3. What is expected next or what action should be taken`,
+2. Customer phone number (if mentioned, in international format like +971501234567)
+3. A brief summary of the conversation (2-3 sentences)
+4. What is expected next or what action should be taken`,
     });
+
+    // Update session name if customer name is provided
+    if (object.customerName && object.customerName !== 'Unknown') {
+      await prisma.session.upsert({
+        where: { id: sessionId },
+        update: { userName: object.customerName },
+        create: {
+          id: sessionId,
+          userName: object.customerName,
+        },
+      });
+    }
 
     // Save summary to database
     const savedSummary = await prisma.conversationSummary.create({
       data: {
         sessionId,
         customerName: object.customerName,
+        phoneNumber: object.phoneNumber,
         summary: object.summary,
         nextAction: object.nextAction,
       },
@@ -222,6 +239,7 @@ Generate a summary that includes:
     res.json({
       summary: {
         customerName: savedSummary.customerName,
+        phoneNumber: savedSummary.phoneNumber,
         summary: savedSummary.summary,
         nextAction: savedSummary.nextAction,
         createdAt: savedSummary.createdAt,

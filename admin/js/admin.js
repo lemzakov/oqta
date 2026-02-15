@@ -264,19 +264,28 @@ const loadSessions = async (append = false) => {
         const sessionsHTML = data.sessions.map(session => {
             const hasSummary = session.summary !== null;
             const isNew = newSessionIds.has(session.id);
+            const phoneNumber = hasSummary && session.summary.phoneNumber ? session.summary.phoneNumber : null;
+            const whatsappLink = phoneNumber ? `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}` : null;
+            
             const summaryHTML = hasSummary ? `
                 <div class="session-summary">
                     <p><strong>Customer:</strong> ${escapeHtml(session.summary.customerName || 'Unknown')}</p>
+                    ${phoneNumber ? `<p><strong>Phone:</strong> ${escapeHtml(phoneNumber)} ${whatsappLink ? `<a href="${whatsappLink}" target="_blank" class="whatsapp-link">💬 Text in WhatsApp</a>` : ''}</p>` : ''}
                     <p><strong>Summary:</strong> ${escapeHtml(session.summary.summary)}</p>
                     <p><strong>Next Action:</strong> ${escapeHtml(session.summary.nextAction || 'N/A')}</p>
                 </div>
             ` : '';
 
+            // Use customer name from summary if available, otherwise use session userName
+            const displayName = (hasSummary && session.summary.customerName && session.summary.customerName !== 'Unknown') 
+                ? session.summary.customerName 
+                : (session.userName || session.userEmail || 'Guest User');
+
             return `
                 <div class="session-item ${isNew ? 'session-new' : ''}" data-session-id="${escapeHtml(session.id)}">
                     ${isNew ? '<div class="new-badge">NEW</div>' : ''}
                     <div class="session-header">
-                        <h4>${escapeHtml(session.userName || session.userEmail || 'Guest User')}</h4>
+                        <h4>${escapeHtml(displayName)}</h4>
                         <div class="session-actions">
                             <button class="btn btn-small btn-summary" data-session-id="${escapeHtml(session.id)}" onclick="generateSessionSummary('${escapeHtml(session.id)}'); event.stopPropagation();">
                                 ${hasSummary ? '🔄 Refresh Summary' : '✨ AI Summary'}
