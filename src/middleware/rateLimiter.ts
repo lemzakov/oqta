@@ -18,6 +18,15 @@ export const aiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Login rate limiter (strict to prevent brute-force attacks)
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 login attempts per 15 minutes
+  message: 'Too many login attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Export operations rate limiter
 export const exportLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
