@@ -119,6 +119,20 @@ model Invoice {
   @@map("invoices")
 }
 
+model AdminLoginLog {
+  id        String   @id @default(uuid())
+  email     String
+  ipAddress String?  @map("ip_address") @db.VarChar(45)
+  userAgent String?  @map("user_agent") @db.Text
+  success   Boolean
+  error     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@index([createdAt])
+  @@map("admin_login_logs")
+}
+
 model FreeZoneIntegration {
   id          String   @id @default(uuid())
   name        String   // "IFZA", "Meydan", "DAFZA", "JAFZA", "UMQ FZ", etc.
