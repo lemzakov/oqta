@@ -46,6 +46,7 @@ model ConversationSummary {
   id           String   @id @default(uuid())
   sessionId    String   @unique @map("session_id") @db.VarChar(255)
   customerName String?  @map("customer_name") @db.Text
+  phoneNumber  String?  @map("phone_number") @db.VarChar(50)
   summary      String   @db.Text
   nextAction   String?  @map("next_action") @db.Text
   createdAt    DateTime @default(now()) @map("created_at")

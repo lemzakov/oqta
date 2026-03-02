@@ -6,7 +6,7 @@ const USER_ID_KEY = "oqta_user_id"; // Persistent user ID (UUID)
 const CHAT_ID_KEY = "oqta_chat_id"; // Current chat ID (UUID)
 const CONVERSATION_KEY = "oqta_conversation"; // Conversation history
 const LANGUAGE_KEY = "oqta_language"; // Selected language
-const N8N_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
+const LEMZAKOV_AI_WEBHOOK_URL = "https://lemzakov.app.n8n.cloud/webhook/44d1ca27-d30f-4088-841b-0853846bb000";
 const DEFAULT_SYSTEM_PROMPT = "I want to register company"; // Can be customized based on user context
 const WELCOME_MESSAGE = "Hello! Welcome to OQTA AI. How can I help you today?";
 const WELCOME_BACK_MESSAGE = "Welcome Back!";
@@ -404,8 +404,8 @@ function hideLoadingIndicator() {
     }
 }
 
-// ===== n8n Webhook Integration =====
-async function sendToN8N(message) {
+// ===== Lemzakov AI Labs Webhook Integration =====
+async function sendToLemzakovAI(message) {
     if (!SESSION) {
         createNewSession();
     }
@@ -415,7 +415,7 @@ async function sendToN8N(message) {
     // Use the default system prompt (can be customized based on context)
     const systemPrompt = DEFAULT_SYSTEM_PROMPT;
     
-    // Prepare the request body in the format expected by n8n
+    // Prepare the request body in the format expected by Lemzakov AI Labs
     const requestBody = {
         systemPrompt: systemPrompt,
         user_id: SESSION.user_id,
@@ -427,10 +427,10 @@ async function sendToN8N(message) {
         chatInput: message
     };
     
-    console.log('Sending to n8n:', requestBody);
+    console.log('Sending to Lemzakov AI Labs:', requestBody);
     
     try {
-        const response = await fetch(N8N_WEBHOOK_URL, {
+        const response = await fetch(LEMZAKOV_AI_WEBHOOK_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -443,7 +443,7 @@ async function sendToN8N(message) {
         }
         
         const data = await response.json();
-        console.log('n8n response:', data);
+        console.log('Lemzakov AI Labs response:', data);
         
         // Parse the AI response - handle nested response formats
         let aiResponse = '';
@@ -470,13 +470,13 @@ async function sendToN8N(message) {
         return aiResponse;
         
     } catch (error) {
-        console.error('Error sending to n8n:', error);
+        console.error('Error sending to Lemzakov AI Labs:', error);
         throw error;
     }
 }
 
 // ===== Database Integration =====
-// Note: n8n manages the n8n_chat_histories table directly
+// Note: Lemzakov AI Labs manages the chat histories table directly
 // We don't write to it from the frontend - only read from admin panel
 
 // ===== Message Sending =====
@@ -513,9 +513,9 @@ async function sendMessage(message) {
         // Show typing indicator
         showTypingIndicator();
         
-        // Send to n8n and wait for response
-        // Note: n8n will save both the user message and AI response to n8n_chat_histories table
-        const aiResponse = await sendToN8N(message);
+        // Send to Lemzakov AI Labs and wait for response
+        // Note: Lemzakov AI Labs will save both the user message and AI response to chat histories table
+        const aiResponse = await sendToLemzakovAI(message);
         
         // Hide typing indicator
         removeTypingIndicator();

@@ -1,8 +1,8 @@
-# OQTA AI - n8n Integration
+# OQTA AI - Lemzakov AI Labs Integration
 
 ## Overview
 
-This is a chat application that integrates with n8n for AI-powered conversations about UAE company registration. It includes both a public-facing chat interface and a comprehensive admin panel.
+This is a chat application that integrates with Lemzakov AI Labs for AI-powered conversations about UAE company registration. It includes both a public-facing chat interface and a comprehensive admin panel.
 
 ## Features
 
@@ -10,7 +10,7 @@ This is a chat application that integrates with n8n for AI-powered conversations
 - **Single Page Application**: No authentication required - users can start chatting immediately
 - **Session Persistence**: Conversation history is stored in browser's localStorage
 - **Welcome Back**: Returning users see their previous conversations automatically
-- **n8n Integration**: All chat messages are sent to n8n webhook for AI processing
+- **Lemzakov AI Labs Integration**: All chat messages are sent to Lemzakov AI Labs webhook for AI processing
 - **Multi-language Support**: Language selector with 6 languages (English, Arabic, Russian, Chinese, Hindi, Urdu)
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 
@@ -18,7 +18,7 @@ This is a chat application that integrates with n8n for AI-powered conversations
 - **Authentication**: Secure login for administrators
 - **Dashboard**: Real-time statistics and metrics
 - **Conversations Management**: View and browse all user sessions
-- **Settings**: Configure application settings (WhatsApp, phone, n8n URL)
+- **Settings**: Configure application settings (WhatsApp, phone, Lemzakov AI Labs URLs)
 - **Knowledge Base**: Manage documents in Qdrant vector database
 
 For admin panel setup instructions, see [ADMIN_SETUP.md](ADMIN_SETUP.md).
@@ -61,7 +61,7 @@ The application sends POST requests to the n8n webhook with the following JSON s
 
 ### Expected Response Format
 
-Your n8n workflow should return a JSON response with one of these formats:
+Your Lemzakov AI Labs workflow should return a JSON response with one of these formats:
 
 ```json
 {
@@ -116,7 +116,7 @@ python3 -m http.server 8080
 
 2. Open `http://localhost:8080` in your browser
 
-3. For testing without n8n, the app will show a fallback error message
+3. For testing without Lemzakov AI Labs, the app will show a fallback error message
 
 ## Customization
 
@@ -129,8 +129,8 @@ Edit these constants in `script.js`:
 - `styles.css`: All visual styling
 - Responsive breakpoints at 768px and 480px
 
-### n8n Endpoint
-Update `N8N_WEBHOOK_URL` in `script.js` to point to your n8n webhook
+### Lemzakov AI Labs Endpoint
+Update `LEMZAKOV_AI_WEBHOOK_URL` in `script.js` to point to your Lemzakov AI Labs webhook
 
 ## Browser Support
 

@@ -26,3 +26,12 @@ export const exportLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// Telegram webhook rate limiter (permissive for Telegram API)
+export const telegramWebhookLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // Limit to 60 webhook requests per minute (Telegram can send many)
+  message: 'Too many webhook requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});

@@ -15,6 +15,7 @@ import customersRoutes from './routes/customers.js';
 import billingRoutes from './routes/billing.js';
 import freeZonesRoutes from './routes/free-zones.js';
 import analyticsRoutes from './routes/analytics.js';
+import telegramRoutes from './routes/telegram.js';
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ app.use('/api/customers', customersRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/free-zones', freeZonesRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 // Health check endpoint with database check
 app.get('/api/health', async (req, res) => {
@@ -94,19 +96,22 @@ app.get('/api/health', async (req, res) => {
   res.json(health);
 });
 
+// Serve static files from public directory (created by build process)
+const publicDir = path.join(__dirname, '..', 'public');
+
 // Serve static files for admin panel
-app.use('/admin', express.static(path.join(__dirname, '..', 'admin')));
+app.use('/admin', express.static(path.join(publicDir, 'admin')));
 
 // Serve static files for assets
-app.use('/assets', express.static(path.join(__dirname, '..', 'assets')));
+app.use('/assets', express.static(path.join(publicDir, 'assets')));
 
 // Serve admin panel HTML for /admin route
 app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'admin', 'index.html'));
+  res.sendFile(path.join(publicDir, 'admin', 'index.html'));
 });
 
 // Serve static files (existing frontend) - place this after specific routes
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(publicDir));
 
 // Fallback route for SPA
 app.use((req, res, next) => {
@@ -114,7 +119,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
-  res.sendFile(path.join(__dirname, '..', 'index.html'));
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 
 // Initialize database on startup
