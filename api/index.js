@@ -20,7 +20,7 @@ console.log(`[BOOT] ADMIN_PASSWORD : ${process.env.ADMIN_PASSWORD ? 'set (hidden
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL,
+      url: process.env.POSTGRES_PRISMA_URL || process.env.DATABASE_URL,
     },
   },
 });
