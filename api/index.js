@@ -4,17 +4,29 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import { PrismaClient } from '@prisma/client';
 
+// Static imports so Vercel's nft bundler can include all dist/routes files in the bundle
+import authRoutes from '../dist/routes/auth.js';
+import dashboardRoutes from '../dist/routes/dashboard.js';
+import conversationsRoutes from '../dist/routes/conversations.js';
+import settingsRoutes from '../dist/routes/settings.js';
+import knowledgeRoutes from '../dist/routes/knowledge.js';
+import chatRoutes from '../dist/routes/chat.js';
+import customersRoutes from '../dist/routes/customers.js';
+import billingRoutes from '../dist/routes/billing.js';
+import freeZonesRoutes from '../dist/routes/free-zones.js';
+import analyticsRoutes from '../dist/routes/analytics.js';
+import telegramRoutes from '../dist/routes/telegram.js';
+
 dotenv.config();
 
-const startTs = new Date().toISOString();
-console.log(`[BOOT] ${startTs} Starting Vercel serverless function`);
-console.log(`[BOOT] Node version : ${process.version}`);
-console.log(`[BOOT] NODE_ENV     : ${process.env.NODE_ENV || 'not set'}`);
-console.log(`[BOOT] DATABASE_URL : ${process.env.DATABASE_URL ? 'set (hidden)' : 'NOT SET'}`);
-console.log(`[BOOT] POSTGRES_PRISMA_URL : ${process.env.POSTGRES_PRISMA_URL ? 'set (hidden)' : 'NOT SET'}`);
-console.log(`[BOOT] JWT_SECRET   : ${process.env.JWT_SECRET ? 'set (hidden)' : 'NOT SET'}`);
-console.log(`[BOOT] ADMIN_EMAIL  : ${process.env.ADMIN_EMAIL ? 'set' : 'NOT SET'}`);
-console.log(`[BOOT] ADMIN_PASSWORD : ${process.env.ADMIN_PASSWORD ? 'set (hidden)' : 'NOT SET'}`);
+console.log(`[BOOT] ${new Date().toISOString()} Starting Vercel serverless function`);
+console.log(`[BOOT] Node version         : ${process.version}`);
+console.log(`[BOOT] NODE_ENV             : ${process.env.NODE_ENV || 'not set'}`);
+console.log(`[BOOT] DATABASE_URL         : ${process.env.DATABASE_URL ? 'set (hidden)' : 'NOT SET'}`);
+console.log(`[BOOT] POSTGRES_PRISMA_URL  : ${process.env.POSTGRES_PRISMA_URL ? 'set (hidden)' : 'NOT SET'}`);
+console.log(`[BOOT] JWT_SECRET           : ${process.env.JWT_SECRET ? 'set (hidden)' : 'NOT SET'}`);
+console.log(`[BOOT] ADMIN_EMAIL          : ${process.env.ADMIN_EMAIL ? 'set' : 'NOT SET'}`);
+console.log(`[BOOT] ADMIN_PASSWORD       : ${process.env.ADMIN_PASSWORD ? 'set (hidden)' : 'NOT SET'}`);
 
 // ── Prisma ───────────────────────────────────────────────────────────────────
 const prisma = new PrismaClient({
@@ -37,74 +49,20 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// ── Route imports ────────────────────────────────────────────────────────────
-// Load route modules; log per-route failures so partial outages are visible.
-const loadRoute = async (name, path) => {
-  try {
-    const mod = await import(path);
-    console.log(`[BOOT] ✅ Loaded route: ${name} (${path})`);
-    return mod.default;
-  } catch (err) {
-    console.error(`[BOOT] ❌ Failed to load route: ${name} (${path}) — ${err.message}`);
-    return null;
-  }
-};
+// ── Routes ───────────────────────────────────────────────────────────────────
+app.use('/api/auth',          authRoutes);
+app.use('/api/dashboard',     dashboardRoutes);
+app.use('/api/conversations', conversationsRoutes);
+app.use('/api/settings',      settingsRoutes);
+app.use('/api/knowledge',     knowledgeRoutes);
+app.use('/api/chat',          chatRoutes);
+app.use('/api/customers',     customersRoutes);
+app.use('/api/billing',       billingRoutes);
+app.use('/api/free-zones',    freeZonesRoutes);
+app.use('/api/analytics',     analyticsRoutes);
+app.use('/api/telegram',      telegramRoutes);
 
-const mountRoutes = async () => {
-  const [
-    authRoutes,
-    dashboardRoutes,
-    conversationsRoutes,
-    settingsRoutes,
-    knowledgeRoutes,
-    chatRoutes,
-    customersRoutes,
-    billingRoutes,
-    freeZonesRoutes,
-    analyticsRoutes,
-    telegramRoutes,
-  ] = await Promise.all([
-    loadRoute('auth',          '../dist/routes/auth.js'),
-    loadRoute('dashboard',     '../dist/routes/dashboard.js'),
-    loadRoute('conversations', '../dist/routes/conversations.js'),
-    loadRoute('settings',      '../dist/routes/settings.js'),
-    loadRoute('knowledge',     '../dist/routes/knowledge.js'),
-    loadRoute('chat',          '../dist/routes/chat.js'),
-    loadRoute('customers',     '../dist/routes/customers.js'),
-    loadRoute('billing',       '../dist/routes/billing.js'),
-    loadRoute('free-zones',    '../dist/routes/free-zones.js'),
-    loadRoute('analytics',     '../dist/routes/analytics.js'),
-    loadRoute('telegram',      '../dist/routes/telegram.js'),
-  ]);
-
-  const mount = (path, router) => {
-    if (router) {
-      app.use(path, router);
-      console.log(`[BOOT] Mounted: ${path}`);
-    } else {
-      console.warn(`[BOOT] Skipped (load failed): ${path}`);
-    }
-  };
-
-  mount('/api/auth',          authRoutes);
-  mount('/api/dashboard',     dashboardRoutes);
-  mount('/api/conversations', conversationsRoutes);
-  mount('/api/settings',      settingsRoutes);
-  mount('/api/knowledge',     knowledgeRoutes);
-  mount('/api/chat',          chatRoutes);
-  mount('/api/customers',     customersRoutes);
-  mount('/api/billing',       billingRoutes);
-  mount('/api/free-zones',    freeZonesRoutes);
-  mount('/api/analytics',     analyticsRoutes);
-  mount('/api/telegram',      telegramRoutes);
-
-  console.log(`[BOOT] All routes mounted.`);
-};
-
-// Initialize routes once at module load time (top-level await is valid in ESM)
-await mountRoutes().catch((err) => {
-  console.error('[BOOT] Fatal: route mounting failed:', err);
-});
+console.log(`[BOOT] All routes mounted.`);
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get('/api/health', async (req, res) => {
