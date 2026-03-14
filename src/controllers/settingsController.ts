@@ -43,6 +43,7 @@ export const getPublicSettings = async (req: Request, res: Response) => {
     // Always include analytics configuration from environment variables
     settingsMap['yandexMetrikaId'] = process.env.YANDEX_METRIKA_ID || '';
     settingsMap['gaMeasurementId'] = process.env.GA_MEASUREMENT_ID || '';
+    settingsMap['googleTagId'] = process.env.GOOGLE_TAG_ID || '';
 
     res.json(settingsMap);
   } catch (error) {
