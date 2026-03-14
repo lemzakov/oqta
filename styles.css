@@ -323,9 +323,11 @@ header {
 
 /* Primary CTA button */
 .primary-cta {
-    display: inline-block;
-    padding: 0.875rem 2.5rem;
-    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #ffffff;
     background: var(--color-dark);
@@ -334,10 +336,34 @@ header {
     cursor: pointer;
     font-family: var(--font-body);
     transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
 }
 
 .primary-cta:hover {
     opacity: 0.88;
+    transform: translateY(-1px);
+}
+
+/* Secondary (outline) CTA button */
+.cta-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 2rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+}
+
+.cta-btn-secondary:hover {
+    border-color: var(--color-dark);
     transform: translateY(-1px);
 }
 
@@ -353,59 +379,31 @@ header {
     gap: 0.875rem;
 }
 
-/* Collapsible expert-assist wrapper */
-.cta-assist-wrap {
+/* Two-button row */
+.cta-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Contact panel (shown when "Get expert help" is clicked) */
+.cta-contact-panel {
     width: 100%;
     background: #ffffff;
     border: 1px solid var(--color-border);
     border-radius: 1rem;
-    overflow: hidden;
+    padding: 1rem 1.25rem 0.875rem;
 }
 
-.cta-assist-trigger {
-    width: 100%;
+.cta-contact-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.875rem 1.25rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: var(--font-body);
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-muted);
-    text-align: left;
     gap: 0.5rem;
-    transition: color 0.2s ease;
-}
-
-.cta-assist-trigger:hover {
-    color: var(--color-text);
-}
-
-.cta-chevron {
-    flex-shrink: 0;
-    color: var(--color-muted);
-    transition: transform 0.2s ease;
-}
-
-.cta-assist-trigger[aria-expanded="true"] .cta-chevron {
-    transform: rotate(180deg);
-}
-
-/* Collapsible body — hidden by default */
-.cta-assist-body {
-    display: none;
-    padding: 0 1.25rem 1.125rem;
-}
-
-.cta-assist-body.open {
-    display: block;
+    margin-bottom: 0.5rem;
 }
 
 .cta-contact-input {
-    width: 100%;
+    flex: 1;
     padding: 0.7rem 1rem;
     font-size: 0.9rem;
     font-family: var(--font-body);
@@ -415,7 +413,7 @@ header {
     border-radius: 0.75rem;
     outline: none;
     transition: border-color 0.2s ease;
-    margin-bottom: 0.5rem;
+    min-width: 0;
 }
 
 .cta-contact-input::placeholder {
@@ -426,12 +424,48 @@ header {
     border-color: var(--color-dark);
 }
 
+.cta-send-btn {
+    padding: 0.7rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: #ffffff;
+    background: var(--color-dark);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+    flex-shrink: 0;
+}
+
+.cta-send-btn:hover {
+    opacity: 0.85;
+}
+
+.cta-send-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
 .cta-privacy-note {
     font-size: 0.75rem;
     color: var(--color-muted);
     margin: 0;
     line-height: 1.4;
     text-align: center;
+}
+
+@media (max-width: 480px) {
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-btn-secondary,
+    .primary-cta {
+        width: 100%;
+    }
 }
 
 /* AI Chat Section */
