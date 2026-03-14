@@ -194,7 +194,8 @@ export const notifyLead = async (req: Request, res: Response) => {
   try {
     const { contact, lang } = req.body;
 
-    if (!contact || typeof contact !== 'string' || contact.trim().length === 0) {
+    const trimmedContact = typeof contact === 'string' ? contact.trim() : '';
+    if (!trimmedContact) {
       return res.status(400).json({ error: 'Contact is required' });
     }
 
@@ -204,7 +205,7 @@ export const notifyLead = async (req: Request, res: Response) => {
       return res.json({ success: true, notified: false });
     }
 
-    const sanitizedContact = escapeHtml(contact.trim().substring(0, 200));
+    const sanitizedContact = escapeHtml(trimmedContact.substring(0, 200));
     const langLabel = lang && typeof lang === 'string' ? ` (${escapeHtml(lang.toUpperCase())})` : '';
     const message = `🔔 <b>New Lead${langLabel}</b>\n\n<b>Contact:</b> ${sanitizedContact}`;
 

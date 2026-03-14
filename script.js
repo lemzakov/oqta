@@ -1136,11 +1136,15 @@ ctaSendBtn?.addEventListener('click', async () => {
 
     let success = true;
     try {
-        await fetch('/api/telegram/lead', {
+        const res = await fetch('/api/telegram/lead', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contact: contactValue, lang: currentLang })
         });
+        if (!res.ok) {
+            success = false;
+            console.error('Lead notification failed with status:', res.status);
+        }
     } catch (err) {
         console.error('Failed to send lead notification:', err);
         success = false;
