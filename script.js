@@ -900,6 +900,17 @@ const translations = {
             whatsapp: "WhatsApp",
             finalCTA: "Ready to start your business in UAE?",
             finalCTAButton: "Get Started Now"
+        },
+        cta: {
+            badge: "🚀 Free Consultation",
+            title: "Ready to Launch Your Business in UAE?",
+            subtitle: "Get your personalized UAE business setup plan in minutes — powered by AI",
+            assistQuestion: "Would you like to be assisted by our expert?",
+            contactPlaceholder: "Your phone or email (optional)",
+            privacyNote: "🔒 Your contact won't be shared with third parties",
+            button: "Get Started Now",
+            selfLink: "or continue yourself →",
+            relocateMessage: "I want to ask a question about relocating my business or starting a new one"
         }
     },
     ru: {
@@ -940,6 +951,17 @@ const translations = {
             whatsapp: "WhatsApp",
             finalCTA: "Готовы начать свой бизнес в ОАЭ?",
             finalCTAButton: "Начать сейчас"
+        },
+        cta: {
+            badge: "🚀 Бесплатная консультация",
+            title: "Готовы запустить бизнес в ОАЭ?",
+            subtitle: "Получите персональный план регистрации бизнеса в ОАЭ за минуты — на базе ИИ",
+            assistQuestion: "Хотите, чтобы вам помог наш эксперт?",
+            contactPlaceholder: "Ваш телефон или email (необязательно)",
+            privacyNote: "🔒 Ваш контакт не будет передан третьим лицам",
+            button: "Начать сейчас",
+            selfLink: "или продолжить самостоятельно →",
+            relocateMessage: "Я хочу задать вопрос о переезде моего бизнеса или открытии нового"
         }
     },
     ar: {
@@ -980,6 +1002,17 @@ const translations = {
             whatsapp: "واتساب",
             finalCTA: "هل أنت مستعد لبدء عملك في الإمارات؟",
             finalCTAButton: "ابدأ الآن"
+        },
+        cta: {
+            badge: "🚀 استشارة مجانية",
+            title: "هل أنت مستعد لإطلاق عملك في الإمارات؟",
+            subtitle: "احصل على خطة تأسيس أعمالك في الإمارات في دقائق — مدعومة بالذكاء الاصطناعي",
+            assistQuestion: "هل تود أن يساعدك أحد خبرائنا؟",
+            contactPlaceholder: "هاتفك أو بريدك الإلكتروني (اختياري)",
+            privacyNote: "🔒 لن تتم مشاركة بياناتك مع أطراف ثالثة",
+            button: "ابدأ الآن",
+            selfLink: "أو تابع بنفسك →",
+            relocateMessage: "أريد أن أسأل عن نقل أعمالي أو بدء عمل جديد"
         }
     }
 };
@@ -1050,11 +1083,28 @@ languageSelect?.addEventListener('change', (e) => {
 // ===== Primary CTA Handler =====
 const primaryCTA = document.getElementById('primary-cta');
 primaryCTA?.addEventListener('click', () => {
-    // Focus on the chat input without harsh scrolling
+    const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
+    const t = translations[currentLang] || translations.en;
+    const relocateMessage = t.cta?.relocateMessage || translations.en.cta.relocateMessage;
+
+    const landingTextarea = document.getElementById('landing-textarea');
+    if (landingTextarea) {
+        landingTextarea.value = relocateMessage;
+        // Trigger the 'input' event so the auto-resize handler updates the textarea height
+        landingTextarea.dispatchEvent(new Event('input'));
+        landingTextarea.focus();
+        landingTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+// ===== Self-link CTA Handler (skip contact, scroll to chat) =====
+const ctaSelfLink = document.getElementById('cta-self-link');
+ctaSelfLink?.addEventListener('click', (e) => {
+    e.preventDefault();
     const landingTextarea = document.getElementById('landing-textarea');
     if (landingTextarea) {
         landingTextarea.focus();
-        // No scrolling - chat is already visible inline
+        landingTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 });
 
