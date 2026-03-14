@@ -2,7 +2,7 @@
 
 ## Overview
 
-This implementation adds Yandex Metrika and Google Analytics (GA4) tracking to all pages of the OQTA application, with counter IDs stored securely in environment variables.
+This implementation adds Google Tag Manager (GTM), Yandex Metrika and Google Analytics (GA4) tracking to all pages of the OQTA application, with IDs stored securely in environment variables.
 
 ## How It Works
 
@@ -28,11 +28,13 @@ Add the following to your `.env` file:
 # Analytics
 YANDEX_METRIKA_ID=12345678
 GA_MEASUREMENT_ID=G-XXXXXXXXXX
+GOOGLE_TAG_ID=GTM-XXXXXXXX
 ```
 
 Replace the values with your actual:
 - **YANDEX_METRIKA_ID**: Your Yandex Metrika counter ID (numbers only)
 - **GA_MEASUREMENT_ID**: Your Google Analytics 4 Measurement ID (format: G-XXXXXXXXXX)
+- **GOOGLE_TAG_ID**: Your Google Tag Manager container ID (format: GTM-XXXXXXXX)
 
 ### 2. Deploy
 
@@ -59,6 +61,11 @@ Analytics tracking is enabled on:
 - Page view tracking
 - Event tracking (automatic)
 
+### Google Tag Manager Features
+- Container-based tag management
+- Supports deploying any tracking tag without code changes
+- Noscript fallback for users with JavaScript disabled
+
 ## Testing
 
 ### Test the API Endpoint
@@ -73,7 +80,8 @@ Expected response (includes analytics config and other public settings):
   "phone_number": "...",
   "whatsapp_number": "...",
   "yandexMetrikaId": "12345678",
-  "gaMeasurementId": "G-TEST123456"
+  "gaMeasurementId": "G-TEST123456",
+  "googleTagId": "GTM-XXXXXXXX"
 }
 ```
 
@@ -91,6 +99,7 @@ Expected response (includes analytics config and other public settings):
 
 1. **Yandex Metrika**: Log into https://metrika.yandex.com/ and verify real-time visitors
 2. **Google Analytics**: Log into https://analytics.google.com/ and check real-time reports
+3. **Google Tag Manager**: Log into https://tagmanager.google.com/ and verify the container is firing
 
 ## Security Notes
 
@@ -121,4 +130,5 @@ See `.env.example` for the complete list of environment variables including anal
 # Analytics
 YANDEX_METRIKA_ID="your-yandex-metrika-counter-id"
 GA_MEASUREMENT_ID="G-XXXXXXXXXX"
+GOOGLE_TAG_ID="GTM-XXXXXXXX"
 ```

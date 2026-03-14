@@ -21,6 +21,25 @@
                 const response = await fetch('/api/settings/public');
                 const config = await response.json();
                 
+                // Initialize Google Tag Manager
+                if (config.googleTagId) {
+                    (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                    })(window,document,'script','dataLayer',config.googleTagId);
+
+                    // Add noscript fallback for Google Tag Manager
+                    const gtmNoscript = document.createElement('noscript');
+                    const gtmFrame = document.createElement('iframe');
+                    gtmFrame.src = 'https://www.googletagmanager.com/ns.html?id=' + config.googleTagId;
+                    gtmFrame.height = '0';
+                    gtmFrame.width = '0';
+                    gtmFrame.style.cssText = 'display:none;visibility:hidden';
+                    gtmNoscript.appendChild(gtmFrame);
+                    document.body.insertBefore(gtmNoscript, document.body.firstChild);
+                }
+
                 // Initialize Yandex Metrika
                 if (config.yandexMetrikaId) {
                     (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
