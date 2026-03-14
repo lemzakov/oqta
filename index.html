@@ -118,6 +118,30 @@
                 </div>
             </section>
 
+            <!-- CTA block: two-button choice -->
+            <div class="cta-section" id="cta-section">
+                <div class="cta-buttons">
+                    <button class="cta-btn-secondary" id="cta-self-btn" data-i18n="cta.selfButton">I'll do it myself</button>
+                    <button class="primary-cta" id="cta-assist-btn" data-i18n="cta.assistButton">Get expert help</button>
+                </div>
+
+                <!-- Contact panel — shown when "Get expert help" is clicked -->
+                <div class="cta-contact-panel" id="cta-contact-panel" hidden>
+                    <div class="cta-contact-row">
+                        <input
+                            type="text"
+                            class="cta-contact-input"
+                            id="cta-contact-input"
+                            data-i18n-placeholder="cta.contactPlaceholder"
+                            placeholder="Your phone or email"
+                            autocomplete="email"
+                        />
+                        <button type="button" class="cta-send-btn" id="cta-send-btn" data-i18n="cta.sendButton">Send</button>
+                    </div>
+                    <p class="cta-privacy-note" data-i18n="cta.privacyNote">🔒 Your contact won't be shared with third parties</p>
+                </div>
+            </div>
+
             <p class="subheadline" data-i18n="hero.subheadline">
                 AI-guided setup, tax structure selection & cost breakdown — free consultation included
             </p>
@@ -266,12 +290,6 @@
                 <a href="#" class="secondary-link" data-action="relocate" data-i18n="hero.secondary2">I want to relocate</a>
                 <a href="#" class="secondary-link" data-action="tax-advice" data-i18n="hero.secondary3">I want tax advice</a>
                 <a href="#" class="secondary-link" data-action="emirates-id" data-i18n="hero.secondary4">I want Emirates ID</a>
-            </div>
-
-            <!-- Final CTA Section -->
-            <div class="final-cta-section">
-                <h2 class="final-cta-title" data-i18n="footer.finalCTA">Ready to start your business in UAE?</h2>
-                <button class="primary-cta" id="primary-cta" data-i18n="footer.finalCTAButton">Get Started Now</button>
             </div>
 
             <div class="contact-info">

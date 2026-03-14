@@ -178,6 +178,46 @@ function formatSummaryMessage(summaryData: any): string {
 }
 
 /**
+ * Escape special HTML characters to prevent injection in Telegram HTML messages
+ */
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
+ * Notify a Telegram group about a new lead from the CTA form
+ */
+export const notifyLead = async (req: Request, res: Response) => {
+  try {
+    const { contact, lang } = req.body;
+
+    const trimmedContact = typeof contact === 'string' ? contact.trim() : '';
+    if (!trimmedContact) {
+      return res.status(400).json({ error: 'Contact is required' });
+    }
+
+    const chatId = process.env.TELEGRAM_NOTIFICATION_CHAT_ID;
+    if (!chatId) {
+      // No group configured — silently succeed so the frontend flow continues
+      return res.json({ success: true, notified: false });
+    }
+
+    const sanitizedContact = escapeHtml(trimmedContact.substring(0, 200));
+    const langLabel = lang && typeof lang === 'string' ? ` (${escapeHtml(lang.toUpperCase())})` : '';
+    const message = `🔔 <b>New Lead${langLabel}</b>\n\n<b>Contact:</b> ${sanitizedContact}`;
+
+    const sent = await sendTelegramMessage(chatId, message);
+    return res.json({ success: true, notified: sent });
+  } catch (error) {
+    console.error('Notify lead error:', error);
+    res.status(500).json({ error: 'Failed to send notification' });
+  }
+};
+
+/**
  * Handle Telegram webhook requests
  * Accepts inline keyboard callback queries with session IDs
  */

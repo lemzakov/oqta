@@ -9,6 +9,7 @@ import conversationsRoutes from '../dist/routes/conversations.js';
 import settingsRoutes from '../dist/routes/settings.js';
 import knowledgeRoutes from '../dist/routes/knowledge.js';
 import chatRoutes from '../dist/routes/chat.js';
+import telegramRoutes from '../dist/routes/telegram.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use('/api/conversations', conversationsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/telegram', telegramRoutes);
 
 // Health check endpoint
 app.get('/api/health', async (req, res) => {

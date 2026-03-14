@@ -321,46 +321,151 @@ header {
     color: #4caf50;
 }
 
-/* Primary CTA (now at bottom before footer) */
+/* Primary CTA button */
 .primary-cta {
-    display: inline-block;
-    padding: 1rem 2.5rem;
-    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #ffffff;
-    background: linear-gradient(135deg, #000000 0%, #1e1e1e 100%);
+    background: var(--color-dark);
     border: none;
     border-radius: 2rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: all 0.3s ease;
+    font-family: var(--font-body);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
 }
 
 .primary-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.25);
+    opacity: 0.88;
+    transform: translateY(-1px);
 }
 
-/* Final CTA Section (before footer) */
-.final-cta-section {
+/* Secondary (outline) CTA button */
+.cta-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--color-text);
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 2rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+}
+
+.cta-btn-secondary:hover {
+    border-color: var(--color-dark);
+    transform: translateY(-1px);
+}
+
+/* CTA section (under title) */
+.cta-section {
     position: relative;
     width: 100%;
     max-width: 700px;
-    margin: 3rem auto 2rem;
-    padding: 2.5rem 2rem;
-    text-align: center;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(249, 249, 249, 0.95));
-    border: 1px solid var(--color-border);
-    border-radius: 1.5rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
+    margin: 0 auto 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
 }
 
-.final-cta-title {
-    font-size: 1.5rem;
-    font-weight: 600;
+/* Two-button row */
+.cta-buttons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Contact panel (shown when "Get expert help" is clicked) */
+.cta-contact-panel {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem 0.875rem;
+}
+
+.cta-contact-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.cta-contact-input {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    font-family: var(--font-body);
     color: var(--color-text);
-    margin: 0 0 1.5rem 0;
-    line-height: 1.3;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    outline: none;
+    transition: border-color 0.2s ease;
+    min-width: 0;
+}
+
+.cta-contact-input::placeholder {
+    color: var(--color-muted);
+}
+
+.cta-contact-input:focus {
+    border-color: var(--color-dark);
+}
+
+.cta-send-btn {
+    padding: 0.7rem 1.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    color: #ffffff;
+    background: var(--color-dark);
+    border: none;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+    flex-shrink: 0;
+}
+
+.cta-send-btn:hover {
+    opacity: 0.85;
+}
+
+.cta-send-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.cta-privacy-note {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin: 0;
+    line-height: 1.4;
+    text-align: center;
+}
+
+@media (max-width: 480px) {
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .cta-btn-secondary,
+    .primary-cta {
+        width: 100%;
+    }
 }
 
 /* AI Chat Section */

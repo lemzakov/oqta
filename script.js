@@ -900,6 +900,21 @@ const translations = {
             whatsapp: "WhatsApp",
             finalCTA: "Ready to start your business in UAE?",
             finalCTAButton: "Get Started Now"
+        },
+        cta: {
+            badge: "🚀 Free Consultation",
+            title: "Ready to Launch Your Business in UAE?",
+            subtitle: "Get your personalized UAE business setup plan in minutes — powered by AI",
+            assistQuestion: "Would you like to be assisted by our expert?",
+            contactPlaceholder: "Your phone or email",
+            privacyNote: "🔒 Your contact won't be shared with third parties",
+            button: "Get Started Now",
+            selfLink: "or continue yourself →",
+            relocateMessage: "I want to ask a question about relocating my business or starting a new one",
+            selfButton: "I'll do it myself",
+            assistButton: "Get expert help",
+            sendButton: "Send",
+            sent: "✓ Sent!"
         }
     },
     ru: {
@@ -940,6 +955,21 @@ const translations = {
             whatsapp: "WhatsApp",
             finalCTA: "Готовы начать свой бизнес в ОАЭ?",
             finalCTAButton: "Начать сейчас"
+        },
+        cta: {
+            badge: "🚀 Бесплатная консультация",
+            title: "Готовы запустить бизнес в ОАЭ?",
+            subtitle: "Получите персональный план регистрации бизнеса в ОАЭ за минуты — на базе ИИ",
+            assistQuestion: "Хотите, чтобы вам помог наш эксперт?",
+            contactPlaceholder: "Ваш телефон или email",
+            privacyNote: "🔒 Ваш контакт не будет передан третьим лицам",
+            button: "Начать сейчас",
+            selfLink: "или продолжить самостоятельно →",
+            relocateMessage: "Я хочу задать вопрос о переезде моего бизнеса или открытии нового",
+            selfButton: "Справлюсь сам",
+            assistButton: "Нужна помощь эксперта",
+            sendButton: "Отправить",
+            sent: "✓ Отправлено!"
         }
     },
     ar: {
@@ -980,6 +1010,21 @@ const translations = {
             whatsapp: "واتساب",
             finalCTA: "هل أنت مستعد لبدء عملك في الإمارات؟",
             finalCTAButton: "ابدأ الآن"
+        },
+        cta: {
+            badge: "🚀 استشارة مجانية",
+            title: "هل أنت مستعد لإطلاق عملك في الإمارات؟",
+            subtitle: "احصل على خطة تأسيس أعمالك في الإمارات في دقائق — مدعومة بالذكاء الاصطناعي",
+            assistQuestion: "هل تود أن يساعدك أحد خبرائنا؟",
+            contactPlaceholder: "هاتفك أو بريدك الإلكتروني",
+            privacyNote: "🔒 لن تتم مشاركة بياناتك مع أطراف ثالثة",
+            button: "ابدأ الآن",
+            selfLink: "أو تابع بنفسك →",
+            relocateMessage: "أريد أن أسأل عن نقل أعمالي أو بدء عمل جديد",
+            selfButton: "سأتولى ذلك بنفسي",
+            assistButton: "أريد مساعدة خبير",
+            sendButton: "إرسال",
+            sent: "✓ تم الإرسال!"
         }
     }
 };
@@ -1047,15 +1092,74 @@ languageSelect?.addEventListener('change', (e) => {
     applyLanguage(selectedLanguage);
 });
 
-// ===== Primary CTA Handler =====
-const primaryCTA = document.getElementById('primary-cta');
-primaryCTA?.addEventListener('click', () => {
-    // Focus on the chat input without harsh scrolling
+// ===== CTA: "I'll do it myself" — scroll to chat textarea =====
+const ctaSelfBtn = document.getElementById('cta-self-btn');
+ctaSelfBtn?.addEventListener('click', () => {
     const landingTextarea = document.getElementById('landing-textarea');
     if (landingTextarea) {
         landingTextarea.focus();
-        // No scrolling - chat is already visible inline
+        landingTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
+});
+
+// ===== CTA: "Get expert help" — reveal contact panel =====
+const ctaAssistBtn = document.getElementById('cta-assist-btn');
+const ctaContactPanel = document.getElementById('cta-contact-panel');
+ctaAssistBtn?.addEventListener('click', () => {
+    if (ctaContactPanel) {
+        const isHidden = ctaContactPanel.hasAttribute('hidden');
+        if (isHidden) {
+            ctaContactPanel.removeAttribute('hidden');
+            document.getElementById('cta-contact-input')?.focus();
+        } else {
+            ctaContactPanel.setAttribute('hidden', '');
+        }
+    }
+});
+
+// ===== CTA: Send button — POST contact to Telegram lead API =====
+const ctaSendBtn = document.getElementById('cta-send-btn');
+ctaSendBtn?.addEventListener('click', async () => {
+    const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
+    const t = translations[currentLang] || translations.en;
+    const contactInput = document.getElementById('cta-contact-input');
+    const contactValue = contactInput?.value?.trim();
+
+    if (!contactValue) {
+        contactInput?.focus();
+        return;
+    }
+
+    ctaSendBtn.disabled = true;
+    const originalText = ctaSendBtn.textContent;
+    ctaSendBtn.textContent = '...';
+
+    let success = true;
+    try {
+        const res = await fetch('/api/telegram/lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contact: contactValue, lang: currentLang })
+        });
+        if (!res.ok) {
+            success = false;
+            console.error('Lead notification failed with status:', res.status);
+        }
+    } catch (err) {
+        console.error('Failed to send lead notification:', err);
+        success = false;
+    }
+
+    const sentLabel = success
+        ? (t.cta?.sent || translations.en.cta.sent)
+        : '✗';
+    ctaSendBtn.textContent = sentLabel;
+    if (success && contactInput) contactInput.value = '';
+    setTimeout(() => {
+        ctaSendBtn.textContent = originalText;
+        ctaSendBtn.disabled = false;
+        if (success) ctaContactPanel?.setAttribute('hidden', '');
+    }, 2500);
 });
 
 // ===== Quick Chips Handlers =====
