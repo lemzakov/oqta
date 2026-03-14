@@ -44,7 +44,7 @@ body {
     margin: 0;
     font-family: var(--font-body);
     color: var(--color-text);
-    background: linear-gradient(180deg, rgba(228, 216, 240, 0.3) 4.4632%, rgba(249, 249, 249, 0) 100%), linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 100%);
+    background: linear-gradient(180deg, rgba(228, 216, 240, 0.6) 4.4632%, rgba(249, 249, 249, 0) 100%), linear-gradient(90deg, var(--color-bg) 0%, var(--color-bg) 100%);
     min-height: 100vh;
     overflow-x: hidden;
     overflow-y: auto;
@@ -91,7 +91,7 @@ body {
     width: 86.4rem;
     height: 57.6rem;
     transform: translateX(-50%);
-    opacity: 0.05;
+    opacity: 0.15;
     object-fit: cover;
     pointer-events: none;
 }
