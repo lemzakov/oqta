@@ -105,30 +105,6 @@
             <!-- Landing page content (shown when not logged in) -->
             <div class="landing-content" id="landing-content">
 
-            <!-- Final CTA Section - Marketing Hook (top of page) -->
-            <div class="final-cta-section">
-                <div class="final-cta-badge" data-i18n="cta.badge">🚀 Free Consultation</div>
-                <h2 class="final-cta-title" data-i18n="cta.title">Ready to Launch Your Business in UAE?</h2>
-                <p class="final-cta-subtitle" data-i18n="cta.subtitle">Get your personalized UAE business setup plan in minutes — powered by AI</p>
-
-                <div class="cta-assist-block">
-                    <p class="cta-assist-question" data-i18n="cta.assistQuestion">Would you like to be assisted by our expert?</p>
-                    <div class="cta-contact-row">
-                        <input
-                            type="text"
-                            class="cta-contact-input"
-                            id="cta-contact-input"
-                            data-i18n-placeholder="cta.contactPlaceholder"
-                            placeholder="Your phone or email (optional)"
-                        />
-                    </div>
-                    <p class="cta-privacy-note" data-i18n="cta.privacyNote">🔒 Your contact won't be shared with third parties</p>
-                </div>
-
-                <button class="primary-cta" id="primary-cta" data-i18n="cta.button">Get Started Now</button>
-                <a href="#" class="cta-self-link" id="cta-self-link" data-i18n="cta.selfLink">or continue yourself →</a>
-            </div>
-
             <div class="welcome">
                 <div class="welcome-inner">
                     <img src="assets/image1.png">
@@ -141,6 +117,30 @@
                     <h1 data-i18n="hero.title">Register your UAE company in minutes with AI</h1>
                 </div>
             </section>
+
+            <!-- CTA block: primary action + collapsible expert-assist form -->
+            <div class="cta-section" id="cta-section">
+                <button class="primary-cta" id="primary-cta" data-i18n="cta.button">Get Started Now</button>
+
+                <div class="cta-assist-wrap">
+                    <button type="button" class="cta-assist-trigger" id="cta-assist-trigger" aria-expanded="false" aria-controls="cta-assist-body">
+                        <span data-i18n="cta.assistQuestion">Would you like to be assisted by our expert?</span>
+                        <svg class="cta-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div class="cta-assist-body" id="cta-assist-body">
+                        <input
+                            type="text"
+                            class="cta-contact-input"
+                            id="cta-contact-input"
+                            data-i18n-placeholder="cta.contactPlaceholder"
+                            placeholder="Your phone or email (optional)"
+                        />
+                        <p class="cta-privacy-note" data-i18n="cta.privacyNote">🔒 Your contact won't be shared with third parties</p>
+                    </div>
+                </div>
+            </div>
 
             <p class="subheadline" data-i18n="hero.subheadline">
                 AI-guided setup, tax structure selection & cost breakdown — free consultation included

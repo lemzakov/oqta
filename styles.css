@@ -321,152 +321,117 @@ header {
     color: #4caf50;
 }
 
-/* Primary CTA (now at top as marketing hook) */
+/* Primary CTA button */
 .primary-cta {
     display: inline-block;
-    padding: 1rem 2.5rem;
-    font-size: 1.1rem;
+    padding: 0.875rem 2.5rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #ffffff;
-    background: linear-gradient(135deg, #000000 0%, #1e1e1e 100%);
+    background: var(--color-dark);
     border: none;
     border-radius: 2rem;
-    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: all 0.3s ease;
+    font-family: var(--font-body);
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .primary-cta:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.25);
+    opacity: 0.88;
+    transform: translateY(-1px);
 }
 
-/* Final CTA Section (now at top of page as marketing hook) */
-.final-cta-section {
+/* CTA section (under title) */
+.cta-section {
     position: relative;
     width: 100%;
     max-width: 700px;
-    margin: 0 auto 2.5rem;
-    padding: 3rem 2.5rem;
-    text-align: center;
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 60%, #16213e 100%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 2rem;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    margin: 0 auto 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.875rem;
+}
+
+/* Collapsible expert-assist wrapper */
+.cta-assist-wrap {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
     overflow: hidden;
 }
 
-.final-cta-section::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at 60% 30%, rgba(120, 80, 255, 0.12) 0%, transparent 60%),
-                radial-gradient(circle at 20% 80%, rgba(0, 180, 255, 0.08) 0%, transparent 50%);
-    pointer-events: none;
+.cta-assist-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.875rem 1.25rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-align: left;
+    gap: 0.5rem;
+    transition: color 0.2s ease;
 }
 
-.final-cta-badge {
-    display: inline-block;
-    padding: 0.35rem 1rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 2rem;
-    margin-bottom: 1.25rem;
-    letter-spacing: 0.02em;
+.cta-assist-trigger:hover {
+    color: var(--color-text);
 }
 
-.final-cta-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #ffffff;
-    margin: 0 0 0.75rem 0;
-    line-height: 1.25;
-    letter-spacing: -0.02em;
+.cta-chevron {
+    flex-shrink: 0;
+    color: var(--color-muted);
+    transition: transform 0.2s ease;
 }
 
-.final-cta-subtitle {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.65);
-    margin: 0 0 1.75rem 0;
-    line-height: 1.5;
+.cta-assist-trigger[aria-expanded="true"] .cta-chevron {
+    transform: rotate(180deg);
 }
 
-/* Assistance block inside final CTA */
-.cta-assist-block {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1.25rem;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1.5rem;
+/* Collapsible body — hidden by default */
+.cta-assist-body {
+    display: none;
+    padding: 0 1.25rem 1.125rem;
 }
 
-.cta-assist-question {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.9);
-    margin: 0 0 0.85rem 0;
-}
-
-.cta-contact-row {
-    margin-bottom: 0.75rem;
+.cta-assist-body.open {
+    display: block;
 }
 
 .cta-contact-input {
     width: 100%;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
     font-family: var(--font-body);
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
     border-radius: 0.75rem;
     outline: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s ease;
+    margin-bottom: 0.5rem;
 }
 
 .cta-contact-input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-muted);
 }
 
 .cta-contact-input:focus {
-    border-color: rgba(255, 255, 255, 0.4);
-    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--color-dark);
 }
 
 .cta-privacy-note {
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.75rem;
+    color: var(--color-muted);
     margin: 0;
     line-height: 1.4;
-}
-
-.cta-self-link {
-    display: block;
-    margin-top: 1rem;
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.5);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.cta-self-link:hover {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-@media (max-width: 600px) {
-    .final-cta-title {
-        font-size: 1.4rem;
-    }
-
-    .final-cta-section {
-        padding: 2rem 1.25rem;
-    }
+    text-align: center;
 }
 
 /* AI Chat Section */

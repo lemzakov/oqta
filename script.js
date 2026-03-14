@@ -1082,10 +1082,25 @@ languageSelect?.addEventListener('change', (e) => {
 
 // ===== Primary CTA Handler =====
 const primaryCTA = document.getElementById('primary-cta');
-primaryCTA?.addEventListener('click', () => {
+primaryCTA?.addEventListener('click', async () => {
     const currentLang = localStorage.getItem(LANGUAGE_KEY) || 'en';
     const t = translations[currentLang] || translations.en;
     const relocateMessage = t.cta?.relocateMessage || translations.en.cta.relocateMessage;
+
+    // If contact is filled, notify Telegram before proceeding
+    const contactInput = document.getElementById('cta-contact-input');
+    const contactValue = contactInput?.value?.trim();
+    if (contactValue) {
+        try {
+            await fetch('/api/telegram/lead', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contact: contactValue, lang: currentLang })
+            });
+        } catch (err) {
+            console.error('Failed to send lead notification:', err);
+        }
+    }
 
     const landingTextarea = document.getElementById('landing-textarea');
     if (landingTextarea) {
@@ -1097,15 +1112,13 @@ primaryCTA?.addEventListener('click', () => {
     }
 });
 
-// ===== Self-link CTA Handler (skip contact, scroll to chat) =====
-const ctaSelfLink = document.getElementById('cta-self-link');
-ctaSelfLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    const landingTextarea = document.getElementById('landing-textarea');
-    if (landingTextarea) {
-        landingTextarea.focus();
-        landingTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+// ===== CTA Assist Collapsible Toggle =====
+const ctaAssistTrigger = document.getElementById('cta-assist-trigger');
+const ctaAssistBody = document.getElementById('cta-assist-body');
+ctaAssistTrigger?.addEventListener('click', () => {
+    const isExpanded = ctaAssistTrigger.getAttribute('aria-expanded') === 'true';
+    ctaAssistTrigger.setAttribute('aria-expanded', String(!isExpanded));
+    ctaAssistBody?.classList.toggle('open', !isExpanded);
 });
 
 // ===== Quick Chips Handlers =====
